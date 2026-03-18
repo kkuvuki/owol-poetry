@@ -1,0 +1,32 @@
+---
+interface Props {
+  title?: string;
+  subtitle?: string;
+  line?: string;
+}
+
+const {
+  title = 'Ravings',
+  subtitle = 'Chidi Francis Onwuka',
+  line = 'We were all strangers, once, you see',
+} = Astro.props;
+---
+
+<section class="hero" aria-label="Introduction">
+  <div class="hero__inner">
+    <h1 class="hero__title reveal" data-reveal="fade-up">
+      {title}
+    </h1>
+    <p class="hero__subtitle reveal" data-reveal="fade-up" data-reveal-delay="200">
+      {subtitle}
+    </p>
+    <p class="hero__line reveal" data-reveal="fade-up" data-reveal-delay="600">
+      <em>&ldquo;{line}&rdquo;</em>
+    </p>
+  </div>
+
+  <div class="hero__scroll-hint reveal" data-reveal="fade" data-reveal-delay="1200" aria-hidden="true">
+    <span class="hero__scroll-text">Scroll</span>
+    <span class="hero__scroll-line"></span>
+  </div>
+</section>

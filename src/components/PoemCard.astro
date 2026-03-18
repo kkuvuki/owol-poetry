@@ -1,0 +1,37 @@
+---
+interface Props {
+  title: string;
+  slug: string;
+  excerpt?: string;
+  theme?: string;
+  year?: string;
+  delay?: number;
+}
+
+const { title, slug, excerpt, theme, year, delay = 0 } = Astro.props;
+
+const excerptLines = excerpt
+  ? excerpt.split('\n').filter((line: string) => line.trim())
+  : [];
+---
+
+<article class="poem-card reveal" data-reveal="fade-up" data-reveal-delay={delay.toString()}>
+  <a href={`/poems/${slug}`} class="poem-card__link" aria-label={`Read ${title}`}>
+    <div class="poem-card__meta">
+      {theme && <span class="poem-card__theme">{theme}</span>}
+      {year && <span class="poem-card__year">{year}</span>}
+    </div>
+
+    <h2 class="poem-card__title">{title}</h2>
+
+    {excerptLines.length > 0 && (
+      <div class="poem-card__excerpt">
+        {excerptLines.map((line: string) => (
+          <span class="poem-card__line">{line}</span>
+        ))}
+      </div>
+    )}
+
+    <span class="poem-card__arrow" aria-hidden="true">&rarr;</span>
+  </a>
+</article>

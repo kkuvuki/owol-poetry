@@ -1,0 +1,43 @@
+---
+interface Props {
+  formAction?: string;
+}
+
+const { formAction = '' } = Astro.props;
+---
+
+<section class="teaser" aria-label="OwOL — Coming Soon">
+  <div class="teaser__inner">
+    <div class="teaser__content reveal" data-reveal="fade-up">
+      <span class="teaser__badge">OwOL</span>
+      <h2 class="teaser__heading">Something is cooking.</h2>
+      <p class="teaser__description">
+        Poetry nourishes the soul. I&rsquo;m building something for what nourishes the body.
+        OwOL &mdash; Our Way of Life &mdash; is a food lifestyle app that brings the same
+        intentionality to your kitchen.
+      </p>
+    </div>
+
+    <div class="teaser__form-wrap reveal" data-reveal="fade-up" data-reveal-delay="200">
+      <p class="teaser__cta">Leave your email to taste it first.</p>
+
+      {formAction ? (
+        <form class="teaser__form" action={formAction} method="post" target="_blank" novalidate>
+          <label for="teaser-email" class="screen-reader-text">Email address</label>
+          <input
+            type="email"
+            id="teaser-email"
+            name="EMAIL"
+            class="teaser__input"
+            placeholder="your@email.com"
+            required
+            autocomplete="email"
+          />
+          <button type="submit" class="teaser__submit">Notify Me</button>
+        </form>
+      ) : (
+        <p class="teaser__placeholder">Email signup coming soon.</p>
+      )}
+    </div>
+  </div>
+</section>

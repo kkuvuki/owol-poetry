@@ -1,0 +1,36 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import PoemCard from '../components/PoemCard.astro';
+import OwolBridge from '../components/OwolBridge.astro';
+import Teaser from '../components/Teaser.astro';
+
+const poems = (await getCollection('poems')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Base>
+  <Hero />
+
+  <section class="poems-feed" aria-label="Poems">
+    {poems.length > 0 ? (
+      poems.map((poem, index) => (
+        <PoemCard
+          title={poem.data.title}
+          slug={poem.id.replace(/\.md$/, '')}
+          excerpt={poem.data.excerpt}
+          theme={poem.data.theme}
+          year={poem.data.year}
+          delay={Math.min(index * 100, 400)}
+        />
+      ))
+    ) : (
+      <div class="poems-feed__empty reveal" data-reveal="fade-up">
+        <p>Poems are being written. Check back soon.</p>
+      </div>
+    )}
+  </section>
+
+  <OwolBridge />
+  <Teaser />
+</Base>

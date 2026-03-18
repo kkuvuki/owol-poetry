@@ -1,0 +1,49 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const poems = (await getCollection('poems')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Base title="Poems — Ravings" description="All poems from the collection Ravings by Chidi Francis Onwuka.">
+  <section class="poems-archive" aria-label="All Poems">
+    <header class="poems-archive__header reveal" data-reveal="fade-up">
+      <h1 class="poems-archive__title">Poems</h1>
+    </header>
+
+    <div class="poems-archive__grid">
+      {poems.map((poem, index) => {
+        const excerptLines = poem.data.excerpt
+          ? poem.data.excerpt.split('\n').filter((l: string) => l.trim())
+          : [];
+
+        return (
+          <article
+            class="poem-card poem-card--grid reveal"
+            data-reveal="fade-up"
+            data-reveal-delay={Math.min(index * 100, 400).toString()}
+          >
+            <a
+              href={`/poems/${poem.id.replace(/\.md$/, '')}`}
+              class="poem-card__link"
+              aria-label={`Read ${poem.data.title}`}
+            >
+              {poem.data.theme && (
+                <span class="poem-card__theme">{poem.data.theme}</span>
+              )}
+              <h2 class="poem-card__title">{poem.data.title}</h2>
+              {excerptLines.length > 0 && (
+                <div class="poem-card__excerpt">
+                  {excerptLines.map((line: string) => (
+                    <span class="poem-card__line">{line}</span>
+                  ))}
+                </div>
+              )}
+              <span class="poem-card__arrow" aria-hidden="true">&rarr;</span>
+            </a>
+          </article>
+        );
+      })}
+    </div>
+  </section>
+</Base>

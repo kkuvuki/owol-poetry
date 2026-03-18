@@ -1,0 +1,75 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const poems = await getCollection('poems');
+  const sorted = poems.sort((a, b) => a.data.order - b.data.order);
+
+  return sorted.map((poem, index) => ({
+    params: { slug: poem.id.replace(/\.md$/, '') },
+    props: {
+      poem,
+      prevPoem: index > 0 ? sorted[index - 1] : null,
+      nextPoem: index < sorted.length - 1 ? sorted[index + 1] : null,
+    },
+  }));
+}
+
+const { poem, prevPoem, nextPoem } = Astro.props;
+const { Content } = await render(poem);
+---
+
+<Base
+  title={`${poem.data.title} — Ravings`}
+  description={poem.data.excerpt || `Read "${poem.data.title}" from the collection Ravings by Chidi Francis Onwuka.`}
+>
+  <article class="poem-single" aria-label={poem.data.title}>
+    <header class="poem-single__header reveal" data-reveal="fade-up">
+      <div class="poem-single__meta">
+        {poem.data.theme && (
+          <span class="poem-single__theme">{poem.data.theme}</span>
+        )}
+        {poem.data.year && (
+          <span class="poem-single__year">{poem.data.year}</span>
+        )}
+      </div>
+      <h1 class="poem-single__title">{poem.data.title}</h1>
+    </header>
+
+    <div class="poem-single__body reveal" data-reveal="fade-up" data-reveal-delay="200">
+      <Content />
+    </div>
+
+    <footer class="poem-single__footer">
+      <nav class="poem-nav" aria-label="Poem navigation">
+        {prevPoem && (
+          <a
+            href={`/poems/${prevPoem.id.replace(/\.md$/, '')}`}
+            class="poem-nav__link poem-nav__link--prev reveal"
+            data-reveal="fade-up"
+          >
+            <span class="poem-nav__label">Previous</span>
+            <span class="poem-nav__title">{prevPoem.data.title}</span>
+          </a>
+        )}
+
+        {nextPoem && (
+          <a
+            href={`/poems/${nextPoem.id.replace(/\.md$/, '')}`}
+            class="poem-nav__link poem-nav__link--next reveal"
+            data-reveal="fade-up"
+            data-reveal-delay="100"
+          >
+            <span class="poem-nav__label">Next</span>
+            <span class="poem-nav__title">{nextPoem.data.title}</span>
+          </a>
+        )}
+      </nav>
+
+      <a href="/" class="poem-single__back reveal" data-reveal="fade" data-reveal-delay="200">
+        &larr; All Poems
+      </a>
+    </footer>
+  </article>
+</Base>

@@ -1,0 +1,33 @@
+---
+const navItems = [
+  { label: 'Index', href: '/' },
+  { label: 'Poems', href: '/poems' },
+  { label: 'Our Way of Life', href: '/our-way-of-life' },
+];
+---
+
+<header class="site-header" role="banner">
+  <nav class="site-nav" aria-label="Primary navigation">
+    <a href="/" class="site-nav__logo" aria-label="Home">
+      <span class="site-nav__wordmark">Ravings</span>
+    </a>
+
+    <button
+      class="site-nav__toggle"
+      aria-expanded="false"
+      aria-controls="primary-menu"
+      aria-label="Toggle menu"
+    >
+      <span class="site-nav__toggle-bar"></span>
+      <span class="site-nav__toggle-bar"></span>
+    </button>
+
+    <ul id="primary-menu" class="site-nav__menu">
+      {navItems.map((item) => (
+        <li>
+          <a href={item.href}>{item.label}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>
