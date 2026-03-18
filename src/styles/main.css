@@ -1315,6 +1315,31 @@ ul, ol {
   color: var(--color-text-muted);
 }
 
+.teaser__success {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-style: italic;
+  color: var(--color-accent-green);
+}
+
+.teaser__success[hidden] { display: none; }
+
+.teaser__error {
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  color: #e55c5c;
+  margin-top: var(--space-xs);
+}
+
+.teaser__error[hidden] { display: none; }
+
+.teaser__submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.teaser__submit-sending[hidden] { display: none; }
+
 @media (max-width: 480px) {
   .teaser__form {
     flex-direction: column;

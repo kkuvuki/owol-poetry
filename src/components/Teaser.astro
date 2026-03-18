@@ -1,9 +1,8 @@
 ---
-interface Props {
-  formAction?: string;
-}
-
-const { formAction = '' } = Astro.props;
+/**
+ * Teaser — OwOL app email signup section
+ * Stores signups directly in Supabase.
+ */
 ---
 
 <section class="teaser" aria-label="OwOL — Coming Soon">
@@ -21,23 +20,119 @@ const { formAction = '' } = Astro.props;
     <div class="teaser__form-wrap reveal" data-reveal="fade-up" data-reveal-delay="200">
       <p class="teaser__cta">Leave your email to taste it first.</p>
 
-      {formAction ? (
-        <form class="teaser__form" action={formAction} method="post" target="_blank" novalidate>
-          <label for="teaser-email" class="screen-reader-text">Email address</label>
-          <input
-            type="email"
-            id="teaser-email"
-            name="EMAIL"
-            class="teaser__input"
-            placeholder="your@email.com"
-            required
-            autocomplete="email"
-          />
-          <button type="submit" class="teaser__submit">Notify Me</button>
-        </form>
-      ) : (
-        <p class="teaser__placeholder">Email signup coming soon.</p>
-      )}
+      <form class="teaser__form" id="teaser-form" novalidate>
+        <label for="teaser-email" class="screen-reader-text">Email address</label>
+        <input
+          type="email"
+          id="teaser-email"
+          class="teaser__input"
+          placeholder="your@email.com"
+          required
+          autocomplete="email"
+        />
+        <button type="submit" class="teaser__submit" id="teaser-submit">
+          <span class="teaser__submit-label">Notify Me</span>
+          <span class="teaser__submit-sending" hidden>...</span>
+        </button>
+      </form>
+
+      <p class="teaser__success" id="teaser-success" hidden>
+        You're on the list. We'll be in touch.
+      </p>
+      <p class="teaser__error" id="teaser-error" hidden></p>
     </div>
   </div>
 </section>
+
+<script>
+  import { createClient } from '@supabase/supabase-js';
+
+  const supabase = createClient(
+    'https://jebbvyeenafpjrdhneoi.supabase.co',
+    'sb_publishable_fM_rNj8c0L8gSlc1IuXwIA_466dQW4x'
+  );
+
+  function initTeaser() {
+    const form = document.getElementById('teaser-form');
+    if (!form) return;
+
+    const input = document.getElementById('teaser-email');
+    const btn = document.getElementById('teaser-submit');
+    const success = document.getElementById('teaser-success');
+    const error = document.getElementById('teaser-error');
+    const label = btn?.querySelector('.teaser__submit-label');
+    const sending = btn?.querySelector('.teaser__submit-sending');
+
+    // Check if already signed up
+    if (localStorage.getItem('owol_email_signed_up') === 'true') {
+      form.hidden = true;
+      if (success) success.hidden = false;
+      return;
+    }
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const email = input?.value.trim();
+      if (!email || !email.includes('@')) {
+        if (error) {
+          error.textContent = 'Please enter a valid email.';
+          error.hidden = false;
+        }
+        return;
+      }
+
+      // Disable
+      if (btn) btn.disabled = true;
+      if (label) label.hidden = true;
+      if (sending) sending.hidden = false;
+      if (error) error.hidden = true;
+
+      const { error: insertError } = await supabase
+        .from('email_signups')
+        .insert([{ email: email }]);
+
+      if (insertError) {
+        // Duplicate email = already signed up, treat as success
+        if (insertError.code === '23505') {
+          localStorage.setItem('owol_email_signed_up', 'true');
+          form.style.opacity = '0';
+          form.style.transform = 'translateY(-8px)';
+          form.style.transition = 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+          setTimeout(function () {
+            form.hidden = true;
+            if (success) {
+              success.hidden = false;
+              success.style.animation = 'fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both';
+            }
+          }, 400);
+          return;
+        }
+
+        if (error) {
+          error.textContent = 'Something went wrong. Please try again.';
+          error.hidden = false;
+        }
+        if (btn) btn.disabled = false;
+        if (label) label.hidden = false;
+        if (sending) sending.hidden = true;
+        return;
+      }
+
+      // Success
+      localStorage.setItem('owol_email_signed_up', 'true');
+      form.style.opacity = '0';
+      form.style.transform = 'translateY(-8px)';
+      form.style.transition = 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+      setTimeout(function () {
+        form.hidden = true;
+        if (success) {
+          success.hidden = false;
+          success.style.animation = 'fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both';
+        }
+      }, 400);
+    });
+  }
+
+  document.addEventListener('astro:page-load', initTeaser);
+</script>
