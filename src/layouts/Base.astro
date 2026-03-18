@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from 'astro:transitions';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/main.css';
@@ -26,7 +27,7 @@ const {
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Ravings" />
+  <meta property="og:site_name" content="Ravings — Chidi Francis Onwuka" />
 
   <!-- Fonts: preconnect + preload critical weights -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -46,6 +47,7 @@ const {
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <title>{title}</title>
+  <ClientRouter />
 </head>
 
 <body>

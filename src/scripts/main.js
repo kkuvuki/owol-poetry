@@ -2,16 +2,43 @@
  * OwOL Poetry — Main JavaScript
  *
  * Handles:
- * - Smooth scrolling (native + Lenis-inspired easing via CSS)
+ * - Lenis smooth scrolling
  * - Scroll-triggered reveal animations (Intersection Observer)
  * - Header scroll state
  * - Mobile menu toggle
- *
- * Zero dependencies. Vanilla JS. Progressive enhancement.
  */
+
+import Lenis from 'lenis';
 
 (function () {
   'use strict';
+
+  /* ══════════════════════════════════════════
+   * Lenis Smooth Scroll
+   * ══════════════════════════════════════════ */
+
+  var lenis = null;
+
+  function initLenis() {
+    // Respect reduced motion preference.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    lenis = new Lenis({
+      duration: 1.2,
+      easing: function (t) {
+        return Math.min(1, 1.001 - Math.pow(2, -10 * t));
+      },
+      smooth: true,
+      smoothTouch: false,
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+  }
 
   /* ══════════════════════════════════════════
    * Scroll Reveal — Intersection Observer
@@ -111,6 +138,15 @@
 
       // Prevent body scroll when menu is open.
       document.body.style.overflow = isOpen ? '' : 'hidden';
+
+      // Pause/resume Lenis when menu opens/closes.
+      if (lenis) {
+        if (!isOpen) {
+          lenis.stop();
+        } else {
+          lenis.start();
+        }
+      }
     });
 
     // Close menu when a link is clicked.
@@ -119,6 +155,7 @@
         toggle.setAttribute('aria-expanded', 'false');
         menu.classList.remove('is-open');
         document.body.style.overflow = '';
+        if (lenis) lenis.start();
       });
     });
 
@@ -128,16 +165,16 @@
         toggle.setAttribute('aria-expanded', 'false');
         menu.classList.remove('is-open');
         document.body.style.overflow = '';
+        if (lenis) lenis.start();
         toggle.focus();
       }
     });
   }
 
   /* ══════════════════════════════════════════
-   * Smooth Scroll Enhancement
-   * Uses native CSS scroll-behavior: smooth as
-   * the baseline, enhanced with JS for anchor
-   * links to respect the fixed header offset.
+   * Smooth Scroll Enhancement for Anchor Links
+   * Uses Lenis scrollTo when available, falls
+   * back to native smooth scroll.
    * ══════════════════════════════════════════ */
 
   function initSmoothScroll() {
@@ -152,12 +189,16 @@
         e.preventDefault();
 
         var headerHeight = document.querySelector('.site-header')?.offsetHeight || 0;
-        var targetPosition = target.getBoundingClientRect().top + window.scrollY - headerHeight - 24;
 
-        window.scrollTo({
-          top: targetPosition,
-          behavior: 'smooth',
-        });
+        if (lenis) {
+          lenis.scrollTo(target, { offset: -(headerHeight + 24) });
+        } else {
+          var targetPosition = target.getBoundingClientRect().top + window.scrollY - headerHeight - 24;
+          window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth',
+          });
+        }
 
         // Update URL without jumping.
         history.pushState(null, '', targetId);
@@ -201,6 +242,7 @@
    * ══════════════════════════════════════════ */
 
   function init() {
+    initLenis();
     initReveal();
     initHeader();
     initMobileMenu();
@@ -208,10 +250,20 @@
     initScrollHintFade();
   }
 
-  // Run on DOM ready.
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  // Use astro:page-load which fires on initial load AND view transitions.
+  // This replaces DOMContentLoaded to avoid double-initialization.
+  document.addEventListener('astro:page-load', function () {
+    // Destroy and recreate Lenis to avoid stale DOM references.
+    if (lenis) {
+      lenis.destroy();
+      lenis = null;
+    }
+    initLenis();
+    initReveal();
+    initHeader();
+    initMobileMenu();
+    initSmoothScroll();
+    initScrollHintFade();
+  });
 })();
+

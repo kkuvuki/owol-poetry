@@ -4,12 +4,14 @@ const navItems = [
   { label: 'Poems', href: '/poems' },
   { label: 'Our Way of Life', href: '/our-way-of-life' },
 ];
+
+const currentPath = Astro.url.pathname;
 ---
 
 <header class="site-header" role="banner">
   <nav class="site-nav" aria-label="Primary navigation">
     <a href="/" class="site-nav__logo" aria-label="Home">
-      <span class="site-nav__wordmark">Ravings</span>
+      <span class="site-nav__wordmark">OwOL</span>
     </a>
 
     <button
@@ -22,12 +24,17 @@ const navItems = [
       <span class="site-nav__toggle-bar"></span>
     </button>
 
-    <ul id="primary-menu" class="site-nav__menu">
-      {navItems.map((item) => (
-        <li>
-          <a href={item.href}>{item.label}</a>
-        </li>
-      ))}
+    <ul id="primary-menu" class="site-nav__menu" role="list">
+      {navItems.map((item) => {
+        const isActive = item.href === '/'
+          ? currentPath === '/'
+          : currentPath.startsWith(item.href);
+        return (
+          <li class:list={[{ 'is-active': isActive }]}>
+            <a href={item.href} aria-current={isActive ? 'page' : undefined}>{item.label}</a>
+          </li>
+        );
+      })}
     </ul>
   </nav>
 </header>

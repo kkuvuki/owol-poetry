@@ -13,7 +13,7 @@
   --color-bg-elevated:     #252119;
   --color-text-primary:    #EFF0ED;
   --color-text-secondary:  #9B9C96;
-  --color-text-muted:      #5C5D58;
+  --color-text-muted:      #7A7B75;
   --color-accent-green:    #79B939;
   --color-accent-green-hover: #8AC44F;
   --color-accent-purple:   #B94EC8; /* AA-compliant against --color-bg (4.5:1) */
@@ -104,8 +104,28 @@ html {
   -moz-text-size-adjust: none;
   -webkit-text-size-adjust: none;
   text-size-adjust: none;
-  scroll-behavior: smooth;
   hanging-punctuation: first last;
+}
+
+/* ── Lenis Smooth Scroll ── */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling {
+  /* no-op — Lenis adds this class during scroll */
 }
 
 body {
@@ -253,8 +273,7 @@ ul, ol {
 }
 
 .site-nav__menu li a:hover,
-.site-nav__menu li.current-menu-item a,
-.site-nav__menu li.current_page_item a {
+.site-nav__menu li.is-active a {
   opacity: 1;
 }
 
@@ -718,12 +737,6 @@ ul, ol {
    Single Poem
    ═══════════════════════════════════════════════ */
 
-.poem-single {
-  max-width: var(--container-narrow);
-  margin: 0 auto;
-  padding: var(--space-4xl) var(--page-gutter) var(--space-3xl);
-}
-
 .poem-single__header {
   margin-bottom: var(--space-2xl);
 }
@@ -757,20 +770,123 @@ ul, ol {
   line-height: var(--lh-tight);
 }
 
+/* ── Ornamental divider after title ── */
+.poem-single__header::after {
+  content: '';
+  display: block;
+  width: 3rem;
+  height: 1px;
+  margin-top: var(--space-lg);
+  background: linear-gradient(
+    90deg,
+    var(--color-accent-green),
+    transparent
+  );
+  opacity: 0.4;
+}
+
+/* ── Decorative opening quotation mark ── */
+.poem-single__body::before {
+  content: '\201C';
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 8vw, 7rem);
+  line-height: 1;
+  color: var(--color-accent-green);
+  opacity: 0.12;
+  margin-bottom: var(--space-sm);
+  margin-left: -0.15em;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* ── Subtle page vignette + texture ── */
+.poem-single {
+  max-width: var(--container-narrow);
+  margin: 0 auto;
+  padding: var(--space-4xl) var(--page-gutter) var(--space-3xl);
+  position: relative;
+}
+
+.poem-single::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    transparent 50%,
+    rgba(0, 0, 0, 0.25) 100%
+  );
+  z-index: -1;
+}
+
+/* CSS-only grain texture overlay — very subtle */
+.poem-single::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  z-index: -1;
+  background-image:
+    repeating-conic-gradient(
+      rgba(255, 255, 255, 0.08) 0% 25%,
+      transparent 0% 50%
+    );
+  background-size: 4px 4px;
+}
+
 /* Poem body — the actual poetry content */
 .poem-single__body {
   font-family: var(--font-body);
   font-size: var(--fs-body);
   line-height: var(--lh-poem);
   color: var(--color-text-primary);
+  position: relative;
 }
 
+/* ── Drop cap on first letter ── */
+.poem-single__body > p:first-of-type::first-letter {
+  font-family: var(--font-display);
+  font-size: 3.4em;
+  float: left;
+  line-height: 0.75;
+  margin-right: 0.06em;
+  margin-top: 0.08em;
+  color: var(--color-accent-green);
+  opacity: 0.7;
+}
+
+/* Each <p> is a stanza — generous spacing between stanzas */
 .poem-single__body p {
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-xl);
+  position: relative;
 }
 
-.poem-single__body p:empty {
-  margin-bottom: var(--space-xl);
+.poem-single__body p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Stanza separator ornament ── */
+.poem-single__body p + p {
+  padding-top: var(--space-xs);
+}
+
+.poem-single__body p + p::before {
+  content: '';
+  display: block;
+  width: 1.5rem;
+  height: 1px;
+  background: var(--color-text-muted);
+  opacity: 0.2;
+  margin-bottom: var(--space-md);
+}
+
+/* ── Subtle left border accent on first stanza ── */
+.poem-single__body > p:first-of-type {
+  padding-left: var(--space-md);
+  border-left: 2px solid rgba(121, 185, 57, 0.2);
 }
 
 /* Poem navigation */
@@ -835,6 +951,19 @@ ul, ol {
 
 .poem-single__back:hover {
   color: var(--color-accent-green);
+}
+
+/* ── Poem author attribution (subtle, after poem body) ── */
+.poem-single__body::after {
+  content: '\2014\2009C. F. O.';
+  display: block;
+  margin-top: var(--space-2xl);
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  font-style: italic;
+  color: var(--color-text-muted);
+  text-align: right;
+  opacity: 0.5;
 }
 
 @media (max-width: 480px) {
@@ -930,8 +1059,8 @@ ul, ol {
 }
 
 .author-card__photo {
-  width: 120px;
-  height: 120px;
+  width: 200px;
+  height: 200px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
@@ -1054,22 +1183,31 @@ ul, ol {
 
 
 /* ═══════════════════════════════════════════════
-   Utility — WordPress defaults
+   View Transitions — page fade
    ═══════════════════════════════════════════════ */
 
-.wp-block-separator {
-  border: none;
-  border-top: 1px solid var(--color-separator);
-  margin: var(--space-xl) 0;
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.alignwide {
-  max-width: var(--container-max);
-  margin-left: auto;
-  margin-right: auto;
+@keyframes fade-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-4px); }
 }
 
-.alignfull {
-  width: 100vw;
-  margin-left: calc(-50vw + 50%);
+::view-transition-old(root) {
+  animation: fade-out 0.2s var(--ease-out-quart) both;
+}
+
+::view-transition-new(root) {
+  animation: fade-in 0.3s var(--ease-out-expo) 0.1s both;
+}
+
+/* Disable view transition animations for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
 }
