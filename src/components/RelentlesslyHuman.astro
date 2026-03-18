@@ -1,0 +1,135 @@
+---
+/**
+ * RelentlesslyHuman — Interactive collaborative poem
+ * Strangers contribute one line at a time to an ever-growing poem.
+ */
+---
+
+<section class="rh" id="relentlessly-human" aria-label="Relentlessly Human — A collaborative poem">
+
+  <!-- A. The Invitation -->
+  <div class="rh__invitation reveal" data-reveal="fade-up">
+    <h2 class="rh__title">Relentlessly Human</h2>
+    <p class="rh__subtitle">
+      A poem being written by strangers, for strangers.<br />
+      One line at a time. No AI. Only what you carry inside.
+    </p>
+  </div>
+
+  <!-- B. Reading Controls -->
+  <div class="rh__controls reveal" data-reveal="fade-up" data-reveal-delay="100">
+    <div class="rh__pills" role="group" aria-label="Number of lines to display">
+      <button class="rh__pill is-active" data-limit="10" aria-pressed="true">Last 10</button>
+      <button class="rh__pill" data-limit="50" aria-pressed="false">Last 50</button>
+      <button class="rh__pill" data-limit="100" aria-pressed="false">Last 100</button>
+      <button class="rh__pill" data-limit="0" aria-pressed="false">All</button>
+    </div>
+    <div class="rh__depth" aria-live="polite">
+      <span class="rh__depth-text"></span>
+    </div>
+  </div>
+
+  <!-- C. The Poem Display -->
+  <div class="rh__poem-container reveal" data-reveal="fade-up" data-reveal-delay="200">
+    <div class="rh__loading" aria-live="polite">
+      <span class="rh__loading-dot"></span>
+      <span class="rh__loading-dot"></span>
+      <span class="rh__loading-dot"></span>
+    </div>
+    <div class="rh__poem" role="list" aria-label="Poem lines">
+      <!-- Lines injected by JS -->
+    </div>
+    <div class="rh__empty" hidden>
+      <p>No lines yet. Be the first to write.</p>
+    </div>
+  </div>
+
+  <!-- D. The Contribution Area -->
+  <div class="rh__contribute" id="rh-contribute" hidden>
+    <div class="rh__contribute-card reveal" data-reveal="fade-up">
+
+      <div class="rh__context">
+        <p class="rh__context-label">The poem so far...</p>
+        <div class="rh__context-lines" aria-hidden="true">
+          <!-- Last few lines shown as context -->
+        </div>
+      </div>
+
+      <form class="rh__form" id="rh-form" novalidate>
+        <div class="rh__form-group rh__form-group--line">
+          <label for="rh-line-input" class="rh__label">Add your line</label>
+          <div class="rh__input-wrap">
+            <input
+              type="text"
+              id="rh-line-input"
+              class="rh__input rh__input--line"
+              maxlength="150"
+              placeholder="Write something only a human could feel..."
+              autocomplete="off"
+              required
+            />
+            <span class="rh__char-count" aria-live="polite">0 / 150</span>
+          </div>
+        </div>
+
+        <div class="rh__form-row">
+          <div class="rh__form-group">
+            <label for="rh-name-input" class="rh__label">Your name</label>
+            <input
+              type="text"
+              id="rh-name-input"
+              class="rh__input"
+              maxlength="100"
+              placeholder="First name or pen name"
+              autocomplete="given-name"
+              required
+            />
+          </div>
+          <div class="rh__form-group">
+            <label for="rh-link-input" class="rh__label rh__label--optional">A link to you <span class="rh__optional">(optional)</span></label>
+            <input
+              type="url"
+              id="rh-link-input"
+              class="rh__input"
+              maxlength="500"
+              placeholder="LinkedIn, Instagram, website..."
+              autocomplete="url"
+            />
+          </div>
+        </div>
+
+        <div class="rh__covenant">
+          <label class="rh__covenant-label">
+            <input type="checkbox" id="rh-covenant" class="rh__covenant-check" required />
+            <span class="rh__covenant-box" aria-hidden="true"></span>
+            <span class="rh__covenant-text">I wrote this from my own experience. No AI.</span>
+          </label>
+        </div>
+
+        <button type="submit" class="rh__submit" id="rh-submit" disabled>
+          <span class="rh__submit-text">Add to the poem</span>
+          <span class="rh__submit-sending" hidden>Sending...</span>
+        </button>
+
+        <div class="rh__error" id="rh-error" role="alert" hidden></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- D (alt). Already contributed state -->
+  <div class="rh__contributed" id="rh-contributed" hidden>
+    <div class="rh__contributed-card reveal" data-reveal="fade-up">
+      <p class="rh__contributed-text">You've left your mark. Thank you.</p>
+    </div>
+  </div>
+
+  <!-- E. The Afterglow -->
+  <div class="rh__afterglow" id="rh-afterglow" hidden>
+    <p class="rh__afterglow-text reveal" data-reveal="fade-up">
+      Someone, someday, will read what you just wrote.
+    </p>
+  </div>
+
+</section>
+
+<script src="../scripts/relentlessly-human.js"></script>

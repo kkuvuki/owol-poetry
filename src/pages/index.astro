@@ -2,15 +2,19 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
+import RelentlesslyHuman from '../components/RelentlesslyHuman.astro';
 import PoemCard from '../components/PoemCard.astro';
 import OwolBridge from '../components/OwolBridge.astro';
 import Teaser from '../components/Teaser.astro';
 
-const poems = (await getCollection('poems')).sort((a, b) => a.data.order - b.data.order);
+const allPoems = (await getCollection('poems')).sort((a, b) => a.data.order - b.data.order);
+const poems = allPoems.slice(0, 6);
 ---
 
 <Base>
   <Hero />
+
+  <RelentlesslyHuman />
 
   <section class="poems-feed" aria-label="Poems">
     {poems.length > 0 ? (
