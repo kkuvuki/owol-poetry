@@ -1953,6 +1953,30 @@ ul, ol {
   color: var(--color-text-muted);
 }
 
+.rh-line__socials {
+  display: inline-flex;
+  gap: 0.4rem;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+.rh-line__social-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  color: var(--color-text-muted);
+  background: rgba(255, 255, 255, 0.04);
+  transition: all var(--duration-fast) var(--ease-out-quart);
+}
+
+.rh-line__social-icon:hover {
+  color: var(--color-accent-green);
+  background: rgba(121, 185, 57, 0.12);
+}
+
 /* New line glow animation */
 .rh-line--new {
   animation: rh-line-new 0.8s var(--ease-out-expo) both;
@@ -2006,18 +2030,38 @@ ul, ol {
 /* Context lines above the form */
 .rh__context {
   margin-bottom: var(--space-lg);
-  padding-bottom: var(--space-lg);
-  border-bottom: 1px solid var(--color-separator);
+  padding: var(--space-md) var(--space-lg);
+  background: linear-gradient(
+    135deg,
+    rgba(121, 185, 57, 0.06) 0%,
+    rgba(185, 78, 200, 0.04) 100%
+  );
+  border: 1px solid rgba(121, 185, 57, 0.12);
+  border-radius: var(--radius-md);
+  position: relative;
+}
+
+.rh__context::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: var(--space-lg);
+  right: var(--space-lg);
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-accent-green), var(--color-accent-purple), transparent);
+  border-radius: 1px;
+  opacity: 0.5;
 }
 
 .rh__context-label {
   font-family: var(--font-ui);
   font-size: var(--fs-caption);
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-text-muted);
+  color: var(--color-accent-green);
   margin-bottom: var(--space-sm);
+  opacity: 0.8;
 }
 
 .rh__context-lines {
@@ -2120,6 +2164,46 @@ ul, ol {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-md);
+}
+
+/* ── Social identity fields ── */
+
+.rh__socials {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+
+.rh__social-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.rh__social-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--color-text-muted);
+  transition: all var(--duration-fast) var(--ease-out-quart);
+  cursor: pointer;
+}
+
+.rh__social-field:focus-within .rh__social-label {
+  color: var(--color-accent-green);
+  border-color: rgba(121, 185, 57, 0.3);
+  background: rgba(121, 185, 57, 0.08);
+}
+
+.rh__input--social {
+  font-size: var(--fs-small);
+  padding: var(--space-xs) 0;
 }
 
 /* Covenant checkbox */
@@ -2266,6 +2350,10 @@ ul, ol {
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .rh__form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .rh__socials {
     grid-template-columns: 1fr;
   }
 }
