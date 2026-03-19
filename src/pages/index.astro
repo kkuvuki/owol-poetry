@@ -14,9 +14,22 @@ const poems = allPoems.slice(0, 6);
 <Base>
   <Hero />
 
+  <div class="section-divider reveal" data-reveal="fade" data-reveal-delay="800" aria-hidden="true">
+    <span class="section-divider__line"></span>
+    <span class="section-divider__dot"></span>
+    <span class="section-divider__line"></span>
+  </div>
+
   <RelentlesslyHuman />
 
-  <section class="poems-feed" aria-label="Poems">
+  <div class="section-divider section-divider--green reveal" data-reveal="fade" aria-hidden="true">
+    <span class="section-divider__line"></span>
+    <span class="section-divider__dot"></span>
+    <span class="section-divider__line"></span>
+  </div>
+
+  <section class="poems-feed" id="poems" aria-label="Poems">
+    <h2 class="poems-feed__heading reveal" data-reveal="fade-up">From the Collection</h2>
     {poems.length > 0 ? (
       poems.map((poem, index) => (
         <PoemCard
@@ -33,8 +46,27 @@ const poems = allPoems.slice(0, 6);
         <p>Poems are being written. Check back soon.</p>
       </div>
     )}
+
+    {allPoems.length > 6 && (
+      <div class="poems-feed__more reveal" data-reveal="fade-up">
+        <a href="/poems" class="poems-feed__more-link">View all poems &rarr;</a>
+      </div>
+    )}
   </section>
 
+  <div class="section-divider reveal" data-reveal="fade" aria-hidden="true">
+    <span class="section-divider__line"></span>
+    <span class="section-divider__dot"></span>
+    <span class="section-divider__line"></span>
+  </div>
+
   <OwolBridge />
+
+  <div class="section-divider reveal" data-reveal="fade" aria-hidden="true">
+    <span class="section-divider__line"></span>
+    <span class="section-divider__dot"></span>
+    <span class="section-divider__line"></span>
+  </div>
+
   <Teaser />
 </Base>

@@ -23,11 +23,22 @@ const {
   <meta name="theme-color" content="#13100D" />
   <meta name="description" content={description} />
 
+  <!-- Canonical -->
+  <link rel="canonical" href={`https://itsowol.com${Astro.url.pathname}`} />
+
   <!-- Open Graph -->
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Ravings — Chidi Francis Onwuka" />
+  <meta property="og:url" content={`https://itsowol.com${Astro.url.pathname}`} />
+  <meta property="og:image" content="/og-image.jpg" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content="/og-image.jpg" />
 
   <!-- Fonts: preconnect + preload critical weights -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />

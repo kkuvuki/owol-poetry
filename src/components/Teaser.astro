@@ -11,14 +11,13 @@
       <span class="teaser__badge">OwOL</span>
       <h2 class="teaser__heading">Something is cooking.</h2>
       <p class="teaser__description">
-        Poetry nourishes the soul. I&rsquo;m building something for what nourishes the body.
         OwOL &mdash; Our Way of Life &mdash; is a food lifestyle app that brings the same
-        intentionality to your kitchen.
+        intentionality to your kitchen that poetry brings to language.
       </p>
     </div>
 
     <div class="teaser__form-wrap reveal" data-reveal="fade-up" data-reveal-delay="200">
-      <p class="teaser__cta">Leave your email to taste it first.</p>
+      <p class="teaser__cta">Leave your email. We&rsquo;ll write once &mdash; when it&rsquo;s ready.</p>
 
       <form class="teaser__form" id="teaser-form" novalidate>
         <label for="teaser-email" class="screen-reader-text">Email address</label>
@@ -45,12 +44,7 @@
 </section>
 
 <script>
-  import { createClient } from '@supabase/supabase-js';
-
-  const supabase = createClient(
-    'https://jebbvyeenafpjrdhneoi.supabase.co',
-    'sb_publishable_fM_rNj8c0L8gSlc1IuXwIA_466dQW4x'
-  );
+  import { supabase } from '../scripts/supabase.js';
 
   function initTeaser() {
     const form = document.getElementById('teaser-form');
@@ -74,7 +68,7 @@
       e.preventDefault();
 
       const email = input?.value.trim();
-      if (!email || !email.includes('@')) {
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         if (error) {
           error.textContent = 'Please enter a valid email.';
           error.hidden = false;

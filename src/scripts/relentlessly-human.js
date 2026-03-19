@@ -5,12 +5,7 @@
  * and all animations for the collaborative poem feature.
  */
 
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  'https://jebbvyeenafpjrdhneoi.supabase.co',
-  'sb_publishable_fM_rNj8c0L8gSlc1IuXwIA_466dQW4x'
-);
+import { supabase } from './supabase.js';
 
 const STORAGE_KEY = 'rh_contributed';
 const FINGERPRINT_KEY = 'rh_fingerprint';
@@ -95,6 +90,8 @@ async function fetchLines(limit) {
 
   if (limit > 0) {
     query = query.limit(limit);
+  } else {
+    query = query.limit(500); // Safety cap for "All"
   }
 
   const { data, error } = await query;
@@ -277,8 +274,9 @@ function createLineElement(line) {
       website: { url: function(v) { return v.startsWith('http') ? v : 'https://' + v; }, svg: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>' },
     };
 
+    var ALLOWED_SOCIALS = ['linkedin', 'instagram', 'email', 'website'];
     Object.keys(socials).forEach(function (key) {
-      if (!iconMap[key]) return;
+      if (ALLOWED_SOCIALS.indexOf(key) === -1 || !iconMap[key]) return;
       var a = document.createElement('a');
       a.href = iconMap[key].url(socials[key]);
       a.target = '_blank';
@@ -441,8 +439,8 @@ function initForm() {
     const len = this.value.length;
     if (els.charCount) {
       els.charCount.textContent = len + ' / 150';
-      els.charCount.classList.toggle('rh__char-count--warn', len > 130);
-      els.charCount.classList.toggle('rh__char-count--max', len >= 150);
+      els.charCount.classList.toggle('is-near-limit', len > 130);
+      els.charCount.classList.toggle('is-at-limit', len >= 150);
     }
     validateForm();
   });
@@ -450,13 +448,14 @@ function initForm() {
   els.nameInput.addEventListener('input', validateForm);
   els.covenant.addEventListener('change', validateForm);
 
-  // Focus mode: dim surroundings
+  // Focus mode: dim surroundings when writing
+  var rhSection = document.querySelector('.rh');
   els.lineInput.addEventListener('focus', function () {
-    els.form.classList.add('rh__form--focus');
+    if (rhSection) rhSection.classList.add('is-focus-mode');
   });
 
   els.lineInput.addEventListener('blur', function () {
-    els.form.classList.remove('rh__form--focus');
+    if (rhSection) rhSection.classList.remove('is-focus-mode');
   });
 
   // Submit
@@ -547,18 +546,31 @@ async function handleSubmit(e) {
       }
     }
 
-    // After afterglow, show "contributed" message
+    // After afterglow, fade out then show "contributed" message
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var afterglowDelay = reducedMotion ? 500 : 5500;
+    var fadeDelay = reducedMotion ? 0 : 1000;
+
     setTimeout(function () {
-      if (els.contributed) {
-        els.contributed.hidden = false;
-        const card = els.contributed.querySelector('.reveal');
-        if (card) {
-          requestAnimationFrame(function () {
-            card.classList.add('is-visible');
-          });
-        }
+      if (els.afterglow && !reducedMotion) {
+        els.afterglow.style.transition = 'opacity 1s ease-out';
+        els.afterglow.style.opacity = '0';
       }
-    }, 3000);
+
+      // Wait for fade-out to finish, then swap
+      setTimeout(function () {
+        if (els.afterglow) els.afterglow.hidden = true;
+        if (els.contributed) {
+          els.contributed.hidden = false;
+          const card = els.contributed.querySelector('.reveal');
+          if (card) {
+            requestAnimationFrame(function () {
+              card.classList.add('is-visible');
+            });
+          }
+        }
+      }, fadeDelay);
+    }, afterglowDelay);
   }, 800);
 }
 
@@ -579,17 +591,23 @@ function initPills() {
       });
       this.classList.add('is-active');
       this.setAttribute('aria-pressed', 'true');
+      this.setAttribute('aria-busy', 'true');
 
       // Show loading briefly
       if (els.loading) els.loading.style.display = 'flex';
       if (els.poem) els.poem.style.opacity = '0.3';
 
-      currentLines = await fetchLines(limit);
-
-      if (els.loading) els.loading.style.display = 'none';
-      if (els.poem) els.poem.style.opacity = '1';
-
-      renderLines(currentLines, true);
+      try {
+        currentLines = await fetchLines(limit);
+        renderLines(currentLines, true);
+      } catch (err) {
+        console.error('Failed to load lines:', err);
+        renderLines(currentLines, false);
+      } finally {
+        if (els.loading) els.loading.style.display = 'none';
+        if (els.poem) els.poem.style.opacity = '1';
+        this.setAttribute('aria-busy', 'false');
+      }
     });
   });
 }
@@ -614,16 +632,39 @@ async function init() {
   // Fetch and display stats
   fetchAndDisplayStats();
 
-  // Show contribution area after a brief delay
-  setTimeout(function () {
+  // Show contribution area when poem container scrolls into view
+  const poemContainer = document.querySelector('.rh__poem-container');
+  if (poemContainer && 'IntersectionObserver' in window) {
+    const formObserver = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            showContributeForm();
+            formObserver.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.3, rootMargin: '0px 0px -40px 0px' }
+    );
+    formObserver.observe(poemContainer);
+  } else {
+    // Fallback for browsers without IO
     showContributeForm();
-  }, 600);
+  }
 
   // Set up interactions
   initPills();
   initForm();
   subscribeToLines();
 }
+
+// Clean up realtime subscription before navigating away
+document.addEventListener('astro:before-preparation', function () {
+  if (subscription) {
+    subscription.unsubscribe();
+    subscription = null;
+  }
+});
 
 // Support both initial load and Astro view transitions
 document.addEventListener('astro:page-load', init);

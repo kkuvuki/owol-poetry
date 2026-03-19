@@ -18,6 +18,7 @@ import Lenis from 'lenis';
    * ══════════════════════════════════════════ */
 
   var lenis = null;
+  var lenisRafId = null;
 
   function initLenis() {
     // Respect reduced motion preference.
@@ -34,10 +35,10 @@ import Lenis from 'lenis';
 
     function raf(time) {
       lenis.raf(time);
-      requestAnimationFrame(raf);
+      lenisRafId = requestAnimationFrame(raf);
     }
 
-    requestAnimationFrame(raf);
+    lenisRafId = requestAnimationFrame(raf);
   }
 
   /* ══════════════════════════════════════════
@@ -253,7 +254,11 @@ import Lenis from 'lenis';
   // Use astro:page-load which fires on initial load AND view transitions.
   // This replaces DOMContentLoaded to avoid double-initialization.
   document.addEventListener('astro:page-load', function () {
-    // Destroy and recreate Lenis to avoid stale DOM references.
+    // Cancel rAF and destroy Lenis to avoid stale DOM references.
+    if (lenisRafId) {
+      cancelAnimationFrame(lenisRafId);
+      lenisRafId = null;
+    }
     if (lenis) {
       lenis.destroy();
       lenis = null;
