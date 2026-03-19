@@ -2424,6 +2424,37 @@ ul, ol {
   opacity: 0.7;
 }
 
+/* ── Keep scrolling hint ── */
+
+.rh__scroll-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-top: var(--space-2xl);
+  position: relative;
+  z-index: 1;
+}
+
+.rh__scroll-hint-text {
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.rh__scroll-hint-arrow {
+  color: var(--color-text-muted);
+  animation: rh-bounce 2s var(--ease-out-expo) infinite;
+}
+
+@keyframes rh-bounce {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50%      { transform: translateY(6px); opacity: 1; }
+}
+
 /* ── Focus mode: dim surroundings when writing ── */
 .rh.is-focus-mode .rh__invitation,
 .rh.is-focus-mode .rh__controls,
