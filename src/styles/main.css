@@ -481,6 +481,66 @@ ul, ol {
   margin: 0 auto;
 }
 
+/* ── Live Stats Counter ── */
+
+.rh__stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+  position: relative;
+  z-index: 1;
+}
+
+.rh__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.rh__stat-number {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw + 0.5rem, 3.5rem);
+  font-weight: 400;
+  line-height: 1;
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-green) 0%,
+    var(--color-accent-green-hover) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: transform 0.4s var(--ease-out-expo);
+}
+
+.rh__stat-number.is-updating {
+  transform: scale(1.15);
+}
+
+.rh__stat-label {
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.rh__stat-divider {
+  width: 1px;
+  height: 2.5rem;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--color-text-muted),
+    transparent
+  );
+  opacity: 0.3;
+}
+
 /* ── Reading Controls ── */
 
 .rh__controls {

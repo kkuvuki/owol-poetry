@@ -42,6 +42,8 @@ function cacheElements() {
     charCount: document.querySelector('.rh__char-count'),
     contextLines: document.querySelector('.rh__context-lines'),
     error: document.getElementById('rh-error'),
+    lineCount: document.getElementById('rh-line-count'),
+    authorCount: document.getElementById('rh-author-count'),
   };
 
   if (els.submit) {
@@ -118,10 +120,86 @@ function subscribeToLines() {
       (payload) => {
         if (payload.new && !payload.new.flagged) {
           animateNewLine(payload.new);
+          bumpLineCount();
         }
       }
     )
     .subscribe();
+}
+
+/* ══════════════════════════════════════════
+ * Stats Counter
+ * ══════════════════════════════════════════ */
+
+async function fetchAndDisplayStats() {
+  // Get total line count
+  const { count: lineCount, error: countErr } = await supabase
+    .from('poem_lines')
+    .select('*', { count: 'exact', head: true })
+    .eq('flagged', false);
+
+  // Get unique author count
+  const { data: authors, error: authErr } = await supabase
+    .from('poem_lines')
+    .select('author_name')
+    .eq('flagged', false);
+
+  var uniqueAuthors = 0;
+  if (authors) {
+    var seen = {};
+    authors.forEach(function (a) {
+      var name = (a.author_name || '').toLowerCase().trim();
+      if (name && !seen[name]) {
+        seen[name] = true;
+        uniqueAuthors++;
+      }
+    });
+  }
+
+  animateCounter(els.lineCount, countErr ? 0 : (lineCount || 0));
+  animateCounter(els.authorCount, uniqueAuthors);
+}
+
+function animateCounter(el, target) {
+  if (!el) return;
+
+  var current = parseInt(el.textContent, 10) || 0;
+  if (current === target && target > 0) return;
+
+  // For first load (from "—"), just set it
+  if (el.textContent === '—' || isNaN(current)) {
+    el.textContent = target;
+    el.classList.add('is-updating');
+    setTimeout(function () { el.classList.remove('is-updating'); }, 400);
+    return;
+  }
+
+  // Animate counting up
+  var diff = target - current;
+  var steps = Math.min(Math.abs(diff), 20);
+  var stepTime = Math.max(30, 600 / steps);
+  var i = 0;
+
+  el.classList.add('is-updating');
+
+  var interval = setInterval(function () {
+    i++;
+    var progress = i / steps;
+    // Ease out
+    var easedProgress = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(current + diff * easedProgress);
+    if (i >= steps) {
+      clearInterval(interval);
+      el.textContent = target;
+      setTimeout(function () { el.classList.remove('is-updating'); }, 200);
+    }
+  }, stepTime);
+}
+
+function bumpLineCount() {
+  if (!els.lineCount) return;
+  var current = parseInt(els.lineCount.textContent, 10) || 0;
+  animateCounter(els.lineCount, current + 1);
 }
 
 /* ══════════════════════════════════════════
@@ -532,6 +610,9 @@ async function init() {
   // Hide loading, render
   if (els.loading) els.loading.style.display = 'none';
   renderLines(currentLines, true);
+
+  // Fetch and display stats
+  fetchAndDisplayStats();
 
   // Show contribution area after a brief delay
   setTimeout(function () {
