@@ -216,7 +216,10 @@ function renderLines(lines, animate) {
 
   if (els.empty) els.empty.hidden = true;
 
-  lines.forEach(function (line, i) {
+  // Reverse so oldest is at top, newest at bottom (reading order)
+  var ordered = lines.slice().reverse();
+
+  ordered.forEach(function (line, i) {
     const el = createLineElement(line);
 
     if (animate) {
@@ -224,8 +227,8 @@ function renderLines(lines, animate) {
       el.classList.add('rh-line--entering');
     }
 
-    // Time-based opacity: newest = 1, oldest fades to 0.55
-    const ageRatio = lines.length > 1 ? i / (lines.length - 1) : 0;
+    // Time-based opacity: oldest fades to 0.55, newest = 1
+    const ageRatio = ordered.length > 1 ? (ordered.length - 1 - i) / (ordered.length - 1) : 0;
     const opacity = 1 - ageRatio * 0.45;
     el.style.setProperty('--line-opacity', opacity);
 
@@ -324,18 +327,18 @@ function animateNewLine(lineData) {
   el.classList.add('rh-line--new');
   el.style.setProperty('--line-opacity', 1);
 
-  // Shift existing lines' opacity down slightly
+  // Shift existing lines' opacity — older lines fade more
   const existingLines = els.poem.querySelectorAll('.rh-line');
   const total = existingLines.length + 1;
   existingLines.forEach(function (existing, i) {
-    const ageRatio = (i + 1) / (total - 1 || 1);
+    const ageRatio = (total - 1 - i) / (total - 1 || 1);
     const opacity = 1 - ageRatio * 0.45;
     existing.style.setProperty('--line-opacity', opacity);
   });
 
-  els.poem.prepend(el);
+  els.poem.appendChild(el);
 
-  // Update context lines
+  // Update context lines (currentLines is newest-first)
   currentLines.unshift(lineData);
   updateContextLines(currentLines);
   updateDepth(els.poem.querySelectorAll('.rh-line').length);

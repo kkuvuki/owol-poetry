@@ -32,10 +32,11 @@
   <!-- B. Reading Controls -->
   <div class="rh__controls reveal" data-reveal="fade-up" data-reveal-delay="100">
     <div class="rh__pills" role="group" aria-label="Number of lines to display">
+      <button class="rh__pill" data-limit="5" aria-pressed="false">Last 5</button>
       <button class="rh__pill is-active" data-limit="10" aria-pressed="true">Last 10</button>
       <button class="rh__pill" data-limit="50" aria-pressed="false">Last 50</button>
       <button class="rh__pill" data-limit="100" aria-pressed="false">Last 100</button>
-      <button class="rh__pill" data-limit="0" aria-pressed="false">All</button>
+      <a href="/poem" class="rh__pill rh__pill--link">All</a>
     </div>
     <div class="rh__depth" aria-live="polite">
       <span class="rh__depth-text"></span>
@@ -55,6 +56,9 @@
     <div class="rh__empty" hidden>
       <p>No lines yet. Be the first to write.</p>
     </div>
+    <noscript>
+      <p class="rh__noscript">This collaborative poem requires JavaScript to load and display lines from contributors around the world.</p>
+    </noscript>
   </div>
 
   <!-- D. The Contribution Area -->

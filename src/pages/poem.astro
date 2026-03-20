@@ -1,0 +1,97 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="The Full Poem — Relentlessly Human"
+  description="Read the entire collaborative poem, written one line at a time by strangers around the world."
+>
+  <article class="poem-page">
+    <header class="poem-page__header reveal" data-reveal="fade-up">
+      <h1 class="poem-page__title">Relentlessly Human</h1>
+      <p class="poem-page__subtitle">The full poem, from first line to last.</p>
+      <div class="poem-page__stats" aria-live="polite">
+        <span class="poem-page__stat" id="poem-page-count">—</span>
+        <span class="poem-page__stat-label">lines &middot;</span>
+        <span class="poem-page__stat" id="poem-page-authors">—</span>
+        <span class="poem-page__stat-label">voices</span>
+      </div>
+    </header>
+
+    <div class="poem-page__body">
+      <div class="poem-page__loading" id="poem-page-loading" aria-live="polite">
+        <span class="rh__loading-dot"></span>
+        <span class="rh__loading-dot"></span>
+        <span class="rh__loading-dot"></span>
+      </div>
+
+      <div class="poem-page__lines" id="poem-page-lines" role="list" aria-label="Full poem">
+        <!-- Lines injected by JS -->
+      </div>
+    </div>
+
+    <footer class="poem-page__footer reveal" data-reveal="fade-up">
+      <a href="/#relentlessly-human" class="poem-page__back">&larr; Back to Ravings</a>
+    </footer>
+  </article>
+</Base>
+
+<script>
+  import { supabase } from '../scripts/supabase.js';
+
+  async function initPoemPage() {
+    const container = document.getElementById('poem-page-lines');
+    const loading = document.getElementById('poem-page-loading');
+    const countEl = document.getElementById('poem-page-count');
+    const authorsEl = document.getElementById('poem-page-authors');
+    if (!container) return;
+
+    // Fetch all lines, oldest first
+    const { data, error } = await supabase
+      .from('poem_lines')
+      .select('*')
+      .eq('flagged', false)
+      .order('created_at', { ascending: true })
+      .limit(2000);
+
+    if (loading) loading.hidden = true;
+
+    if (error || !data || data.length === 0) {
+      container.innerHTML = '<p class="poem-page__empty">No lines yet. Be the first to write.</p>';
+      return;
+    }
+
+    // Update stats
+    if (countEl) countEl.textContent = data.length;
+    if (authorsEl) {
+      var seen = {};
+      data.forEach(function (l) {
+        var name = (l.author_name || '').toLowerCase().trim();
+        if (name) seen[name] = true;
+      });
+      authorsEl.textContent = Object.keys(seen).length;
+    }
+
+    // Render lines with staggered animation
+    data.forEach(function (line, i) {
+      var el = document.createElement('div');
+      el.className = 'poem-page__line';
+      el.setAttribute('role', 'listitem');
+      el.style.animationDelay = Math.min(i * 30, 3000) + 'ms';
+
+      var text = document.createElement('p');
+      text.className = 'poem-page__line-text';
+      text.textContent = line.text;
+
+      var meta = document.createElement('span');
+      meta.className = 'poem-page__line-meta';
+      meta.textContent = '— ' + line.author_name;
+
+      el.appendChild(text);
+      el.appendChild(meta);
+      container.appendChild(el);
+    });
+  }
+
+  document.addEventListener('astro:page-load', initPoemPage);
+</script>
