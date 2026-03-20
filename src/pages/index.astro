@@ -4,6 +4,7 @@ import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import RelentlesslyHuman from '../components/RelentlesslyHuman.astro';
 import PoemCard from '../components/PoemCard.astro';
+import StanzaOfTheWeek from '../components/StanzaOfTheWeek.astro';
 import OwolBridge from '../components/OwolBridge.astro';
 import Teaser from '../components/Teaser.astro';
 
@@ -23,6 +24,14 @@ const poems = allPoems.slice(0, 6);
   <RelentlesslyHuman />
 
   <div class="section-divider section-divider--green reveal" data-reveal="fade" aria-hidden="true">
+    <span class="section-divider__line"></span>
+    <span class="section-divider__dot"></span>
+    <span class="section-divider__line"></span>
+  </div>
+
+  <StanzaOfTheWeek />
+
+  <div class="section-divider reveal" data-reveal="fade" aria-hidden="true">
     <span class="section-divider__line"></span>
     <span class="section-divider__dot"></span>
     <span class="section-divider__line"></span>

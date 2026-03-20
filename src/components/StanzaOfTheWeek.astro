@@ -1,0 +1,112 @@
+---
+/**
+ * Stanza of the Week — Features the most resonant lines from the past week.
+ * Fetches top-resonated lines client-side from Supabase.
+ */
+---
+
+<section class="sotw" id="stanza-of-the-week" aria-label="Stanza of the Week">
+  <div class="sotw__inner reveal" data-reveal="fade-up">
+    <h2 class="sotw__heading">Stanza of the Week</h2>
+    <p class="sotw__subheading">The lines that moved people most</p>
+    <div class="sotw__lines" id="sotw-lines">
+      <!-- Populated by JS -->
+    </div>
+    <p class="sotw__empty" id="sotw-empty" hidden>
+      Contribute and resonate to shape next week's stanza.
+    </p>
+  </div>
+</section>
+
+<script>
+  import { supabase } from '../scripts/supabase.js';
+
+  async function initStanza() {
+    var container = document.getElementById('sotw-lines');
+    var emptyEl = document.getElementById('sotw-empty');
+    if (!container) return;
+
+    var oneWeekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+
+    // Get resonance counts from the past week
+    var { data: resonances } = await supabase
+      .from('line_resonance')
+      .select('line_id')
+      .gte('created_at', oneWeekAgo);
+
+    if (!resonances || resonances.length === 0) {
+      // Fallback: show the most recent lines
+      var { data: recent } = await supabase
+        .from('poem_lines')
+        .select('id, text, author_name')
+        .eq('flagged', false)
+        .order('created_at', { ascending: false })
+        .limit(4);
+
+      if (!recent || recent.length === 0) {
+        if (emptyEl) emptyEl.hidden = false;
+        return;
+      }
+      renderStanza(container, recent);
+      return;
+    }
+
+    // Count resonances per line
+    var counts = {};
+    resonances.forEach(function (r) {
+      counts[r.line_id] = (counts[r.line_id] || 0) + 1;
+    });
+
+    // Sort by count, take top 4-6
+    var topIds = Object.entries(counts)
+      .sort(function (a, b) { return b[1] - a[1]; })
+      .slice(0, 5)
+      .map(function (e) { return e[0]; });
+
+    if (topIds.length === 0) {
+      if (emptyEl) emptyEl.hidden = false;
+      return;
+    }
+
+    // Fetch the actual lines
+    var { data: lines } = await supabase
+      .from('poem_lines')
+      .select('id, text, author_name')
+      .in('id', topIds)
+      .eq('flagged', false);
+
+    if (!lines || lines.length === 0) {
+      if (emptyEl) emptyEl.hidden = false;
+      return;
+    }
+
+    // Sort by resonance count
+    lines.sort(function (a, b) {
+      return (counts[b.id] || 0) - (counts[a.id] || 0);
+    });
+
+    renderStanza(container, lines);
+  }
+
+  function renderStanza(container, lines) {
+    container.innerHTML = '';
+    lines.forEach(function (line) {
+      var el = document.createElement('div');
+      el.className = 'sotw__line';
+
+      var text = document.createElement('p');
+      text.className = 'sotw__line-text';
+      text.textContent = line.text;
+
+      var author = document.createElement('span');
+      author.className = 'sotw__line-author';
+      author.textContent = line.author_name;
+
+      el.appendChild(text);
+      el.appendChild(author);
+      container.appendChild(el);
+    });
+  }
+
+  document.addEventListener('astro:page-load', initStanza);
+</script>

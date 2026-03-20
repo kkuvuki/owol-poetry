@@ -1,0 +1,125 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const ALL_FEELINGS = [
+  { slug: 'longing', title: 'Longing', keywords: ['miss', 'remember', 'gone', 'lost', 'wish', 'far', 'distance', 'away', 'home', 'return'] },
+  { slug: 'love', title: 'Love', keywords: ['love', 'heart', 'hold', 'touch', 'warm', 'tender', 'dear', 'beloved', 'embrace'] },
+  { slug: 'grief', title: 'Grief', keywords: ['grief', 'mourn', 'loss', 'tears', 'cry', 'gone', 'death', 'empty', 'ache'] },
+  { slug: 'hope', title: 'Hope', keywords: ['hope', 'light', 'dawn', 'tomorrow', 'bright', 'rise', 'dream', 'begin', 'new'] },
+  { slug: 'anger', title: 'Anger', keywords: ['anger', 'rage', 'burn', 'fire', 'fight', 'scream', 'break', 'fury'] },
+  { slug: 'joy', title: 'Joy', keywords: ['joy', 'laugh', 'smile', 'dance', 'sing', 'happy', 'bright', 'warm', 'sun'] },
+  { slug: 'solitude', title: 'Solitude', keywords: ['alone', 'quiet', 'silence', 'still', 'empty', 'space', 'self', 'shadow'] },
+  { slug: 'resilience', title: 'Resilience', keywords: ['strong', 'stand', 'rise', 'survive', 'endure', 'persist', 'fight', 'keep'] },
+];
+
+export function getStaticPaths() {
+  const FEELINGS = [
+    { slug: 'longing', title: 'Longing', keywords: ['miss', 'remember', 'gone', 'lost', 'wish', 'far', 'distance', 'away', 'home', 'return'] },
+    { slug: 'love', title: 'Love', keywords: ['love', 'heart', 'hold', 'touch', 'warm', 'tender', 'dear', 'beloved', 'embrace'] },
+    { slug: 'grief', title: 'Grief', keywords: ['grief', 'mourn', 'loss', 'tears', 'cry', 'gone', 'death', 'empty', 'ache'] },
+    { slug: 'hope', title: 'Hope', keywords: ['hope', 'light', 'dawn', 'tomorrow', 'bright', 'rise', 'dream', 'begin', 'new'] },
+    { slug: 'anger', title: 'Anger', keywords: ['anger', 'rage', 'burn', 'fire', 'fight', 'scream', 'break', 'fury'] },
+    { slug: 'joy', title: 'Joy', keywords: ['joy', 'laugh', 'smile', 'dance', 'sing', 'happy', 'bright', 'warm', 'sun'] },
+    { slug: 'solitude', title: 'Solitude', keywords: ['alone', 'quiet', 'silence', 'still', 'empty', 'space', 'self', 'shadow'] },
+    { slug: 'resilience', title: 'Resilience', keywords: ['strong', 'stand', 'rise', 'survive', 'endure', 'persist', 'fight', 'keep'] },
+  ];
+  return FEELINGS.map(f => ({ params: { feeling: f.slug }, props: { feeling: f } }));
+}
+
+const { feeling } = Astro.props;
+---
+
+<Base
+  title={`${feeling.title} — Lines from the Poem`}
+  description={`Read lines about ${feeling.title.toLowerCase()} from the collaborative poem Relentlessly Human.`}
+>
+  <article class="feelings-page">
+    <header class="feelings-page__header reveal" data-reveal="fade-up">
+      <h1 class="feelings-page__title">{feeling.title}</h1>
+      <p class="feelings-page__subtitle">Lines that carry this feeling</p>
+    </header>
+
+    <div class="feelings-page__loading" id="feelings-loading">
+      <span class="rh__loading-dot"></span>
+      <span class="rh__loading-dot"></span>
+      <span class="rh__loading-dot"></span>
+    </div>
+
+    <div class="feelings-page__lines" id="feelings-lines" role="list">
+      <!-- Populated by JS -->
+    </div>
+
+    <nav class="feelings-page__nav" aria-label="Other feelings">
+      <h2 class="feelings-page__nav-title">Explore other feelings</h2>
+      <div class="feelings-page__nav-links">
+        {ALL_FEELINGS.filter(f => f.slug !== feeling.slug).map(f => (
+          <a href={`/feelings/${f.slug}`} class="feelings-page__nav-link">{f.title}</a>
+        ))}
+      </div>
+    </nav>
+
+    <footer class="feelings-page__footer reveal" data-reveal="fade-up">
+      <a href="/poem" class="feelings-page__link">Read the full poem &rarr;</a>
+    </footer>
+  </article>
+</Base>
+
+<script define:vars={{ keywords: feeling.keywords }}>
+  window.__feelingKeywords = keywords;
+</script>
+<script>
+  import { supabase } from '../../scripts/supabase.js';
+
+  async function initFeelings() {
+    var container = document.getElementById('feelings-lines');
+    var loading = document.getElementById('feelings-loading');
+    if (!container) return;
+
+    var keywords = window.__feelingKeywords || [];
+
+    var { data: lines } = await supabase
+      .from('poem_lines')
+      .select('text, author_name, created_at')
+      .eq('flagged', false)
+      .order('created_at', { ascending: true })
+      .limit(2000);
+
+    if (loading) loading.hidden = true;
+
+    if (!lines || lines.length === 0) {
+      container.innerHTML = '<p class="feelings-page__empty">No lines yet.</p>';
+      return;
+    }
+
+    // Filter lines that match any keyword
+    var matched = lines.filter(function (l) {
+      var lower = l.text.toLowerCase();
+      return keywords.some(function (kw) { return lower.indexOf(kw) !== -1; });
+    });
+
+    if (matched.length === 0) {
+      container.innerHTML = '<p class="feelings-page__empty">No lines match this feeling yet. Add yours.</p>';
+      return;
+    }
+
+    matched.forEach(function (line) {
+      var el = document.createElement('div');
+      el.className = 'feelings-page__line';
+      el.setAttribute('role', 'listitem');
+
+      var text = document.createElement('p');
+      text.className = 'feelings-page__line-text';
+      text.textContent = line.text;
+
+      var author = document.createElement('span');
+      author.className = 'feelings-page__line-author';
+      author.textContent = line.author_name;
+
+      el.appendChild(text);
+      el.appendChild(author);
+      container.appendChild(el);
+    });
+  }
+
+  document.addEventListener('astro:page-load', initFeelings);
+</script>

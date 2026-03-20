@@ -193,6 +193,28 @@
   <div class="rh__contributed" id="rh-contributed" hidden>
     <div class="rh__contributed-card reveal" data-reveal="fade-up">
       <p class="rh__contributed-text">You've left your mark. Thank you.</p>
+      <div class="rh__notify" id="rh-notify">
+        <p class="rh__notify-text">Get notified when someone writes after you:</p>
+        <form class="rh__notify-form" id="rh-notify-form">
+          <input type="email" id="rh-notify-email" class="rh__input rh__input--notify" placeholder="your@email.com" required />
+          <button type="submit" class="rh__notify-btn" id="rh-notify-btn">Notify me</button>
+        </form>
+        <p class="rh__notify-done" id="rh-notify-done" hidden>We'll let you know.</p>
+      </div>
+
+      <div class="rh__invite">
+        <p class="rh__invite-text">Invite someone to write the next line:</p>
+        <div class="rh__invite-actions">
+          <button class="rh__invite-btn" id="rh-invite-copy" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span id="rh-invite-copy-label">Copy link</span>
+          </button>
+          <button class="rh__invite-btn" id="rh-invite-share" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            Share
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 

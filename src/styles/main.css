@@ -183,7 +183,8 @@ ul, ol {
    Skip Link
    ═══════════════════════════════════════════════ */
 
-.screen-reader-text {
+.screen-reader-text,
+.sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -1310,6 +1311,72 @@ ul, ol {
 
 
 /* ═══════════════════════════════════════════════
+   Stanza of the Week
+   ═══════════════════════════════════════════════ */
+
+.sotw {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--space-2xl) var(--page-gutter);
+  text-align: center;
+}
+
+.sotw__heading {
+  font-family: var(--font-heading);
+  font-size: clamp(1.25rem, 2vw + 0.5rem, 1.75rem);
+  font-weight: 400;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-xs);
+  letter-spacing: 0.02em;
+}
+
+.sotw__subheading {
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-xl);
+}
+
+.sotw__lines {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.sotw__line {
+  text-align: left;
+  padding: var(--space-md) var(--space-lg);
+  border-left: 2px solid var(--color-accent-green);
+  background: linear-gradient(90deg, rgba(121, 185, 57, 0.04), transparent);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.sotw__line-text {
+  font-family: var(--font-body);
+  font-size: clamp(1.125rem, 1vw + 0.8rem, 1.375rem);
+  font-style: italic;
+  line-height: var(--lh-poem);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.sotw__line-author {
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-muted);
+  letter-spacing: 0.03em;
+}
+
+.sotw__empty {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+/* ═══════════════════════════════════════════════
    Full Poem Page — /poem
    ═══════════════════════════════════════════════ */
 
@@ -1519,26 +1586,135 @@ ul, ol {
   border: 1px solid var(--color-card-border);
 }
 
-.poem-page__export {
+.poem-page__actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+}
+
+.poem-page__action-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.4em;
   font-family: var(--font-ui);
-  font-size: var(--fs-small);
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: var(--color-text-muted);
   background: none;
   border: 1px solid var(--color-card-border);
   border-radius: var(--radius-pill);
-  padding: 0.5em 1.2em;
+  padding: 0.5em 1em;
   cursor: pointer;
-  margin-bottom: var(--space-md);
   transition: all var(--duration-fast) var(--ease-out-quart);
 }
 
-.poem-page__export:hover {
+.poem-page__action-btn:hover {
   border-color: var(--color-accent-green);
   color: var(--color-accent-green);
+}
+
+/* ── Reading Mode Overlay ── */
+
+.reading-mode {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.reading-mode[hidden] { display: none; }
+
+.reading-mode__close {
+  position: absolute;
+  top: var(--space-lg);
+  right: var(--space-lg);
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  line-height: 1;
+  padding: var(--space-sm);
+}
+
+.reading-mode__close:hover { color: var(--color-text-primary); }
+
+.reading-mode__viewport {
+  text-align: center;
+  max-width: 680px;
+  padding: 0 var(--page-gutter);
+}
+
+.reading-mode__line {
+  font-family: var(--font-body);
+  font-size: clamp(1.5rem, 3vw + 0.5rem, 2.5rem);
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  transition: opacity 0.3s ease;
+  margin-bottom: var(--space-lg);
+}
+
+.reading-mode__author {
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  color: var(--color-text-muted);
+  letter-spacing: 0.05em;
+}
+
+.reading-mode__controls {
+  position: absolute;
+  bottom: var(--space-2xl);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.reading-mode__btn {
+  background: none;
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-pill);
+  padding: 0.5em 1em;
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out-quart);
+}
+
+.reading-mode__btn:hover {
+  border-color: var(--color-accent-green);
+  color: var(--color-accent-green);
+}
+
+.reading-mode__progress {
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-muted);
+  min-width: 60px;
+  text-align: center;
+}
+
+/* ── Print Styles ── */
+@media print {
+  body { background: #fff !important; color: #000 !important; }
+  .poem-page__header, .poem-page__search, .poem-page__filter,
+  .poem-page__footer, .poem-page__map, .reading-mode,
+  nav, header, footer { display: none !important; }
+  .poem-page { padding: 20px !important; }
+  .poem-page__line { padding: 4px 0 !important; animation: none !important; }
+  .poem-page__line-text { color: #000 !important; font-size: 14pt !important; }
+  .poem-page__line-meta { color: #666 !important; }
+  .poem-page__line-share { display: none !important; }
+  .poem-page__stanza-break { height: 12pt !important; }
+  .poem-page__title { display: block !important; text-align: center; font-size: 24pt; margin-bottom: 20px; color: #000 !important; }
 }
 
 .poem-page__back {
@@ -1625,6 +1801,298 @@ ul, ol {
   }
 }
 
+
+/* ═══════════════════════════════════════════════
+   Feelings Pages — /feelings/[feeling]
+   ═══════════════════════════════════════════════ */
+
+.feelings-page {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--space-4xl) var(--page-gutter) var(--space-3xl);
+  min-height: 100vh;
+}
+
+.feelings-page__header {
+  text-align: center;
+  margin-bottom: var(--space-2xl);
+}
+
+.feelings-page__title {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 3vw + 1rem, 3.5rem);
+  font-weight: 400;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.feelings-page__subtitle {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-style: italic;
+  color: var(--color-text-secondary);
+}
+
+.feelings-page__lines {
+  max-width: 680px;
+  margin: 0 auto var(--space-3xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.feelings-page__line {
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-separator);
+}
+
+.feelings-page__line-text {
+  font-family: var(--font-body);
+  font-size: clamp(1.125rem, 1vw + 0.8rem, 1.375rem);
+  font-style: italic;
+  line-height: var(--lh-poem);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.feelings-page__line-author {
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-muted);
+}
+
+.feelings-page__empty {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-style: italic;
+  padding: var(--space-3xl) 0;
+}
+
+.feelings-page__nav {
+  max-width: 680px;
+  margin: 0 auto var(--space-2xl);
+  text-align: center;
+}
+
+.feelings-page__nav-title {
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-md);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.feelings-page__nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  justify-content: center;
+}
+
+.feelings-page__nav-link {
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  padding: 0.4em 1em;
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-pill);
+  transition: all var(--duration-fast) var(--ease-out-quart);
+}
+
+.feelings-page__nav-link:hover {
+  border-color: var(--color-accent-green);
+  color: var(--color-accent-green);
+}
+
+.feelings-page__footer {
+  text-align: center;
+}
+
+.feelings-page__link {
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-accent-green);
+  text-decoration: none;
+}
+
+.feelings-page__link:hover {
+  text-decoration: underline;
+}
+
+/* ═══════════════════════════════════════════════
+   Voices Page — /voices
+   ═══════════════════════════════════════════════ */
+
+.voices-page {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--space-4xl) var(--page-gutter) var(--space-3xl);
+  min-height: 100vh;
+}
+
+.voices-page__header {
+  text-align: center;
+  margin-bottom: var(--space-2xl);
+}
+
+.voices-page__title {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 3vw + 1rem, 3.5rem);
+  font-weight: 400;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.voices-page__subtitle {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-style: italic;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-md);
+}
+
+.voices-page__stats {
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  color: var(--color-text-muted);
+}
+
+.voices-page__stat {
+  font-weight: 700;
+  color: var(--color-accent-green);
+}
+
+.voices-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-lg);
+  margin-bottom: var(--space-3xl);
+}
+
+.voice-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  transition: border-color var(--duration-fast) var(--ease-out-quart);
+}
+
+.voice-card:hover {
+  border-color: rgba(121, 185, 57, 0.3);
+}
+
+.voice-card__header {
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-separator);
+}
+
+.voice-card__name {
+  font-family: var(--font-heading);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 2px;
+}
+
+.voice-card__count {
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-accent-green);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.voice-card__location {
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-muted);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.voice-card__socials {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+}
+
+.voice-card__social {
+  color: var(--color-text-muted);
+  transition: color var(--duration-fast) var(--ease-out-quart);
+}
+
+.voice-card__social:hover {
+  color: var(--color-accent-green);
+}
+
+.voice-card__lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.voice-card__line {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  font-style: italic;
+  line-height: var(--lh-poem);
+  color: var(--color-text-secondary);
+}
+
+.voices-page__footer {
+  text-align: center;
+  padding-top: var(--space-xl);
+  border-top: 1px solid var(--color-separator);
+}
+
+.voices-page__cta {
+  display: inline-block;
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--color-bg);
+  background: var(--color-accent-green);
+  padding: 0.6em 1.5em;
+  border-radius: var(--radius-pill);
+  text-decoration: none;
+  transition: background var(--duration-fast) var(--ease-out-quart);
+  margin-bottom: var(--space-md);
+}
+
+.voices-page__cta:hover {
+  background: var(--color-accent-green-hover);
+}
+
+.voices-page__link {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  margin-top: var(--space-sm);
+}
+
+.voices-page__link:hover {
+  color: var(--color-accent-green);
+}
+
+.voices-page__empty {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-style: italic;
+  padding: var(--space-3xl) 0;
+  grid-column: 1 / -1;
+}
 
 /* ═══════════════════════════════════════════════
    Admin Dashboard
@@ -2627,6 +3095,92 @@ ul, ol {
   color: var(--color-text-secondary);
 }
 
+.rh__notify {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-separator);
+}
+
+.rh__notify-text {
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.rh__notify-form {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: center;
+}
+
+.rh__input--notify {
+  max-width: 220px;
+}
+
+.rh__notify-btn {
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-bg);
+  background: var(--color-accent-green);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 0.4em 1em;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out-quart);
+}
+
+.rh__notify-btn:hover { background: var(--color-accent-green-hover); }
+.rh__notify-btn:disabled { opacity: 0.5; cursor: default; }
+
+.rh__notify-done {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  font-style: italic;
+  color: var(--color-accent-green);
+}
+
+.rh__invite {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-separator);
+}
+
+.rh__invite-text {
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.rh__invite-actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: center;
+}
+
+.rh__invite-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: none;
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-pill);
+  padding: 0.4em 1em;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out-quart);
+}
+
+.rh__invite-btn:hover {
+  border-color: var(--color-accent-green);
+  color: var(--color-accent-green);
+}
+
 /* ── Afterglow ── */
 .rh__afterglow[hidden] { display: none; }
 
@@ -2688,6 +3242,62 @@ ul, ol {
 @keyframes rh-bounce {
   0%, 100% { transform: translateY(0); opacity: 0.6; }
   50%      { transform: translateY(6px); opacity: 1; }
+}
+
+/* ── Word reactions ── */
+.rh-word-picker {
+  position: absolute;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  padding: 6px 10px;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  animation: rh-picker-in 0.2s var(--ease-out-expo) both;
+}
+
+@keyframes rh-picker-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px) scale(0.9); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+.rh-word-picker__word {
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-style: italic;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-pill);
+  transition: all var(--duration-fast) var(--ease-out-quart);
+  white-space: nowrap;
+}
+
+.rh-word-picker__word:hover {
+  color: var(--color-accent-green);
+  background: rgba(121, 185, 57, 0.1);
+}
+
+.rh-word-float {
+  position: absolute;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-style: italic;
+  color: var(--color-accent-green);
+  pointer-events: none;
+  z-index: 99;
+  animation: rh-word-float 2s var(--ease-out-expo) forwards;
+}
+
+@keyframes rh-word-float {
+  0% { opacity: 1; transform: translateY(0); }
+  70% { opacity: 0.6; }
+  100% { opacity: 0; transform: translateY(-60px); }
 }
 
 /* ── Focus mode: dim surroundings when writing ── */

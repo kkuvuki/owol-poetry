@@ -377,10 +377,68 @@ function createLineElement(line) {
   meta.appendChild(time);
   meta.appendChild(resonanceBtn);
   meta.appendChild(shareBtn);
+  // Word reaction — double-click/tap to show feeling picker
+  container.addEventListener('dblclick', function (e) {
+    e.preventDefault();
+    showWordPicker(container, e);
+  });
+
   container.appendChild(text);
   container.appendChild(meta);
 
   return container;
+}
+
+var FEELING_WORDS = ['ache', 'yes', 'home', 'truth', 'fire', 'still', 'raw', 'light'];
+
+function showWordPicker(lineEl, event) {
+  // Remove any existing picker
+  var existing = document.querySelector('.rh-word-picker');
+  if (existing) existing.remove();
+
+  var picker = document.createElement('div');
+  picker.className = 'rh-word-picker';
+
+  FEELING_WORDS.forEach(function (word) {
+    var btn = document.createElement('button');
+    btn.className = 'rh-word-picker__word';
+    btn.textContent = word;
+    btn.type = 'button';
+    btn.addEventListener('click', function () {
+      floatWord(lineEl, word);
+      picker.remove();
+    });
+    picker.appendChild(btn);
+  });
+
+  // Position near the click
+  var rect = lineEl.getBoundingClientRect();
+  picker.style.top = (rect.top + window.scrollY - 40) + 'px';
+  picker.style.left = (rect.left + rect.width / 2) + 'px';
+  document.body.appendChild(picker);
+
+  // Remove picker on outside click
+  setTimeout(function () {
+    document.addEventListener('click', function handler(e) {
+      if (!picker.contains(e.target)) {
+        picker.remove();
+        document.removeEventListener('click', handler);
+      }
+    });
+  }, 10);
+}
+
+function floatWord(lineEl, word) {
+  var float = document.createElement('span');
+  float.className = 'rh-word-float';
+  float.textContent = word;
+
+  var rect = lineEl.getBoundingClientRect();
+  float.style.left = (rect.left + Math.random() * rect.width * 0.6 + rect.width * 0.2) + 'px';
+  float.style.top = (rect.top + window.scrollY) + 'px';
+
+  document.body.appendChild(float);
+  setTimeout(function () { float.remove(); }, 2000);
 }
 
 function animateNewLine(lineData) {
@@ -575,6 +633,31 @@ async function handleSubmit(e) {
 
   if (!text || !authorName) return;
 
+  // Content moderation — block obvious spam/slurs
+  var blocked = /\b(fuck|shit|bitch|nigger|faggot|cunt|retard|viagra|crypto|buy now|click here|subscribe)\b/i;
+  if (blocked.test(text) || blocked.test(authorName)) {
+    if (els.error) {
+      els.error.textContent = 'Your submission contains language that can\'t be included. Please revise.';
+      els.error.hidden = false;
+    }
+    return;
+  }
+
+  // Rate limiting — 1 submission per 24 hours
+  var RATE_KEY = 'rh_last_submit';
+  var lastSubmit = localStorage.getItem(RATE_KEY);
+  if (lastSubmit) {
+    var elapsed = Date.now() - parseInt(lastSubmit, 10);
+    if (elapsed < 86400000) {
+      var hoursLeft = Math.ceil((86400000 - elapsed) / 3600000);
+      if (els.error) {
+        els.error.textContent = 'You can add another line in ' + hoursLeft + ' hour' + (hoursLeft !== 1 ? 's' : '') + '. One line a day keeps it meaningful.';
+        els.error.hidden = false;
+      }
+      return;
+    }
+  }
+
   // Disable form
   els.submit.disabled = true;
   if (els.submitText) els.submitText.hidden = true;
@@ -605,6 +688,7 @@ async function handleSubmit(e) {
   }
 
   // Success
+  localStorage.setItem(RATE_KEY, String(Date.now()));
   markAsContributed();
 
   // Animate the submitted line into the poem
@@ -787,6 +871,54 @@ async function init() {
   initForm();
   subscribeToLines();
   initPrompt();
+  initInvite();
+}
+
+function initInvite() {
+  // Notification opt-in
+  var notifyForm = document.getElementById('rh-notify-form');
+  if (notifyForm) {
+    notifyForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var emailInput = document.getElementById('rh-notify-email');
+      var btn = document.getElementById('rh-notify-btn');
+      var done = document.getElementById('rh-notify-done');
+      if (!emailInput || !emailInput.value.trim()) return;
+
+      if (btn) btn.disabled = true;
+      await supabase.from('email_signups').insert([{ email: emailInput.value.trim() }]);
+      if (notifyForm) notifyForm.hidden = true;
+      if (done) done.hidden = false;
+    });
+  }
+
+  var copyBtn = document.getElementById('rh-invite-copy');
+  var shareBtn = document.getElementById('rh-invite-share');
+  var inviteUrl = window.location.origin + '/#relentlessly-human';
+  var inviteText = 'Add your line to this collaborative poem — written by strangers, for strangers.';
+
+  if (copyBtn) {
+    copyBtn.addEventListener('click', function () {
+      navigator.clipboard.writeText(inviteUrl).then(function () {
+        var label = document.getElementById('rh-invite-copy-label');
+        if (label) {
+          label.textContent = 'Copied!';
+          setTimeout(function () { label.textContent = 'Copy link'; }, 2000);
+        }
+      });
+    });
+  }
+
+  if (shareBtn) {
+    shareBtn.addEventListener('click', function () {
+      if (navigator.share) {
+        navigator.share({ title: 'Relentlessly Human', text: inviteText, url: inviteUrl });
+      } else {
+        // Fallback: copy
+        navigator.clipboard.writeText(inviteUrl);
+      }
+    });
+  }
 }
 
 // Clean up realtime subscription before navigating away
