@@ -338,6 +338,9 @@ function animateNewLine(lineData) {
 
   els.poem.appendChild(el);
 
+  // Smooth scroll to the new line
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
   // Update context lines (currentLines is newest-first)
   currentLines.unshift(lineData);
   updateContextLines(currentLines);

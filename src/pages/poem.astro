@@ -11,12 +11,20 @@ import Base from '../layouts/Base.astro';
       <h1 class="poem-page__title">Relentlessly Human</h1>
       <p class="poem-page__subtitle">The full poem, from first line to last.</p>
       <div class="poem-page__stats" aria-live="polite">
-        <span class="poem-page__stat" id="poem-page-count">—</span>
+        <span class="poem-page__stat" id="poem-page-count">&mdash;</span>
         <span class="poem-page__stat-label">lines &middot;</span>
-        <span class="poem-page__stat" id="poem-page-authors">—</span>
+        <span class="poem-page__stat" id="poem-page-authors">&mdash;</span>
         <span class="poem-page__stat-label">voices</span>
       </div>
     </header>
+
+    <!-- Author filter banner (hidden by default) -->
+    <div class="poem-page__filter" id="poem-page-filter" hidden>
+      <span class="poem-page__filter-text">
+        Showing lines by <strong id="poem-page-filter-name"></strong>
+      </span>
+      <button class="poem-page__filter-clear" id="poem-page-filter-clear">Show all</button>
+    </div>
 
     <div class="poem-page__body">
       <div class="poem-page__loading" id="poem-page-loading" aria-live="polite">
@@ -31,7 +39,10 @@ import Base from '../layouts/Base.astro';
     </div>
 
     <footer class="poem-page__footer reveal" data-reveal="fade-up">
-      <a href="/#relentlessly-human" class="poem-page__back">&larr; Back to Ravings</a>
+      <a href="/#relentlessly-human" class="poem-page__cta">
+        Add your line &rarr;
+      </a>
+      <a href="/" class="poem-page__back">&larr; Back to Ravings</a>
     </footer>
   </article>
 </Base>
@@ -39,15 +50,96 @@ import Base from '../layouts/Base.astro';
 <script>
   import { supabase } from '../scripts/supabase.js';
 
+  var allLines = [];
+  var subscription = null;
+
+  function createLineEl(line, i) {
+    var el = document.createElement('div');
+    el.className = 'poem-page__line';
+    el.setAttribute('role', 'listitem');
+    el.dataset.id = line.id;
+    el.dataset.author = (line.author_name || '').toLowerCase().trim();
+    if (typeof i === 'number') {
+      el.style.animationDelay = Math.min(i * 30, 3000) + 'ms';
+    }
+
+    var text = document.createElement('p');
+    text.className = 'poem-page__line-text';
+    text.textContent = line.text;
+
+    var meta = document.createElement('button');
+    meta.className = 'poem-page__line-meta';
+    meta.textContent = '— ' + line.author_name;
+    meta.type = 'button';
+    meta.setAttribute('aria-label', 'Show all lines by ' + line.author_name);
+    meta.addEventListener('click', function () {
+      filterByAuthor(line.author_name);
+    });
+
+    el.appendChild(text);
+    el.appendChild(meta);
+    return el;
+  }
+
+  function updateStats(lines) {
+    var countEl = document.getElementById('poem-page-count');
+    var authorsEl = document.getElementById('poem-page-authors');
+    if (countEl) countEl.textContent = lines.length;
+    if (authorsEl) {
+      var seen = {};
+      lines.forEach(function (l) {
+        var name = (l.author_name || '').toLowerCase().trim();
+        if (name) seen[name] = true;
+      });
+      authorsEl.textContent = Object.keys(seen).length;
+    }
+  }
+
+  function renderLines(lines, animate) {
+    var container = document.getElementById('poem-page-lines');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (lines.length === 0) {
+      container.innerHTML = '<p class="poem-page__empty">No lines yet. Be the first to write.</p>';
+      return;
+    }
+
+    lines.forEach(function (line, i) {
+      container.appendChild(createLineEl(line, animate ? i : undefined));
+    });
+  }
+
+  function filterByAuthor(name) {
+    var filterEl = document.getElementById('poem-page-filter');
+    var filterName = document.getElementById('poem-page-filter-name');
+    var key = name.toLowerCase().trim();
+
+    if (filterEl) filterEl.hidden = false;
+    if (filterName) filterName.textContent = name;
+
+    var filtered = allLines.filter(function (l) {
+      return (l.author_name || '').toLowerCase().trim() === key;
+    });
+    renderLines(filtered, false);
+  }
+
+  function clearFilter() {
+    var filterEl = document.getElementById('poem-page-filter');
+    if (filterEl) filterEl.hidden = true;
+    renderLines(allLines, false);
+  }
+
   async function initPoemPage() {
-    const container = document.getElementById('poem-page-lines');
-    const loading = document.getElementById('poem-page-loading');
-    const countEl = document.getElementById('poem-page-count');
-    const authorsEl = document.getElementById('poem-page-authors');
+    var container = document.getElementById('poem-page-lines');
+    var loading = document.getElementById('poem-page-loading');
+    var clearBtn = document.getElementById('poem-page-filter-clear');
     if (!container) return;
 
+    if (clearBtn) clearBtn.addEventListener('click', clearFilter);
+
     // Fetch all lines, oldest first
-    const { data, error } = await supabase
+    var result = await supabase
       .from('poem_lines')
       .select('*')
       .eq('flagged', false)
@@ -56,42 +148,52 @@ import Base from '../layouts/Base.astro';
 
     if (loading) loading.hidden = true;
 
-    if (error || !data || data.length === 0) {
+    if (result.error || !result.data || result.data.length === 0) {
       container.innerHTML = '<p class="poem-page__empty">No lines yet. Be the first to write.</p>';
       return;
     }
 
-    // Update stats
-    if (countEl) countEl.textContent = data.length;
-    if (authorsEl) {
-      var seen = {};
-      data.forEach(function (l) {
-        var name = (l.author_name || '').toLowerCase().trim();
-        if (name) seen[name] = true;
-      });
-      authorsEl.textContent = Object.keys(seen).length;
-    }
+    allLines = result.data;
+    updateStats(allLines);
+    renderLines(allLines, true);
 
-    // Render lines with staggered animation
-    data.forEach(function (line, i) {
-      var el = document.createElement('div');
-      el.className = 'poem-page__line';
-      el.setAttribute('role', 'listitem');
-      el.style.animationDelay = Math.min(i * 30, 3000) + 'ms';
+    // Subscribe to realtime inserts
+    subscription = supabase
+      .channel('poem_page_realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'poem_lines' },
+        function (payload) {
+          if (payload.new && !payload.new.flagged) {
+            // Check for duplicates
+            var exists = allLines.some(function (l) { return l.id === payload.new.id; });
+            if (exists) return;
 
-      var text = document.createElement('p');
-      text.className = 'poem-page__line-text';
-      text.textContent = line.text;
+            allLines.push(payload.new);
+            updateStats(allLines);
 
-      var meta = document.createElement('span');
-      meta.className = 'poem-page__line-meta';
-      meta.textContent = '— ' + line.author_name;
-
-      el.appendChild(text);
-      el.appendChild(meta);
-      container.appendChild(el);
-    });
+            // If no filter active, append the line
+            var filterEl = document.getElementById('poem-page-filter');
+            if (!filterEl || filterEl.hidden) {
+              var el = createLineEl(payload.new);
+              el.classList.add('poem-page__line--new');
+              container.appendChild(el);
+              // Smooth scroll to the new line
+              el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }
+          }
+        }
+      )
+      .subscribe();
   }
+
+  // Cleanup on navigation
+  document.addEventListener('astro:before-preparation', function () {
+    if (subscription) {
+      subscription.unsubscribe();
+      subscription = null;
+    }
+  });
 
   document.addEventListener('astro:page-load', initPoemPage);
 </script>

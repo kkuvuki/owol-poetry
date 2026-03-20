@@ -7,11 +7,13 @@ import '../styles/main.css';
 interface Props {
   title?: string;
   description?: string;
+  ogImage?: string;
 }
 
 const {
   title = 'Ravings — Chidi Francis Onwuka',
   description = 'Poetry by Chidi Francis Onwuka. Ravings — a collection about resilience, heritage, connection, and our way of life.',
+  ogImage = '/og-image.jpg',
 } = Astro.props;
 ---
 
@@ -32,13 +34,13 @@ const {
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Ravings — Chidi Francis Onwuka" />
   <meta property="og:url" content={`https://itsowol.com${Astro.url.pathname}`} />
-  <meta property="og:image" content="/og-image.jpg" />
+  <meta property="og:image" content={ogImage} />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
-  <meta name="twitter:image" content="/og-image.jpg" />
+  <meta name="twitter:image" content={ogImage} />
 
   <!-- Fonts: preconnect + preload critical weights -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -57,6 +59,7 @@ const {
   </noscript>
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="alternate" type="application/rss+xml" title="Ravings — RSS Feed" href="/rss.xml" />
   <title>{title}</title>
   <ClientRouter />
 </head>

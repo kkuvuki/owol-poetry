@@ -18,11 +18,18 @@ export async function getStaticPaths() {
 
 const { poem, prevPoem, nextPoem } = Astro.props;
 const { Content } = await render(poem);
+const slug = poem.id.replace(/\.md$/, '');
+
+// Reading time estimate
+const rawContent = poem.body || '';
+const wordCount = rawContent.split(/\s+/).filter(Boolean).length;
+const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 ---
 
 <Base
   title={`${poem.data.title} — Ravings`}
   description={poem.data.excerpt || `Read "${poem.data.title}" from the collection Ravings by Chidi Francis Onwuka.`}
+  ogImage={`/og/${slug}.svg`}
 >
   <article class="poem-single" aria-label={poem.data.title}>
     <header class="poem-single__header reveal" data-reveal="fade-up">
@@ -35,6 +42,7 @@ const { Content } = await render(poem);
         )}
       </div>
       <h1 class="poem-single__title">{poem.data.title}</h1>
+      <span class="poem-single__reading-time">{readingTime} min read</span>
     </header>
 
     <div class="poem-single__body reveal" data-reveal="fade-up" data-reveal-delay="200">
