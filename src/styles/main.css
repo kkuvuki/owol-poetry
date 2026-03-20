@@ -910,6 +910,58 @@ ul, ol {
   display: block;
 }
 
+.poem-bg-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+.poem-single__header,
+.poem-single__body,
+.poem-single__footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* Audio player */
+.poem-single__audio {
+  margin-top: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.poem-single__audio-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-pill);
+  padding: 0.5em 1.2em;
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  transition: all var(--duration-fast) var(--ease-out-quart);
+}
+
+.poem-single__audio-btn:hover {
+  border-color: var(--color-accent-green);
+  color: var(--color-accent-green);
+}
+
+.poem-single__audio-btn.is-playing {
+  border-color: var(--color-accent-green);
+  color: var(--color-accent-green);
+}
+
 /* ── Ornamental divider after title ── */
 .poem-single__header::after {
   content: '';
@@ -1459,6 +1511,53 @@ ul, ol {
   }
 }
 
+.poem-page__search {
+  margin-bottom: var(--space-lg);
+}
+
+.poem-page__search-input {
+  width: 100%;
+  padding: 0.75em 1em;
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  color: var(--color-text-primary);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--duration-fast) var(--ease-out-quart);
+}
+
+.poem-page__search-input:focus-visible {
+  border-color: var(--color-accent-green);
+  outline: 2px solid var(--color-accent-green);
+  outline-offset: 2px;
+}
+
+.poem-page__line-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.poem-page__line-share {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 4px;
+  opacity: 0;
+  transition: all var(--duration-fast) var(--ease-out-quart);
+}
+
+.poem-page__line:hover .poem-page__line-share {
+  opacity: 1;
+}
+
+.poem-page__line-share:hover {
+  color: var(--color-accent-green);
+}
+
 @keyframes poem-line-enter {
   from {
     opacity: 0;
@@ -1468,6 +1567,139 @@ ul, ol {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+
+/* ═══════════════════════════════════════════════
+   Admin Dashboard
+   ═══════════════════════════════════════════════ */
+
+.admin {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--space-4xl) var(--page-gutter) var(--space-3xl);
+}
+
+.admin__gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  gap: var(--space-lg);
+}
+
+.admin__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: 400;
+  margin-bottom: var(--space-lg);
+}
+
+.admin__login {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.admin__input {
+  padding: 0.6em 1em;
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  color: var(--color-text-primary);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-md);
+  outline: none;
+}
+
+.admin__input:focus-visible {
+  border-color: var(--color-accent-green);
+}
+
+.admin__btn {
+  padding: 0.6em 1.2em;
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-bg);
+  background: var(--color-accent-green);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.admin__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-2xl);
+}
+
+.admin__card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  text-align: center;
+}
+
+.admin__card-number {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.admin__card-label {
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.admin__section-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: 500;
+  margin-bottom: var(--space-md);
+  margin-top: var(--space-xl);
+}
+
+.admin__table {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.admin__row {
+  display: flex;
+  gap: var(--space-md);
+  padding: 0.75em 1em;
+  border-bottom: 1px solid var(--color-separator);
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+.admin__row:last-child {
+  border-bottom: none;
+}
+
+.admin__cell--text {
+  flex: 1;
+  font-family: var(--font-body);
+  font-style: italic;
+}
+
+.admin__chart {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
 }
 
 
@@ -1835,6 +2067,82 @@ ul, ol {
   color: var(--color-text-muted);
 }
 
+.rh-line__lang {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  color: var(--color-accent-amber);
+  background: var(--color-accent-amber-light);
+  padding: 2px 6px;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.03em;
+}
+
+.rh-line__resonate {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transition: all var(--duration-fast) var(--ease-out-quart);
+}
+
+.rh-line:hover .rh-line__resonate {
+  opacity: 0.6;
+}
+
+.rh-line__resonate:hover {
+  opacity: 1;
+}
+
+.rh-line__resonate-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+  transition: all 0.3s var(--ease-out-expo);
+}
+
+.rh-line__resonate.is-resonated .rh-line__resonate-dot {
+  background: var(--color-accent-green);
+  box-shadow: 0 0 8px rgba(121, 185, 57, 0.6);
+}
+
+.rh-line__resonate.is-resonated {
+  opacity: 1;
+}
+
+.rh-line__resonate-count {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+.rh-line__resonate.is-resonated .rh-line__resonate-count {
+  color: var(--color-accent-green);
+}
+
+.rh-line__share {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 4px;
+  opacity: 0;
+  transition: all var(--duration-fast) var(--ease-out-quart);
+}
+
+.rh-line:hover .rh-line__share {
+  opacity: 0.6;
+}
+
+.rh-line__share:hover {
+  opacity: 1;
+  color: var(--color-accent-green);
+}
+
 .rh-line__socials {
   display: inline-flex;
   gap: 0.4rem;
@@ -1961,6 +2269,17 @@ ul, ol {
 }
 
 /* Form fields */
+.rh__prompt {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  font-style: italic;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-bottom: var(--space-md);
+  min-height: 1.5em;
+  transition: opacity 0.4s ease;
+}
+
 .rh__form {
   display: flex;
   flex-direction: column;

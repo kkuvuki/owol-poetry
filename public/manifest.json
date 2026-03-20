@@ -1,0 +1,16 @@
+{
+  "name": "Ravings — Chidi Francis Onwuka",
+  "short_name": "Ravings",
+  "description": "Poetry about resilience, heritage, connection, and our way of life.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#13100D",
+  "theme_color": "#13100D",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

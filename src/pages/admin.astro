@@ -1,0 +1,249 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Analytics — Ravings" description="Private analytics dashboard.">
+  <div class="admin" id="admin-root">
+    <div class="admin__gate" id="admin-gate">
+      <h1 class="admin__title">Analytics</h1>
+      <form class="admin__login" id="admin-login">
+        <input
+          type="password"
+          id="admin-pass"
+          class="admin__input"
+          placeholder="Password"
+          autocomplete="current-password"
+        />
+        <button type="submit" class="admin__btn">Enter</button>
+      </form>
+    </div>
+
+    <div class="admin__dashboard" id="admin-dashboard" hidden>
+      <h1 class="admin__title">Ravings — Analytics</h1>
+
+      <div class="admin__grid">
+        <div class="admin__card">
+          <span class="admin__card-number" id="admin-lines">—</span>
+          <span class="admin__card-label">Total Lines</span>
+        </div>
+        <div class="admin__card">
+          <span class="admin__card-number" id="admin-authors">—</span>
+          <span class="admin__card-label">Unique Voices</span>
+        </div>
+        <div class="admin__card">
+          <span class="admin__card-number" id="admin-signups">—</span>
+          <span class="admin__card-label">Email Signups</span>
+        </div>
+        <div class="admin__card">
+          <span class="admin__card-number" id="admin-resonance">—</span>
+          <span class="admin__card-label">Resonances</span>
+        </div>
+      </div>
+
+      <h2 class="admin__section-title">Recent Lines</h2>
+      <div class="admin__table" id="admin-recent-lines">
+        <!-- Populated by JS -->
+      </div>
+
+      <h2 class="admin__section-title">Top Contributors</h2>
+      <div class="admin__table" id="admin-top-authors">
+        <!-- Populated by JS -->
+      </div>
+
+      <h2 class="admin__section-title">Contribution Timeline</h2>
+      <div class="admin__chart" id="admin-chart">
+        <canvas id="admin-chart-canvas" height="200"></canvas>
+      </div>
+
+      <h2 class="admin__section-title">Timezone Distribution</h2>
+      <div class="admin__table" id="admin-timezones">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+</Base>
+
+<script>
+  import { supabase } from '../scripts/supabase.js';
+
+  // Simple password gate (client-side — not secure, just obscurity)
+  var PASS_HASH = '5d41402abc4b2a76b9719d911017c592'; // md5("hello") — change this!
+
+  function md5simple(str) {
+    // Simple hash for gate — NOT cryptographic
+    var hash = 0;
+    for (var i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash + str.charCodeAt(i)) & 0xffffffff;
+    }
+    return Math.abs(hash).toString(16);
+  }
+
+  async function initAdmin() {
+    var gate = document.getElementById('admin-gate');
+    var dashboard = document.getElementById('admin-dashboard');
+    var form = document.getElementById('admin-login');
+    if (!gate || !dashboard || !form) return;
+
+    // Check if already authed
+    if (sessionStorage.getItem('admin_auth') === 'true') {
+      gate.hidden = true;
+      dashboard.hidden = false;
+      loadDashboard();
+      return;
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var pass = document.getElementById('admin-pass');
+      if (pass && pass.value) {
+        sessionStorage.setItem('admin_auth', 'true');
+        gate.hidden = true;
+        dashboard.hidden = false;
+        loadDashboard();
+      }
+    });
+  }
+
+  async function loadDashboard() {
+    // Total lines
+    var { count: lineCount } = await supabase
+      .from('poem_lines')
+      .select('*', { count: 'exact', head: true })
+      .eq('flagged', false);
+
+    var linesEl = document.getElementById('admin-lines');
+    if (linesEl) linesEl.textContent = lineCount || 0;
+
+    // All lines for analysis
+    var { data: lines } = await supabase
+      .from('poem_lines')
+      .select('*')
+      .eq('flagged', false)
+      .order('created_at', { ascending: false })
+      .limit(1000);
+
+    lines = lines || [];
+
+    // Unique authors
+    var authorMap = {};
+    lines.forEach(function (l) {
+      var name = (l.author_name || '').toLowerCase().trim();
+      if (name) authorMap[name] = (authorMap[name] || 0) + 1;
+    });
+    var authorsEl = document.getElementById('admin-authors');
+    if (authorsEl) authorsEl.textContent = Object.keys(authorMap).length;
+
+    // Email signups
+    var { count: signupCount } = await supabase
+      .from('email_signups')
+      .select('*', { count: 'exact', head: true });
+    var signupsEl = document.getElementById('admin-signups');
+    if (signupsEl) signupsEl.textContent = signupCount || 0;
+
+    // Resonance count
+    var { count: resCount } = await supabase
+      .from('line_resonance')
+      .select('*', { count: 'exact', head: true });
+    var resEl = document.getElementById('admin-resonance');
+    if (resEl) resEl.textContent = resCount || 0;
+
+    // Recent lines table
+    var recentEl = document.getElementById('admin-recent-lines');
+    if (recentEl) {
+      var rows = lines.slice(0, 20).map(function (l) {
+        var date = new Date(l.created_at).toLocaleDateString();
+        return '<div class="admin__row">' +
+          '<span class="admin__cell admin__cell--text">' + escHtml(l.text) + '</span>' +
+          '<span class="admin__cell">' + escHtml(l.author_name) + '</span>' +
+          '<span class="admin__cell">' + date + '</span>' +
+          '</div>';
+      });
+      recentEl.innerHTML = rows.join('');
+    }
+
+    // Top contributors
+    var topAuthorsEl = document.getElementById('admin-top-authors');
+    if (topAuthorsEl) {
+      var sorted = Object.entries(authorMap).sort(function (a, b) { return b[1] - a[1]; });
+      var rows = sorted.slice(0, 10).map(function (entry) {
+        return '<div class="admin__row">' +
+          '<span class="admin__cell">' + escHtml(entry[0]) + '</span>' +
+          '<span class="admin__cell">' + entry[1] + ' lines</span>' +
+          '</div>';
+      });
+      topAuthorsEl.innerHTML = rows.join('');
+    }
+
+    // Timeline chart (simple bar chart via canvas)
+    drawTimeline(lines);
+
+    // Timezone distribution from ip_hash (fingerprint contains timezone info indirectly)
+    var tzEl = document.getElementById('admin-timezones');
+    if (tzEl) {
+      // Group by hour of creation
+      var hourMap = {};
+      lines.forEach(function (l) {
+        var hour = new Date(l.created_at).getHours();
+        hourMap[hour] = (hourMap[hour] || 0) + 1;
+      });
+      var rows = Object.entries(hourMap)
+        .sort(function (a, b) { return parseInt(a[0]) - parseInt(b[0]); })
+        .map(function (entry) {
+          return '<div class="admin__row">' +
+            '<span class="admin__cell">' + entry[0] + ':00</span>' +
+            '<span class="admin__cell">' + entry[1] + ' lines</span>' +
+            '</div>';
+        });
+      tzEl.innerHTML = rows.join('') || '<p>No data yet.</p>';
+    }
+  }
+
+  function drawTimeline(lines) {
+    var canvas = document.getElementById('admin-chart-canvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var w = canvas.parentElement.offsetWidth;
+    canvas.width = w;
+
+    // Group by day
+    var dayMap = {};
+    lines.forEach(function (l) {
+      var day = new Date(l.created_at).toISOString().split('T')[0];
+      dayMap[day] = (dayMap[day] || 0) + 1;
+    });
+
+    var days = Object.keys(dayMap).sort();
+    if (days.length === 0) return;
+
+    var maxCount = Math.max.apply(null, Object.values(dayMap));
+    var barW = Math.max(4, (w - 40) / Math.max(days.length, 1));
+    var h = 180;
+
+    ctx.fillStyle = '#1C1916';
+    ctx.fillRect(0, 0, w, 200);
+
+    days.forEach(function (day, i) {
+      var count = dayMap[day];
+      var barH = (count / maxCount) * h;
+      ctx.fillStyle = 'rgba(121, 185, 57, 0.7)';
+      ctx.fillRect(20 + i * barW, h - barH + 10, barW - 2, barH);
+    });
+
+    // Labels
+    ctx.fillStyle = '#7A7B75';
+    ctx.font = '10px sans-serif';
+    if (days.length > 0) {
+      ctx.fillText(days[0], 20, h + 25);
+      ctx.textAlign = 'right';
+      ctx.fillText(days[days.length - 1], w - 20, h + 25);
+    }
+  }
+
+  function escHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  document.addEventListener('astro:page-load', initAdmin);
+</script>

@@ -73,6 +73,7 @@
       </div>
 
       <form class="rh__form" id="rh-form" novalidate>
+        <p class="rh__prompt" id="rh-prompt" aria-live="polite"></p>
         <div class="rh__form-group rh__form-group--line">
           <label for="rh-line-input" class="rh__label">Add your line</label>
           <div class="rh__input-wrap">
@@ -130,6 +131,20 @@
               <input type="url" id="rh-website" class="rh__input rh__input--social" maxlength="200" placeholder="yoursite.com" data-social="website" />
             </div>
           </div>
+        </div>
+
+        <div class="rh__form-group rh__form-group--lang">
+          <label for="rh-lang" class="rh__label rh__label--optional">
+            Language <span class="rh__optional">(if not English)</span>
+          </label>
+          <input
+            type="text"
+            id="rh-lang"
+            class="rh__input rh__input--lang"
+            maxlength="30"
+            placeholder="e.g. Español, Français, 日本語"
+            autocomplete="language"
+          />
         </div>
 
         <div class="rh__covenant">

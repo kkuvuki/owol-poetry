@@ -18,6 +18,17 @@ import Base from '../layouts/Base.astro';
       </div>
     </header>
 
+    <!-- Search -->
+    <div class="poem-page__search">
+      <input
+        type="search"
+        id="poem-page-search"
+        class="poem-page__search-input"
+        placeholder="Search lines..."
+        autocomplete="off"
+      />
+    </div>
+
     <!-- Author filter banner (hidden by default) -->
     <div class="poem-page__filter" id="poem-page-filter" hidden>
       <span class="poem-page__filter-text">
@@ -49,6 +60,7 @@ import Base from '../layouts/Base.astro';
 
 <script>
   import { supabase } from '../scripts/supabase.js';
+  import { shareLine } from '../scripts/share-card.js';
 
   var allLines = [];
   var subscription = null;
@@ -67,6 +79,9 @@ import Base from '../layouts/Base.astro';
     text.className = 'poem-page__line-text';
     text.textContent = line.text;
 
+    var actions = document.createElement('div');
+    actions.className = 'poem-page__line-actions';
+
     var meta = document.createElement('button');
     meta.className = 'poem-page__line-meta';
     meta.textContent = '— ' + line.author_name;
@@ -76,8 +91,19 @@ import Base from '../layouts/Base.astro';
       filterByAuthor(line.author_name);
     });
 
+    var shareBtn = document.createElement('button');
+    shareBtn.className = 'poem-page__line-share';
+    shareBtn.type = 'button';
+    shareBtn.setAttribute('aria-label', 'Share this line');
+    shareBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';
+    shareBtn.addEventListener('click', function () {
+      shareLine(line.text, line.author_name);
+    });
+
+    actions.appendChild(meta);
+    actions.appendChild(shareBtn);
     el.appendChild(text);
-    el.appendChild(meta);
+    el.appendChild(actions);
     return el;
   }
 
@@ -137,6 +163,27 @@ import Base from '../layouts/Base.astro';
     if (!container) return;
 
     if (clearBtn) clearBtn.addEventListener('click', clearFilter);
+
+    // Search
+    var searchInput = document.getElementById('poem-page-search');
+    var searchTimeout = null;
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        clearTimeout(searchTimeout);
+        var query = this.value.trim().toLowerCase();
+        searchTimeout = setTimeout(function () {
+          if (!query) {
+            renderLines(allLines, false);
+            return;
+          }
+          var filtered = allLines.filter(function (l) {
+            return l.text.toLowerCase().indexOf(query) !== -1 ||
+                   (l.author_name || '').toLowerCase().indexOf(query) !== -1;
+          });
+          renderLines(filtered, false);
+        }, 200);
+      });
+    }
 
     // Fetch all lines, oldest first
     var result = await supabase

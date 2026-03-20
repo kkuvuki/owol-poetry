@@ -6,8 +6,28 @@
  */
 
 import { supabase } from './supabase.js';
+import { shareLine } from './share-card.js';
+import { fetchResonanceCounts, fetchUserResonance, toggleResonance, getCount, hasResonated } from './resonance.js';
 
 const STORAGE_KEY = 'rh_contributed';
+
+const WRITING_PROMPTS = [
+  'What would you say to your younger self?',
+  'Describe a sound you\u2019ll never forget.',
+  'What does home smell like?',
+  'Write what silence sounds like to you.',
+  'Name something you\u2019re afraid to want.',
+  'What do your hands remember?',
+  'Describe the color of a feeling.',
+  'What would you whisper to the night?',
+  'Write about something you almost said.',
+  'What does the rain know about you?',
+  'Describe the weight of a memory.',
+  'What are you still learning to forgive?',
+  'Write the first line of your unwritten letter.',
+  'What does your reflection think about?',
+  'Describe love without using the word.',
+];
 const FINGERPRINT_KEY = 'rh_fingerprint';
 
 /* ══════════════════════════════════════════
@@ -309,8 +329,45 @@ function createLineElement(line) {
   time.dateTime = line.created_at;
   time.textContent = formatTimeAgo(line.created_at);
 
+  var shareBtn = document.createElement('button');
+  shareBtn.className = 'rh-line__share';
+  shareBtn.type = 'button';
+  shareBtn.setAttribute('aria-label', 'Share this line');
+  shareBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';
+  shareBtn.addEventListener('click', function () {
+    shareLine(line.text, line.author_name);
+  });
+
+  // Language tag
+  if (socials && socials.lang) {
+    var langTag = document.createElement('span');
+    langTag.className = 'rh-line__lang';
+    langTag.textContent = socials.lang;
+    meta.appendChild(langTag);
+  }
+
+  var resonanceBtn = document.createElement('button');
+  resonanceBtn.className = 'rh-line__resonate';
+  resonanceBtn.type = 'button';
+  resonanceBtn.setAttribute('aria-label', 'This line moved me');
+  var resonanceCount = document.createElement('span');
+  resonanceCount.className = 'rh-line__resonate-count';
+  var count = getCount(line.id);
+  resonanceCount.textContent = count > 0 ? count : '';
+  resonanceBtn.innerHTML = '<span class="rh-line__resonate-dot"></span>';
+  resonanceBtn.appendChild(resonanceCount);
+  if (hasResonated(line.id)) resonanceBtn.classList.add('is-resonated');
+  resonanceBtn.addEventListener('click', async function () {
+    var fp = generateFingerprint();
+    var newCount = await toggleResonance(line.id, fp);
+    resonanceCount.textContent = newCount > 0 ? newCount : '';
+    resonanceBtn.classList.toggle('is-resonated');
+  });
+
   meta.appendChild(author);
   meta.appendChild(time);
+  meta.appendChild(resonanceBtn);
+  meta.appendChild(shareBtn);
   container.appendChild(text);
   container.appendChild(meta);
 
@@ -494,6 +551,9 @@ async function handleSubmit(e) {
       if (val) socials[input.dataset.social] = val;
     });
   }
+  var langInput = document.getElementById('rh-lang');
+  var lang = langInput ? langInput.value.trim() : '';
+  if (lang) socials.lang = lang;
   const authorLink = Object.keys(socials).length > 0 ? JSON.stringify(socials) : '';
 
   if (!text || !authorName) return;
@@ -619,6 +679,28 @@ function initPills() {
 }
 
 /* ══════════════════════════════════════════
+ * Writing Prompts
+ * ══════════════════════════════════════════ */
+
+function initPrompt() {
+  var promptEl = document.getElementById('rh-prompt');
+  if (!promptEl) return;
+
+  var index = Math.floor(Math.random() * WRITING_PROMPTS.length);
+  promptEl.textContent = WRITING_PROMPTS[index];
+
+  // Rotate every 8 seconds
+  setInterval(function () {
+    promptEl.style.opacity = '0';
+    setTimeout(function () {
+      index = (index + 1) % WRITING_PROMPTS.length;
+      promptEl.textContent = WRITING_PROMPTS[index];
+      promptEl.style.opacity = '1';
+    }, 400);
+  }, 8000);
+}
+
+/* ══════════════════════════════════════════
  * Initialization
  * ══════════════════════════════════════════ */
 
@@ -637,6 +719,13 @@ async function init() {
 
   // Fetch and display stats
   fetchAndDisplayStats();
+
+  // Load resonance data, then re-render to update dots
+  var lineIds = currentLines.map(function (l) { return l.id; });
+  var fp = generateFingerprint();
+  Promise.all([fetchResonanceCounts(lineIds), fetchUserResonance(lineIds, fp)]).then(function () {
+    renderLines(currentLines, false);
+  });
 
   // Show contribution area when poem container scrolls into view
   const poemContainer = document.querySelector('.rh__poem-container');
@@ -662,6 +751,7 @@ async function init() {
   initPills();
   initForm();
   subscribeToLines();
+  initPrompt();
 }
 
 // Clean up realtime subscription before navigating away

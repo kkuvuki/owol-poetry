@@ -31,6 +31,19 @@ const readingTime = Math.max(1, Math.ceil(wordCount / 200));
   description={poem.data.excerpt || `Read "${poem.data.title}" from the collection Ravings by Chidi Francis Onwuka.`}
   ogImage={`/og/${slug}.svg`}
 >
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Poem",
+    "name": poem.data.title,
+    "author": { "@type": "Person", "name": "Chidi Francis Onwuka" },
+    "datePublished": poem.data.year || "2024",
+    "genre": poem.data.theme || "Poetry",
+    "description": poem.data.excerpt || `A poem from the collection Ravings.`,
+    "isPartOf": { "@type": "Collection", "name": "Ravings" },
+    "url": `https://itsowol.com/poems/${slug}/`,
+    "inLanguage": "en"
+  })} />
+
   <article class="poem-single" aria-label={poem.data.title}>
     <header class="poem-single__header reveal" data-reveal="fade-up">
       <div class="poem-single__meta">
@@ -43,6 +56,13 @@ const readingTime = Math.max(1, Math.ceil(wordCount / 200));
       </div>
       <h1 class="poem-single__title">{poem.data.title}</h1>
       <span class="poem-single__reading-time">{readingTime} min read</span>
+      <div class="poem-single__audio" id="poem-audio-wrap" hidden>
+        <button class="poem-single__audio-btn" id="poem-audio-btn" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span id="poem-audio-label">Listen</span>
+        </button>
+        <audio id="poem-audio" preload="none"></audio>
+      </div>
     </header>
 
     <div class="poem-single__body reveal" data-reveal="fade-up" data-reveal-delay="200">
@@ -81,3 +101,59 @@ const readingTime = Math.max(1, Math.ceil(wordCount / 200));
     </footer>
   </article>
 </Base>
+
+<script define:vars={{ theme: poem.data.theme || 'Resilience', audioSlug: slug }}>
+  window.__poemTheme = theme;
+  window.__poemAudioSlug = audioSlug;
+</script>
+<script>
+  import { initPoemBg, destroyPoemBg } from '../../scripts/poem-bg.js';
+
+  function setupBg() {
+    destroyPoemBg();
+    if (document.querySelector('.poem-single')) {
+      initPoemBg(window.__poemTheme);
+    }
+  }
+
+  function setupAudio() {
+    var slug = window.__poemAudioSlug;
+    var audioPath = '/audio/' + slug + '.mp3';
+    var wrap = document.getElementById('poem-audio-wrap');
+    var btn = document.getElementById('poem-audio-btn');
+    var audio = document.getElementById('poem-audio');
+    var label = document.getElementById('poem-audio-label');
+    if (!wrap || !btn || !audio) return;
+
+    // Check if audio file exists
+    fetch(audioPath, { method: 'HEAD' }).then(function (res) {
+      if (res.ok) {
+        audio.src = audioPath;
+        wrap.hidden = false;
+
+        btn.addEventListener('click', function () {
+          if (audio.paused) {
+            audio.play();
+            if (label) label.textContent = 'Pause';
+            btn.classList.add('is-playing');
+          } else {
+            audio.pause();
+            if (label) label.textContent = 'Listen';
+            btn.classList.remove('is-playing');
+          }
+        });
+
+        audio.addEventListener('ended', function () {
+          if (label) label.textContent = 'Listen';
+          btn.classList.remove('is-playing');
+        });
+      }
+    }).catch(function () {});
+  }
+
+  document.addEventListener('astro:page-load', function () {
+    setupBg();
+    setupAudio();
+  });
+  document.addEventListener('astro:before-preparation', destroyPoemBg);
+</script>

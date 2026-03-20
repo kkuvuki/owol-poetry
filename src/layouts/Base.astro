@@ -59,6 +59,7 @@ const {
   </noscript>
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="manifest" href="/manifest.json" />
   <link rel="alternate" type="application/rss+xml" title="Ravings — RSS Feed" href="/rss.xml" />
   <title>{title}</title>
   <ClientRouter />
@@ -76,5 +77,10 @@ const {
   <Footer />
 
   <script src="../scripts/main.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function () {});
+    }
+  </script>
 </body>
 </html>
