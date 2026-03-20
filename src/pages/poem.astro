@@ -49,10 +49,19 @@ import Base from '../layouts/Base.astro';
       </div>
     </div>
 
+    <div class="poem-page__map reveal" data-reveal="fade-up">
+      <h2 class="poem-page__map-title">Where the voices write from</h2>
+      <canvas id="poem-page-map" aria-label="World map showing contributor locations"></canvas>
+    </div>
+
     <footer class="poem-page__footer reveal" data-reveal="fade-up">
       <a href="/#relentlessly-human" class="poem-page__cta">
         Add your line &rarr;
       </a>
+      <button class="poem-page__export" id="poem-page-export" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export poem
+      </button>
       <a href="/" class="poem-page__back">&larr; Back to Ravings</a>
     </footer>
   </article>
@@ -61,6 +70,7 @@ import Base from '../layouts/Base.astro';
 <script>
   import { supabase } from '../scripts/supabase.js';
   import { shareLine } from '../scripts/share-card.js';
+  import { initContributionMap } from '../scripts/contribution-map.js';
 
   var allLines = [];
   var subscription = null;
@@ -79,12 +89,12 @@ import Base from '../layouts/Base.astro';
     text.className = 'poem-page__line-text';
     text.textContent = line.text;
 
-    var actions = document.createElement('div');
-    actions.className = 'poem-page__line-actions';
+    var right = document.createElement('div');
+    right.className = 'poem-page__line-right';
 
     var meta = document.createElement('button');
     meta.className = 'poem-page__line-meta';
-    meta.textContent = '— ' + line.author_name;
+    meta.textContent = line.author_name;
     meta.type = 'button';
     meta.setAttribute('aria-label', 'Show all lines by ' + line.author_name);
     meta.addEventListener('click', function () {
@@ -100,11 +110,35 @@ import Base from '../layouts/Base.astro';
       shareLine(line.text, line.author_name);
     });
 
-    actions.appendChild(meta);
-    actions.appendChild(shareBtn);
+    right.appendChild(meta);
+    right.appendChild(shareBtn);
     el.appendChild(text);
-    el.appendChild(actions);
+    el.appendChild(right);
     return el;
+  }
+
+  /**
+   * Intelligent stanza breaks — groups lines into stanzas by:
+   * 1. Author change (different voice = new stanza)
+   * 2. Time gap > 1 hour between lines
+   * 3. Every 4-6 lines from the same author (natural rhythm)
+   */
+  function shouldBreakStanza(prev, curr, runLength) {
+    if (!prev) return false;
+
+    // Different author = new stanza
+    var prevAuthor = (prev.author_name || '').toLowerCase().trim();
+    var currAuthor = (curr.author_name || '').toLowerCase().trim();
+    if (prevAuthor !== currAuthor) return true;
+
+    // Time gap > 1 hour
+    var gap = new Date(curr.created_at) - new Date(prev.created_at);
+    if (gap > 3600000) return true;
+
+    // Natural rhythm: break every 5 lines from same author
+    if (runLength >= 5) return true;
+
+    return false;
   }
 
   function updateStats(lines) {
@@ -131,7 +165,17 @@ import Base from '../layouts/Base.astro';
       return;
     }
 
+    var runLength = 0;
     lines.forEach(function (line, i) {
+      var prev = i > 0 ? lines[i - 1] : null;
+      if (shouldBreakStanza(prev, line, runLength)) {
+        var spacer = document.createElement('div');
+        spacer.className = 'poem-page__stanza-break';
+        spacer.setAttribute('aria-hidden', 'true');
+        container.appendChild(spacer);
+        runLength = 0;
+      }
+      runLength++;
       container.appendChild(createLineEl(line, animate ? i : undefined));
     });
   }
@@ -156,13 +200,42 @@ import Base from '../layouts/Base.astro';
     renderLines(allLines, false);
   }
 
+  function exportPoem() {
+    if (allLines.length === 0) return;
+    var text = 'Relentlessly Human\n';
+    text += 'A collaborative poem — itsowol.com/poem\n';
+    text += '━'.repeat(40) + '\n\n';
+    var runLength = 0;
+    allLines.forEach(function (line, i) {
+      var prev = i > 0 ? allLines[i - 1] : null;
+      if (shouldBreakStanza(prev, line, runLength)) {
+        text += '\n';
+        runLength = 0;
+      }
+      runLength++;
+      text += line.text + '\n';
+    });
+    text += '\n' + '━'.repeat(40) + '\n';
+    text += allLines.length + ' lines · ' + new Date().toLocaleDateString() + '\n';
+
+    var blob = new Blob([text], { type: 'text/plain' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'relentlessly-human.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   async function initPoemPage() {
     var container = document.getElementById('poem-page-lines');
     var loading = document.getElementById('poem-page-loading');
     var clearBtn = document.getElementById('poem-page-filter-clear');
+    var exportBtn = document.getElementById('poem-page-export');
     if (!container) return;
 
     if (clearBtn) clearBtn.addEventListener('click', clearFilter);
+    if (exportBtn) exportBtn.addEventListener('click', exportPoem);
 
     // Search
     var searchInput = document.getElementById('poem-page-search');
@@ -203,6 +276,10 @@ import Base from '../layouts/Base.astro';
     allLines = result.data;
     updateStats(allLines);
     renderLines(allLines, true);
+
+    // Initialize contribution map
+    var mapCanvas = document.getElementById('poem-page-map');
+    initContributionMap(mapCanvas, allLines);
 
     // Subscribe to realtime inserts
     subscription = supabase

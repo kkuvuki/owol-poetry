@@ -35,7 +35,7 @@
       <button class="rh__pill" data-limit="5" aria-pressed="false">Last 5</button>
       <button class="rh__pill is-active" data-limit="10" aria-pressed="true">Last 10</button>
       <button class="rh__pill" data-limit="50" aria-pressed="false">Last 50</button>
-      <button class="rh__pill" data-limit="100" aria-pressed="false">Last 100</button>
+      <button class="rh__pill" data-limit="0" aria-pressed="false">None</button>
       <a href="/poem" class="rh__pill rh__pill--link">All</a>
     </div>
     <div class="rh__depth" aria-live="polite">
@@ -145,6 +145,30 @@
             placeholder="e.g. Español, Français, 日本語"
             autocomplete="language"
           />
+        </div>
+
+        <div class="rh__form-group rh__form-group--location">
+          <span class="rh__label rh__label--optional">
+            Where are you? <span class="rh__optional">(optional)</span>
+          </span>
+          <div class="rh__location-fields">
+            <input
+              type="text"
+              id="rh-city"
+              class="rh__input rh__input--location"
+              maxlength="100"
+              placeholder="City"
+              autocomplete="address-level2"
+            />
+            <input
+              type="text"
+              id="rh-country"
+              class="rh__input rh__input--location"
+              maxlength="100"
+              placeholder="Country"
+              autocomplete="country-name"
+            />
+          </div>
         </div>
 
         <div class="rh__covenant">

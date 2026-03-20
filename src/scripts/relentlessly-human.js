@@ -346,6 +346,15 @@ function createLineElement(line) {
     meta.appendChild(langTag);
   }
 
+  // Location tag
+  if (socials && (socials.city || socials.country)) {
+    var locTag = document.createElement('span');
+    locTag.className = 'rh-line__location';
+    var locParts = [socials.city, socials.country].filter(Boolean);
+    locTag.textContent = locParts.join(', ');
+    meta.appendChild(locTag);
+  }
+
   var resonanceBtn = document.createElement('button');
   resonanceBtn.className = 'rh-line__resonate';
   resonanceBtn.type = 'button';
@@ -554,6 +563,14 @@ async function handleSubmit(e) {
   var langInput = document.getElementById('rh-lang');
   var lang = langInput ? langInput.value.trim() : '';
   if (lang) socials.lang = lang;
+
+  var cityInput = document.getElementById('rh-city');
+  var countryInput = document.getElementById('rh-country');
+  var city = cityInput ? cityInput.value.trim() : '';
+  var country = countryInput ? countryInput.value.trim() : '';
+  if (city) socials.city = city;
+  if (country) socials.country = country;
+
   const authorLink = Object.keys(socials).length > 0 ? JSON.stringify(socials) : '';
 
   if (!text || !authorName) return;
@@ -657,6 +674,24 @@ function initPills() {
       });
       this.classList.add('is-active');
       this.setAttribute('aria-pressed', 'true');
+
+      // "None" mode: hide poem entirely for blind writing
+      if (limit === 0) {
+        if (els.poem) els.poem.hidden = true;
+        if (els.empty) els.empty.hidden = true;
+        if (els.depthText) els.depthText.textContent = 'Write blind — no context';
+        // Hide context lines in the form too
+        if (els.contextLines) els.contextLines.innerHTML = '';
+        var contextLabel = document.querySelector('.rh__context-label');
+        if (contextLabel) contextLabel.textContent = 'Write without seeing the poem...';
+        return;
+      }
+
+      // Restore poem visibility if coming from "None"
+      if (els.poem) els.poem.hidden = false;
+      var contextLabel = document.querySelector('.rh__context-label');
+      if (contextLabel) contextLabel.textContent = 'The poem so far...';
+
       this.setAttribute('aria-busy', 'true');
 
       // Show loading briefly

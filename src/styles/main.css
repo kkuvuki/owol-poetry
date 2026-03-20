@@ -1374,13 +1374,16 @@ ul, ol {
 }
 
 .poem-page__line {
-  padding: var(--space-lg) 0;
-  border-bottom: 1px solid var(--color-separator);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: 0.35em 0;
   animation: poem-line-enter 0.6s var(--ease-out-expo) both;
 }
 
-.poem-page__line:first-child {
-  border-top: 1px solid var(--color-separator);
+.poem-page__stanza-break {
+  height: var(--space-xl);
 }
 
 .poem-page__line-text {
@@ -1389,7 +1392,7 @@ ul, ol {
   font-style: italic;
   line-height: var(--lh-poem);
   color: var(--color-text-primary);
-  margin-bottom: 0.5rem;
+  flex: 1;
 }
 
 .poem-page__line-meta {
@@ -1397,6 +1400,8 @@ ul, ol {
   font-size: var(--fs-caption);
   color: var(--color-text-muted);
   letter-spacing: 0.03em;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .poem-page__empty {
@@ -1412,6 +1417,13 @@ ul, ol {
   margin-top: var(--space-3xl);
   padding-top: var(--space-xl);
   border-top: 1px solid var(--color-separator);
+}
+
+.poem-page__line-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-shrink: 0;
 }
 
 .poem-page__line-meta {
@@ -1483,6 +1495,50 @@ ul, ol {
 
 .poem-page__cta:hover {
   background: var(--color-accent-green-hover);
+}
+
+.poem-page__map {
+  margin-top: var(--space-3xl);
+  padding-top: var(--space-xl);
+  border-top: 1px solid var(--color-separator);
+}
+
+.poem-page__map-title {
+  font-family: var(--font-heading);
+  font-size: var(--fs-body);
+  font-weight: 400;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-bottom: var(--space-lg);
+  letter-spacing: 0.03em;
+}
+
+.poem-page__map canvas {
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-card-border);
+}
+
+.poem-page__export {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: none;
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-pill);
+  padding: 0.5em 1.2em;
+  cursor: pointer;
+  margin-bottom: var(--space-md);
+  transition: all var(--duration-fast) var(--ease-out-quart);
+}
+
+.poem-page__export:hover {
+  border-color: var(--color-accent-green);
+  color: var(--color-accent-green);
 }
 
 .poem-page__back {
@@ -2088,6 +2144,14 @@ ul, ol {
   letter-spacing: 0.03em;
 }
 
+.rh-line__location {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  color: var(--color-text-muted);
+  opacity: 0.7;
+  letter-spacing: 0.03em;
+}
+
 .rh-line__resonate {
   background: none;
   border: none;
@@ -2423,6 +2487,16 @@ ul, ol {
 .rh__input--social {
   font-size: var(--fs-small);
   padding: var(--space-xs) 0;
+}
+
+/* Location fields */
+.rh__location-fields {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.rh__input--location {
+  flex: 1;
 }
 
 /* Covenant checkbox */
