@@ -66,16 +66,11 @@ import Base from '../layouts/Base.astro';
 <script>
   import { supabase } from '../scripts/supabase.js';
 
-  // Simple password gate (client-side — not secure, just obscurity)
-  var PASS_HASH = '5d41402abc4b2a76b9719d911017c592'; // md5("hello") — change this!
+  var PASS_HASH = '12b2c3b43ebbef2f47533e5f682d75262e8dd1b7385c74bde77a1921edcdabd0';
 
-  function md5simple(str) {
-    // Simple hash for gate — NOT cryptographic
-    var hash = 0;
-    for (var i = 0; i < str.length; i++) {
-      hash = ((hash << 5) - hash + str.charCodeAt(i)) & 0xffffffff;
-    }
-    return Math.abs(hash).toString(16);
+  async function sha256(str) {
+    var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
   }
 
   async function initAdmin() {
@@ -84,22 +79,33 @@ import Base from '../layouts/Base.astro';
     var form = document.getElementById('admin-login');
     if (!gate || !dashboard || !form) return;
 
-    // Check if already authed
-    if (sessionStorage.getItem('admin_auth') === 'true') {
+    // Check if already authed this session
+    if (sessionStorage.getItem('admin_auth') === PASS_HASH) {
       gate.hidden = true;
       dashboard.hidden = false;
       loadDashboard();
       return;
     }
 
-    form.addEventListener('submit', function (e) {
+    form.addEventListener('submit', async function (e) {
       e.preventDefault();
       var pass = document.getElementById('admin-pass');
-      if (pass && pass.value) {
-        sessionStorage.setItem('admin_auth', 'true');
+      if (!pass || !pass.value) return;
+
+      var hash = await sha256(pass.value);
+      if (hash === PASS_HASH) {
+        sessionStorage.setItem('admin_auth', PASS_HASH);
         gate.hidden = true;
         dashboard.hidden = false;
         loadDashboard();
+      } else {
+        pass.value = '';
+        pass.placeholder = 'Wrong password';
+        pass.classList.add('admin__input--error');
+        setTimeout(function () {
+          pass.placeholder = 'Password';
+          pass.classList.remove('admin__input--error');
+        }, 2000);
       }
     });
   }

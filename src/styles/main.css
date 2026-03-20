@@ -1616,6 +1616,17 @@ ul, ol {
   border-color: var(--color-accent-green);
 }
 
+.admin__input--error {
+  border-color: #c44;
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
 .admin__btn {
   padding: 0.6em 1.2em;
   font-family: var(--font-ui);
