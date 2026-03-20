@@ -4,82 +4,345 @@ import Base from '../layouts/Base.astro';
 
 <Base
   title="Our Way of Life — Ravings"
-  description="The philosophy connecting poetry and OwOL — two expressions of living intentionally."
+  description="The philosophy connecting poetry and OwOL — two expressions of living intentionally, by Chidi Francis Onwuka."
 >
-  <article class="page-owol">
-    <header class="page-owol__header reveal" data-reveal="fade-up">
-      <h1 class="page-owol__title">Our Way of Life</h1>
-    </header>
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "name": "Our Way of Life",
+    "description": "The philosophy connecting poetry and OwOL — two expressions of living intentionally.",
+    "author": {
+      "@type": "Person",
+      "name": "Chidi Francis Onwuka",
+      "url": "https://www.linkedin.com/in/chidi-onwuka",
+      "jobTitle": "Poet & Builder",
+      "sameAs": [
+        "https://www.linkedin.com/in/chidi-onwuka",
+        "https://itsowol.com"
+      ]
+    },
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "OwOL — Our Way of Life",
+      "description": "A food lifestyle app that brings intentionality to your kitchen.",
+      "url": "https://owol.app"
+    }
+  })} />
 
-    <div class="page-owol__body reveal" data-reveal="fade-up" data-reveal-delay="200">
-      <p>
-        Poetry and food are both acts of nourishment. One feeds the soul, the other the body.
-        Both carry heritage, memory, and identity. Both are best when shared.
+  <!-- Ambient Canvas Background -->
+  <canvas class="owol-ambient" id="owol-ambient" aria-hidden="true"></canvas>
+
+  <!-- 1. IMMERSIVE HERO -->
+  <section class="owol-hero" aria-label="Our Way of Life">
+    <div class="owol-hero__inner">
+      <span class="owol-hero__eyebrow reveal" data-reveal="fade" data-reveal-delay="200">A Philosophy</span>
+      <h1 class="owol-hero__title reveal" data-reveal="fade-up" data-reveal-delay="400">
+        Our Way<br />of Life
+      </h1>
+      <p class="owol-hero__subtitle reveal" data-reveal="fade-up" data-reveal-delay="600">
+        Poetry feeds the soul. Food feeds the body.<br />
+        Both carry heritage, memory, and identity.<br />
+        Both are best when shared.
       </p>
+      <div class="owol-hero__scroll reveal" data-reveal="fade" data-reveal-delay="1000">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+      </div>
+    </div>
+  </section>
 
-      <p>
-        <em>Ravings</em> is a collection born from the same impulse that drives
-        <a href="https://owol.app" target="_blank" rel="noopener noreferrer">OwOL</a>
-        &mdash; Our Way of Life &mdash; a desire to live with intention, to fight for what
-        matters, and to gather around the things that sustain us.
-      </p>
+  <!-- 2. TWO HALVES — Poetry vs Food -->
+  <section class="owol-halves" aria-label="Two expressions of one philosophy">
+    <div class="owol-halves__grid">
+      <div class="owol-halves__side owol-halves__side--soul reveal" data-reveal="fade-up">
+        <span class="owol-halves__label">The Soul</span>
+        <h2 class="owol-halves__heading">Ravings</h2>
+        <p class="owol-halves__text">
+          A collection of poems about resilience, exile, heritage, and connection.
+          Written in the space between darkness and what endures.
+          From the defiance of <em>"Still, We Fight"</em> to the tenderness of
+          <em>"We Were All Strangers Once"</em> — these are ravings of a life lived fully.
+        </p>
+        <a href="/poems" class="owol-halves__link">Read the collection &rarr;</a>
+      </div>
+      <div class="owol-halves__divider reveal" data-reveal="scale-up" aria-hidden="true">
+        <span class="owol-halves__divider-line"></span>
+        <span class="owol-halves__divider-dot"></span>
+        <span class="owol-halves__divider-line"></span>
+      </div>
+      <div class="owol-halves__side owol-halves__side--body reveal" data-reveal="fade-up" data-reveal-delay="200">
+        <span class="owol-halves__label">The Body</span>
+        <h2 class="owol-halves__heading">OwOL</h2>
+        <p class="owol-halves__text">
+          A food lifestyle app that brings the same intentionality to your kitchen.
+          It's about the dinner party you throw for friends, the recipe your grandmother
+          never wrote down, the way a shared meal turns strangers into family.
+        </p>
+        <span class="owol-halves__badge">Coming Soon</span>
+      </div>
+    </div>
+  </section>
 
-      <div class="author-card">
+  <!-- 3. CONVERGENCE QUOTE -->
+  <section class="owol-convergence reveal" data-reveal="fade-up" aria-label="Convergence">
+    <blockquote class="owol-convergence__quote">
+      <p>"Hello" is a soft incantation, that summons kindred flame.</p>
+      <p>Suddenly, the spaces between are not absence, but invitation —<br />
+        not voids, but bridges arching across the unknown.</p>
+    </blockquote>
+  </section>
+
+  <!-- 4. EXPANDED AUTHOR SECTION -->
+  <section class="owol-author" aria-label="About the author">
+    <div class="owol-author__inner">
+      <div class="owol-author__portrait reveal" data-reveal="fade-up">
         <img
           src="/chidi-onwuka.jpg"
           alt="Chidi Francis Onwuka"
-          class="author-card__photo"
-          width="200"
-          height="200"
+          class="owol-author__photo"
+          width="400"
+          height="400"
           loading="lazy"
         />
-        <div class="author-card__info">
-          <h2 class="author-card__name">Chidi Francis Onwuka</h2>
-          <p class="author-card__role">Poet &amp; Builder</p>
-          <a
-            href="https://www.linkedin.com/in/chidi-onwuka"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="author-card__linkedin"
-            aria-label="Chidi Onwuka on LinkedIn"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-            </svg>
-            <span>LinkedIn</span>
+      </div>
+      <div class="owol-author__story">
+        <span class="owol-author__eyebrow reveal" data-reveal="fade" data-reveal-delay="100">The Poet & Builder</span>
+        <h2 class="owol-author__name reveal" data-reveal="fade-up" data-reveal-delay="200">Chidi Francis Onwuka</h2>
+        <p class="owol-author__bio reveal" data-reveal="fade-up" data-reveal-delay="300">
+          Chidi writes about what it means to be human — the full spectrum of it.
+          His poems don't shy from darkness; they sit inside it and find what endures.
+          Resilience. Exile. Heritage. Connection. The terrain of a life that refuses to be half-lived.
+        </p>
+        <p class="owol-author__bio reveal" data-reveal="fade-up" data-reveal-delay="400">
+          By day, he builds OwOL — a food lifestyle app born from the same belief that the
+          things we gather around define who we are. By night, the poems come.
+          Both are acts of nourishment. Both are offerings.
+        </p>
+        <div class="owol-author__socials reveal" data-reveal="fade-up" data-reveal-delay="500">
+          <a href="https://www.linkedin.com/in/chidi-onwuka" target="_blank" rel="noopener noreferrer" class="owol-author__social" aria-label="LinkedIn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </a>
+          <a href="mailto:onwufranc@gmail.com" class="owol-author__social" aria-label="Email">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          </a>
+          <a href="https://itsowol.com" class="owol-author__social" aria-label="Website">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
           </a>
         </div>
       </div>
-
-      <p>
-        Chidi writes about resilience, exile, heritage, and connection.
-        His poems don&rsquo;t shy from darkness &mdash; they sit inside it and find
-        what endures. From the defiance of <em>&ldquo;Still, We Fight&rdquo;</em> to the
-        tenderness of <em>&ldquo;We Were All Strangers Once,&rdquo;</em> the collection
-        maps the terrain of a life lived fully.
-      </p>
-
-      <h2>The Builder</h2>
-
-      <p>
-        OwOL is a food lifestyle app that brings the same philosophy to your kitchen.
-        It&rsquo;s about more than recipes and grocery lists &mdash; it&rsquo;s about the
-        dinner party you throw for friends, the recipe your grandmother never wrote down,
-        the way a shared meal turns strangers into family.
-      </p>
-
-      <blockquote>
-        <p>
-          &ldquo;Hello&rdquo; is a soft incantation, that summons kindred flame.
-          Suddenly, the spaces between are not absence, but invitation &mdash;
-          not voids, but bridges arching across the unknown.
-        </p>
-      </blockquote>
-
-      <p>
-        Both the poetry and the app are expressions of the same question:
-        <strong>What does it mean to live well?</strong>
-      </p>
     </div>
-  </article>
+  </section>
+
+  <!-- 5. PHILOSOPHY PILLARS -->
+  <section class="owol-pillars" aria-label="Philosophy">
+    <h2 class="owol-pillars__heading reveal" data-reveal="fade-up">The Pillars</h2>
+    <p class="owol-pillars__subheading reveal" data-reveal="fade-up" data-reveal-delay="100">
+      Four forces that run through every poem and every meal.
+    </p>
+    <div class="owol-pillars__grid">
+      <a href="/poems/halfway-there" class="owol-pillar reveal" data-reveal="fade-up" data-reveal-delay="100">
+        <span class="owol-pillar__icon" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="10"/></svg>
+        </span>
+        <h3 class="owol-pillar__name">Resilience</h3>
+        <p class="owol-pillar__desc">The refusal to be broken. The fire that survives the storm.</p>
+        <span class="owol-pillar__poem">Halfway There &rarr;</span>
+      </a>
+      <a href="/poems/blacksmith" class="owol-pillar reveal" data-reveal="fade-up" data-reveal-delay="200">
+        <span class="owol-pillar__icon" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </span>
+        <h3 class="owol-pillar__name">Identity</h3>
+        <p class="owol-pillar__desc">We are hardened metals, the shape of our very choosing.</p>
+        <span class="owol-pillar__poem">Blacksmith &rarr;</span>
+      </a>
+      <a href="/poems/dearth" class="owol-pillar reveal" data-reveal="fade-up" data-reveal-delay="300">
+        <span class="owol-pillar__icon" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z"/><path d="M12 3v18"/><path d="M3.6 9h16.8"/><path d="M3.6 15h16.8"/></svg>
+        </span>
+        <h3 class="owol-pillar__name">Heritage</h3>
+        <p class="owol-pillar__desc">What we carry forward. The recipes and stories that survive us.</p>
+        <span class="owol-pillar__poem">Dearth &rarr;</span>
+      </a>
+      <a href="/poems/we-were-all-strangers-once" class="owol-pillar reveal" data-reveal="fade-up" data-reveal-delay="400">
+        <span class="owol-pillar__icon" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 18a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2"/><rect x="3" y="4" width="18" height="18" rx="2"/><circle cx="12" cy="10" r="2"/></svg>
+        </span>
+        <h3 class="owol-pillar__name">Connection</h3>
+        <p class="owol-pillar__desc">A shared meal turns strangers into family. A shared line turns strangers into poets.</p>
+        <span class="owol-pillar__poem">We Were All Strangers Once &rarr;</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- 6. FEATURED POEM EXCERPT -->
+  <section class="owol-featured" aria-label="Featured poem">
+    <div class="owol-featured__inner">
+      <span class="owol-featured__label reveal" data-reveal="fade">From the collection</span>
+      <div class="owol-featured__lines reveal" data-reveal="fade-up" data-reveal-delay="200">
+        <p>This is where we fight,</p>
+        <p>Frost, snow, hailstones and fire,</p>
+        <p>Unyielding in spirit,</p>
+        <p>Each breath a defiant roar.</p>
+      </div>
+      <a href="/poems/still-we-fight" class="owol-featured__source reveal" data-reveal="fade" data-reveal-delay="400">
+        Still, We Fight &rarr;
+      </a>
+    </div>
+  </section>
+
+  <!-- 7. TIMELINE -->
+  <section class="owol-timeline" aria-label="Journey">
+    <h2 class="owol-timeline__heading reveal" data-reveal="fade-up">The Journey</h2>
+    <div class="owol-timeline__track">
+      <div class="owol-timeline__item reveal" data-reveal="fade-up">
+        <span class="owol-timeline__year">2023</span>
+        <h3 class="owol-timeline__event">Ravings is Born</h3>
+        <p class="owol-timeline__desc">Twelve poems pour out over a single year — raw, unfiltered explorations of resilience, heritage, and what it means to live fully.</p>
+      </div>
+      <div class="owol-timeline__item reveal" data-reveal="fade-up" data-reveal-delay="100">
+        <span class="owol-timeline__year">2024</span>
+        <h3 class="owol-timeline__event">Relentlessly Human</h3>
+        <p class="owol-timeline__desc">The collaborative poem launches. Strangers around the world begin adding lines — one at a time, no AI, only what they carry inside.</p>
+      </div>
+      <div class="owol-timeline__item reveal" data-reveal="fade-up" data-reveal-delay="200">
+        <span class="owol-timeline__year">2025</span>
+        <h3 class="owol-timeline__event">OwOL Takes Shape</h3>
+        <p class="owol-timeline__desc">The food lifestyle app begins development — bringing the same intentionality to the kitchen that poetry brings to language.</p>
+      </div>
+      <div class="owol-timeline__item owol-timeline__item--future reveal" data-reveal="fade-up" data-reveal-delay="300">
+        <span class="owol-timeline__year">Next</span>
+        <h3 class="owol-timeline__event">What Comes Next</h3>
+        <p class="owol-timeline__desc">The poem keeps growing. The app launches. Poetry and food — two ways of gathering around what nourishes us.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. JOIN THE MOVEMENT CTA -->
+  <section class="owol-cta" aria-label="Get involved">
+    <div class="owol-cta__inner">
+      <h2 class="owol-cta__heading reveal" data-reveal="fade-up">Join the Movement</h2>
+      <p class="owol-cta__text reveal" data-reveal="fade-up" data-reveal-delay="100">
+        Whether you write, cook, or simply believe in living intentionally — there's a place for you here.
+      </p>
+      <div class="owol-cta__actions reveal" data-reveal="fade-up" data-reveal-delay="200">
+        <a href="/#relentlessly-human" class="owol-cta__btn owol-cta__btn--primary">Add a line to the poem</a>
+        <a href="/poems" class="owol-cta__btn owol-cta__btn--secondary">Read the collection</a>
+        <a href="/voices" class="owol-cta__btn owol-cta__btn--secondary">Meet the voices</a>
+      </div>
+      <div class="owol-cta__email reveal" data-reveal="fade-up" data-reveal-delay="300">
+        <p class="owol-cta__email-text">Get notified when OwOL launches:</p>
+        <form class="owol-cta__form" id="owol-cta-form">
+          <label for="owol-cta-email" class="sr-only">Email address</label>
+          <input type="email" id="owol-cta-email" class="owol-cta__input" placeholder="your@email.com" required />
+          <button type="submit" class="owol-cta__submit" id="owol-cta-submit">Notify me</button>
+        </form>
+        <p class="owol-cta__done" id="owol-cta-done" hidden>You're on the list.</p>
+      </div>
+    </div>
+  </section>
 </Base>
+
+<script>
+  import { supabase } from '../scripts/supabase.js';
+
+  /* ── Ambient Canvas Background ── */
+  function initAmbient() {
+    var canvas = document.getElementById('owol-ambient');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var w, h;
+    var particles = [];
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var raf;
+
+    function resize() {
+      w = window.innerWidth;
+      h = document.body.scrollHeight;
+      canvas.width = w;
+      canvas.height = h;
+    }
+
+    function createParticles() {
+      particles = [];
+      var count = reducedMotion ? 0 : Math.min(30, Math.floor(w * h / 50000));
+      for (var i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          r: Math.random() * 1.5 + 0.5,
+          vx: (Math.random() - 0.5) * 0.2,
+          vy: (Math.random() - 0.5) * 0.15,
+          alpha: Math.random() * 0.3 + 0.05,
+        });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, w, h);
+      particles.forEach(function (p) {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = w;
+        if (p.x > w) p.x = 0;
+        if (p.y < 0) p.y = h;
+        if (p.y > h) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(121, 185, 57, ' + p.alpha + ')';
+        ctx.fill();
+      });
+      raf = requestAnimationFrame(draw);
+    }
+
+    resize();
+    createParticles();
+    if (!reducedMotion) draw();
+
+    window.addEventListener('resize', function () {
+      resize();
+      createParticles();
+    });
+
+    // Cleanup
+    document.addEventListener('astro:before-preparation', function () {
+      if (raf) cancelAnimationFrame(raf);
+    });
+  }
+
+  /* ── CTA Email Form ── */
+  function initCtaForm() {
+    var form = document.getElementById('owol-cta-form');
+    if (!form) return;
+
+    if (localStorage.getItem('owol_email_signed_up') === 'true') {
+      form.hidden = true;
+      var done = document.getElementById('owol-cta-done');
+      if (done) done.hidden = false;
+      return;
+    }
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var input = document.getElementById('owol-cta-email');
+      var btn = document.getElementById('owol-cta-submit');
+      var done = document.getElementById('owol-cta-done');
+      if (!input || !input.value.trim()) return;
+
+      if (btn) btn.disabled = true;
+      await supabase.from('email_signups').insert([{ email: input.value.trim() }]);
+      localStorage.setItem('owol_email_signed_up', 'true');
+      form.hidden = true;
+      if (done) done.hidden = false;
+    });
+  }
+
+  function initOwolPage() {
+    if (!document.querySelector('.owol-hero')) return;
+    initAmbient();
+    initCtaForm();
+  }
+
+  document.addEventListener('astro:page-load', initOwolPage);
+</script>
