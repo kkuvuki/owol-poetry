@@ -12,6 +12,7 @@ import { supabase } from './supabase.js';
 import { shareLine } from './share-card.js';
 import { fetchResonanceCounts, fetchUserResonance, toggleResonance, getCount, hasResonated } from './resonance.js';
 import { initAudioRecorder, uploadAudio, getAudioUrl } from './audio-recorder.js';
+import { showProofModal } from './proof-of-authorship.js';
 
 const STORAGE_KEY = 'rh_contributed';
 
@@ -947,6 +948,8 @@ async function handleSubmit(e) {
   // Animate the submitted line into the poem
   if (data && data[0]) {
     animateNewLine(data[0]);
+    // Show proof of authorship modal (non-blocking)
+    showProofModal(data[0]);
   }
 
   // Transition: hide form, show afterglow

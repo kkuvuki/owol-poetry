@@ -4453,3 +4453,146 @@ ul, ol {
   background: var(--color-bg-surface);
   color: var(--color-text-primary);
 }
+
+
+/* ═══════════════════════════════════════════════
+   Proof of Authorship Modal
+   ═══════════════════════════════════════════════ */
+
+.proof-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: fade-in 0.3s var(--ease-out-expo);
+  padding: var(--page-gutter);
+}
+
+.proof-modal__card {
+  position: relative;
+  background: var(--color-bg-elevated);
+  border: 1px solid rgba(121, 185, 57, 0.2);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2xl) var(--space-xl);
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  animation: fade-in 0.4s var(--ease-out-expo) 0.1s both;
+}
+
+.proof-modal__close {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.25rem 0.5rem;
+  transition: color var(--duration-fast) ease;
+}
+
+.proof-modal__close:hover {
+  color: var(--color-text-primary);
+}
+
+.proof-modal__badge {
+  margin-bottom: var(--space-md);
+}
+
+.proof-modal__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.proof-modal__line {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: var(--fs-body);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-lg);
+  line-height: var(--lh-poem);
+}
+
+.proof-modal__code-wrap {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.proof-modal__code-label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-xs);
+}
+
+.proof-modal__code {
+  display: block;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-accent-green);
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-xs);
+}
+
+.proof-modal__code-hint {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-muted);
+}
+
+.proof-modal__actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.proof-modal__btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  cursor: pointer;
+  transition: all var(--duration-fast) ease;
+}
+
+.proof-modal__btn--download {
+  background: var(--color-accent-green);
+  border: none;
+  color: #13100D;
+  font-weight: 600;
+}
+
+.proof-modal__btn--download:hover {
+  background: var(--color-accent-green-hover);
+}
+
+.proof-modal__btn--copy {
+  background: none;
+  border: 1px solid var(--color-card-border);
+  color: var(--color-text-secondary);
+}
+
+.proof-modal__btn--copy:hover {
+  border-color: var(--color-accent-green);
+  color: var(--color-text-primary);
+}
