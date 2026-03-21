@@ -1,13 +1,18 @@
 /**
- * Shareable Line Cards — generates a dark, branded PNG from a poem line.
+ * Shareable Line Cards — generates branded PNG share images from poem lines.
+ * Uses og-card.js for image generation, adds share UI with multiple options.
+ *
  * Used on both the homepage RH section and the /poem page.
  */
+
+import { generateLineCard, generateStoryCard, dataUrlToBlob } from './og-card.js';
 
 var CARD_W = 1080;
 var CARD_H = 1080;
 
 /**
- * Renders a line card to a canvas and returns a Blob URL.
+ * Renders a 1080x1080 square line card to a canvas and returns a Blob URL.
+ * (Original card format, kept for backward compatibility.)
  * @param {string} text — the poem line
  * @param {string} author — author name
  * @returns {Promise<string>} blob URL of the PNG
@@ -87,40 +92,231 @@ export function renderCard(text, author) {
   });
 }
 
+/* ------------------------------------------------------------------ */
+/*  Share Menu                                                         */
+/* ------------------------------------------------------------------ */
+
+var activeMenu = null;
+
+function dismissMenu() {
+  if (activeMenu) {
+    activeMenu.remove();
+    activeMenu = null;
+  }
+  document.removeEventListener('click', onDocClick);
+  document.removeEventListener('keydown', onDocKey);
+}
+
+function onDocClick(e) {
+  if (activeMenu && !activeMenu.contains(e.target)) {
+    dismissMenu();
+  }
+}
+
+function onDocKey(e) {
+  if (e.key === 'Escape') dismissMenu();
+}
+
 /**
- * Triggers share or download for a line.
- * Uses Web Share API if available, falls back to download.
+ * Creates and shows a floating share menu near the trigger button.
  */
-export async function shareLine(text, author) {
-  var blobUrl = await renderCard(text, author);
+function showShareMenu(text, author, anchorEl) {
+  dismissMenu();
 
-  // Try Web Share API first (mobile-friendly)
-  if (navigator.share && navigator.canShare) {
+  var menu = document.createElement('div');
+  menu.className = 'share-menu';
+  menu.setAttribute('role', 'menu');
+  menu.innerHTML = [
+    '<button class="share-menu__item" data-action="share" role="menuitem">',
+    '  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>',
+    '  Share image',
+    '</button>',
+    '<button class="share-menu__item" data-action="story" role="menuitem">',
+    '  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>',
+    '  Story card',
+    '</button>',
+    '<button class="share-menu__item" data-action="copy" role="menuitem">',
+    '  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+    '  Copy text',
+    '</button>',
+    '<button class="share-menu__item" data-action="download" role="menuitem">',
+    '  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+    '  Download image',
+    '</button>',
+  ].join('\n');
+
+  // Position near the anchor
+  var rect = anchorEl.getBoundingClientRect();
+  menu.style.position = 'fixed';
+  menu.style.top = (rect.bottom + 8) + 'px';
+  menu.style.left = Math.max(8, rect.left - 80) + 'px';
+  menu.style.zIndex = '9999';
+
+  document.body.appendChild(menu);
+  activeMenu = menu;
+
+  // Close on outside click (delayed to avoid immediate close)
+  setTimeout(function () {
+    document.addEventListener('click', onDocClick);
+    document.addEventListener('keydown', onDocKey);
+  }, 0);
+
+  // Handle actions
+  menu.addEventListener('click', async function (e) {
+    var btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    var action = btn.dataset.action;
+    dismissMenu();
+
+    if (action === 'share') {
+      await shareImage(text, author, 'og');
+    } else if (action === 'story') {
+      await shareImage(text, author, 'story');
+    } else if (action === 'copy') {
+      await copyText(text, author);
+    } else if (action === 'download') {
+      await downloadImage(text, author, 'og');
+    }
+  });
+}
+
+/**
+ * Shares or downloads a generated image.
+ * @param {'og'|'story'} format
+ */
+async function shareImage(text, author, format) {
+  var dataUrl = format === 'story'
+    ? await generateStoryCard(text, author)
+    : await generateLineCard(text, author);
+
+  var blob = dataUrlToBlob(dataUrl);
+  var filename = format === 'story' ? 'poem-story.png' : 'poem-line.png';
+  var file = new File([blob], filename, { type: 'image/png' });
+
+  // Try Web Share API with file support
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
-      var response = await fetch(blobUrl);
-      var blob = await response.blob();
-      var file = new File([blob], 'poem-line.png', { type: 'image/png' });
-
-      if (navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          title: 'Relentlessly Human',
-          text: '"' + text + '" \u2014 ' + author,
-          files: [file],
-        });
-        URL.revokeObjectURL(blobUrl);
-        return;
-      }
+      await navigator.share({
+        title: 'Relentlessly Human',
+        text: '\u201C' + text + '\u201D \u2014 ' + author,
+        files: [file],
+      });
+      return;
     } catch (e) {
-      // User cancelled or share failed — fall through to download
+      // User cancelled — fall through to download
+      if (e.name === 'AbortError') return;
     }
   }
 
-  // Fallback: download the image
+  // Fallback: download
+  downloadBlob(blob, filename);
+}
+
+/**
+ * Downloads a blob as a file.
+ */
+function downloadBlob(blob, filename) {
+  var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
-  a.href = blobUrl;
-  a.download = 'poem-line.png';
+  a.href = url;
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  setTimeout(function () { URL.revokeObjectURL(blobUrl); }, 1000);
+  setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+}
+
+/**
+ * Downloads the OG or story image directly.
+ */
+async function downloadImage(text, author, format) {
+  var dataUrl = format === 'story'
+    ? await generateStoryCard(text, author)
+    : await generateLineCard(text, author);
+
+  var blob = dataUrlToBlob(dataUrl);
+  var filename = format === 'story' ? 'poem-story.png' : 'poem-line.png';
+  downloadBlob(blob, filename);
+}
+
+/**
+ * Copies the poem line text to clipboard.
+ */
+async function copyText(text, author) {
+  var str = '\u201C' + text + '\u201D \u2014 ' + author + '\nitsowol.com/poem';
+  try {
+    await navigator.clipboard.writeText(str);
+    showToast('Copied to clipboard');
+  } catch (e) {
+    // Fallback
+    var ta = document.createElement('textarea');
+    ta.value = str;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('Copied to clipboard');
+  }
+}
+
+/**
+ * Brief toast notification.
+ */
+function showToast(message) {
+  var toast = document.createElement('div');
+  toast.className = 'share-toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  // Trigger animation
+  requestAnimationFrame(function () {
+    toast.classList.add('share-toast--visible');
+  });
+  setTimeout(function () {
+    toast.classList.remove('share-toast--visible');
+    setTimeout(function () { toast.remove(); }, 300);
+  }, 2000);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Public API                                                         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Triggers share for a line.
+ * If called with an event/element, shows the share menu.
+ * If called without, uses the quick-share path (backward compatible).
+ *
+ * @param {string} text
+ * @param {string} author
+ * @param {HTMLElement} [anchorEl] — optional element to anchor the menu to
+ */
+export async function shareLine(text, author, anchorEl) {
+  if (anchorEl) {
+    showShareMenu(text, author, anchorEl);
+    return;
+  }
+
+  // Quick share path (backward compatible) — generate OG card + share/download
+  var dataUrl = await generateLineCard(text, author);
+  var blob = dataUrlToBlob(dataUrl);
+  var file = new File([blob], 'poem-line.png', { type: 'image/png' });
+
+  // Try Web Share API with file support
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        title: 'Relentlessly Human',
+        text: '\u201C' + text + '\u201D \u2014 ' + author,
+        files: [file],
+      });
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+    }
+  }
+
+  // Fallback: download
+  downloadBlob(blob, 'poem-line.png');
 }

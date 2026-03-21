@@ -160,6 +160,36 @@ function drawGlowDot(ctx, x, y, radius, color) {
 }
 
 /**
+ * Lazy-initialize the contribution map using IntersectionObserver.
+ * The map only renders when the canvas scrolls into (or near) the viewport.
+ * @param {HTMLCanvasElement} canvas
+ * @param {Array} lines - poem_lines data
+ */
+export function lazyInitContributionMap(canvas, lines) {
+  if (!canvas) return;
+
+  if (!('IntersectionObserver' in window)) {
+    // Fallback: initialize immediately if IO is unsupported
+    initContributionMap(canvas, lines);
+    return;
+  }
+
+  var observer = new IntersectionObserver(
+    function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          initContributionMap(canvas, lines);
+          observer.disconnect();
+        }
+      });
+    },
+    { rootMargin: '200px' }
+  );
+
+  observer.observe(canvas);
+}
+
+/**
  * Initialize the contribution map
  * @param {HTMLCanvasElement} canvas
  * @param {Array} lines - poem_lines data

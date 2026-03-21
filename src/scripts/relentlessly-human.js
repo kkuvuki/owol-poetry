@@ -3,31 +3,155 @@
  *
  * Handles Supabase integration, real-time updates, form submission,
  * and all animations for the collaborative poem feature.
+ *
+ * Threading/Reply feature requires a `reply_to` column on poem_lines:
+ *   ALTER TABLE poem_lines ADD COLUMN reply_to UUID REFERENCES poem_lines(id);
  */
 
 import { supabase } from './supabase.js';
 import { shareLine } from './share-card.js';
 import { fetchResonanceCounts, fetchUserResonance, toggleResonance, getCount, hasResonated } from './resonance.js';
+import { initAudioRecorder, uploadAudio, getAudioUrl } from './audio-recorder.js';
 
 const STORAGE_KEY = 'rh_contributed';
 
-const WRITING_PROMPTS = [
-  'What would you say to your younger self?',
-  'Describe a sound you\u2019ll never forget.',
-  'What does home smell like?',
-  'Write what silence sounds like to you.',
-  'Name something you\u2019re afraid to want.',
-  'What do your hands remember?',
-  'Describe the color of a feeling.',
-  'What would you whisper to the night?',
-  'Write about something you almost said.',
-  'What does the rain know about you?',
-  'Describe the weight of a memory.',
-  'What are you still learning to forgive?',
-  'Write the first line of your unwritten letter.',
-  'What does your reflection think about?',
-  'Describe love without using the word.',
-];
+const SEASONAL_PROMPTS = {
+  valentine: {
+    name: 'Love Letters',
+    emoji: '\u2764\uFE0F',
+    start: [2, 1],
+    end: [2, 28],
+    intro: 'Season of love \u2014 write from the heart',
+    prompts: [
+      'What does love sound like at 2am?',
+      'Describe a kiss you still carry.',
+      'Write the words you never sent.',
+      'What would you say to the one who got away?',
+      'Describe the exact moment you knew.',
+      'What does longing taste like?',
+      'Write about the space between two hands.',
+      'What did love teach you about silence?',
+    ],
+  },
+  remembrance: {
+    name: 'Remembrance',
+    emoji: '\uD83D\uDD6F\uFE0F',
+    start: [11, 1],
+    end: [11, 15],
+    intro: 'Honor those who came before',
+    prompts: [
+      'What would you ask your ancestors?',
+      'Describe a voice you can no longer hear.',
+      'What did they leave in your hands?',
+      'Write about a place that no longer exists.',
+      'What do the dead know that we don\u2019t?',
+      'Describe the weight of an empty chair.',
+      'What would you cook for someone who\u2019s gone?',
+      'Write the eulogy no one gave.',
+    ],
+  },
+  spring: {
+    name: 'Spring \u2014 Renewal',
+    emoji: '\uD83C\uDF31',
+    start: [3, 20],
+    end: [6, 20],
+    intro: 'Everything begins again',
+    prompts: [
+      'What is trying to bloom inside you?',
+      'Describe the first warm day after winter.',
+      'What would you plant if you could grow anything?',
+      'Write about something breaking open.',
+      'What does the morning owe you?',
+      'Describe the color of a new beginning.',
+      'What are you ready to become?',
+      'Write about rain that feels like forgiveness.',
+    ],
+  },
+  summer: {
+    name: 'Summer \u2014 Light',
+    emoji: '\u2600\uFE0F',
+    start: [6, 21],
+    end: [9, 22],
+    intro: 'The long days hold everything',
+    prompts: [
+      'What does freedom smell like?',
+      'Describe a moment that lasted all day.',
+      'What would you do with one endless afternoon?',
+      'Write about heat on bare skin.',
+      'What does the sun know about you?',
+      'Describe the sound of a wide-open window.',
+      'What are you most alive doing?',
+      'Write about a night you didn\u2019t want to end.',
+    ],
+  },
+  autumn: {
+    name: 'Autumn \u2014 Letting Go',
+    emoji: '\uD83C\uDF42',
+    start: [9, 23],
+    end: [12, 20],
+    intro: 'Beauty in what falls away',
+    prompts: [
+      'What have you been carrying too long?',
+      'Describe the sound of something ending.',
+      'What would you release if you could?',
+      'Write about a door you finally closed.',
+      'What does the wind take with it?',
+      'Describe the color of letting go.',
+      'What are you harvesting from this year?',
+      'Write about the last warm night.',
+    ],
+  },
+  winter: {
+    name: 'Winter \u2014 Stillness',
+    emoji: '\u2744\uFE0F',
+    start: [12, 21],
+    end: [3, 19],
+    intro: 'In the quiet, listen closer',
+    prompts: [
+      'What do you hear when the world goes silent?',
+      'Describe the warmth inside the cold.',
+      'What survives the longest nights?',
+      'Write about a fire that kept you going.',
+      'What does endurance look like at midnight?',
+      'Describe the weight of a dark afternoon.',
+      'What are you saving for spring?',
+      'Write about rest that feels earned.',
+    ],
+  },
+};
+
+function getCurrentSeason() {
+  var now = new Date();
+  var month = now.getMonth() + 1;
+  var day = now.getDate();
+  var md = month * 100 + day; // e.g. March 20 = 320, Nov 5 = 1105
+
+  // Check special themes first
+  var specials = ['valentine', 'remembrance'];
+  for (var i = 0; i < specials.length; i++) {
+    var s = SEASONAL_PROMPTS[specials[i]];
+    var start = s.start[0] * 100 + s.start[1];
+    var end = s.end[0] * 100 + s.end[1];
+    if (md >= start && md <= end) return specials[i];
+  }
+
+  // Check standard seasons (winter wraps around year boundary)
+  var standards = ['spring', 'summer', 'autumn', 'winter'];
+  for (var j = 0; j < standards.length; j++) {
+    var s = SEASONAL_PROMPTS[standards[j]];
+    var start = s.start[0] * 100 + s.start[1];
+    var end = s.end[0] * 100 + s.end[1];
+    if (start <= end) {
+      if (md >= start && md <= end) return standards[j];
+    } else {
+      // Wraps around year (winter: Dec 21 - Mar 19)
+      if (md >= start || md <= end) return standards[j];
+    }
+  }
+
+  return 'spring'; // fallback
+}
+
 const FINGERPRINT_KEY = 'rh_fingerprint';
 
 /* ══════════════════════════════════════════
@@ -59,6 +183,7 @@ function cacheElements() {
     error: document.getElementById('rh-error'),
     lineCount: document.getElementById('rh-line-count'),
     authorCount: document.getElementById('rh-author-count'),
+    replyingTo: document.getElementById('rh-replying-to'),
   };
 
   if (els.submit) {
@@ -100,6 +225,8 @@ function generateFingerprint() {
 let currentLines = [];
 let currentLimit = 10;
 let subscription = null;
+let replyToId = null;
+let audioRecorderCtrl = null;
 
 async function fetchLines(limit) {
   let query = supabase
@@ -338,6 +465,15 @@ function createLineElement(line) {
     shareLine(line.text, line.author_name);
   });
 
+  var replyBtn = document.createElement('button');
+  replyBtn.className = 'rh-line__reply';
+  replyBtn.type = 'button';
+  replyBtn.setAttribute('aria-label', 'Reply to this line');
+  replyBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>';
+  replyBtn.addEventListener('click', function () {
+    setReplyTo(line.id, line.text);
+  });
+
   // Language tag
   if (socials && socials.lang) {
     var langTag = document.createElement('span');
@@ -373,10 +509,48 @@ function createLineElement(line) {
     resonanceBtn.classList.toggle('is-resonated');
   });
 
+  // Translate button
+  var translateBtn = document.createElement('button');
+  translateBtn.className = 'rh-line__translate';
+  translateBtn.type = 'button';
+  translateBtn.setAttribute('aria-label', 'Translate this line');
+  translateBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>';
+  translateBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    showTranslatePopup(translateBtn, line.text);
+  });
+
+  // Audio play button (if audio exists)
+  var audioBtn = document.createElement('button');
+  audioBtn.className = 'rh-line__audio';
+  audioBtn.type = 'button';
+  audioBtn.setAttribute('aria-label', 'Listen to this line');
+  audioBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
+  audioBtn.hidden = true;
+  audioBtn.dataset.lineId = line.id;
+  // Check for audio asynchronously
+  var audioUrl = getAudioUrl(line.id);
+  fetch(audioUrl, { method: 'HEAD' }).then(function (res) {
+    if (res.ok) {
+      audioBtn.hidden = false;
+      audioBtn.addEventListener('click', function () {
+        var audio = new Audio(audioUrl);
+        audio.play();
+        audioBtn.classList.add('is-playing');
+        audio.addEventListener('ended', function () {
+          audioBtn.classList.remove('is-playing');
+        });
+      });
+    }
+  }).catch(function () {});
+
   meta.appendChild(author);
   meta.appendChild(time);
   meta.appendChild(resonanceBtn);
   meta.appendChild(shareBtn);
+  meta.appendChild(translateBtn);
+  meta.appendChild(audioBtn);
+  meta.appendChild(replyBtn);
   // Word reaction — double-click/tap to show feeling picker
   container.addEventListener('dblclick', function (e) {
     e.preventDefault();
@@ -439,6 +613,71 @@ function floatWord(lineEl, word) {
 
   document.body.appendChild(float);
   setTimeout(function () { float.remove(); }, 2000);
+}
+
+var TRANSLATE_LANGS = [
+  { code: 'es', name: 'Espa\u00f1ol' },
+  { code: 'fr', name: 'Fran\u00e7ais' },
+  { code: 'pt', name: 'Portugu\u00eas' },
+  { code: 'ja', name: '\u65e5\u672c\u8a9e' },
+  { code: 'ar', name: '\u0627\u0644\u0639\u0631\u0628\u064a\u0629' },
+  { code: 'zh', name: '\u4e2d\u6587' },
+];
+
+function showTranslatePopup(anchorEl, text) {
+  var existing = document.querySelector('.rh-line__translate-popup');
+  if (existing) existing.remove();
+
+  var popup = document.createElement('div');
+  popup.className = 'rh-line__translate-popup';
+
+  TRANSLATE_LANGS.forEach(function (lang) {
+    var a = document.createElement('a');
+    a.className = 'rh-line__translate-link';
+    a.href = 'https://translate.google.com/?sl=auto&tl=' + lang.code + '&text=' + encodeURIComponent(text);
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.textContent = lang.name;
+    popup.appendChild(a);
+  });
+
+  var rect = anchorEl.getBoundingClientRect();
+  popup.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+  popup.style.left = (rect.left + rect.width / 2) + 'px';
+  document.body.appendChild(popup);
+
+  setTimeout(function () {
+    document.addEventListener('click', function handler(e) {
+      if (!popup.contains(e.target)) {
+        popup.remove();
+        document.removeEventListener('click', handler);
+      }
+    });
+  }, 10);
+}
+
+function setReplyTo(lineId, lineText) {
+  replyToId = lineId;
+  if (els.replyingTo) {
+    var textEl = els.replyingTo.querySelector('.rh__replying-to-text');
+    if (textEl) {
+      var truncated = lineText.length > 60 ? lineText.substring(0, 60) + '...' : lineText;
+      textEl.textContent = truncated;
+    }
+    els.replyingTo.hidden = false;
+  }
+  // Scroll to and focus the contribution form
+  if (els.lineInput) {
+    els.lineInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(function () { els.lineInput.focus(); }, 400);
+  }
+}
+
+function clearReplyTo() {
+  replyToId = null;
+  if (els.replyingTo) {
+    els.replyingTo.hidden = true;
+  }
 }
 
 function animateNewLine(lineData) {
@@ -666,13 +905,18 @@ async function handleSubmit(e) {
 
   const fingerprint = generateFingerprint();
 
+  var insertPayload = {
+    text: text,
+    author_name: authorName,
+    author_link: authorLink || null,
+    ip_hash: fingerprint,
+  };
+  if (replyToId) {
+    insertPayload.reply_to = replyToId;
+  }
+
   const { data, error } = await supabase.from('poem_lines').insert([
-    {
-      text: text,
-      author_name: authorName,
-      author_link: authorLink || null,
-      ip_hash: fingerprint,
-    },
+    insertPayload,
   ]).select();
 
   if (error) {
@@ -690,6 +934,15 @@ async function handleSubmit(e) {
   // Success
   localStorage.setItem(RATE_KEY, String(Date.now()));
   markAsContributed();
+  clearReplyTo();
+
+  // Upload audio if recorded
+  if (data && data[0] && audioRecorderCtrl && audioRecorderCtrl.getBlob()) {
+    uploadAudio(audioRecorderCtrl.getBlob(), data[0].id).catch(function (e) {
+      console.warn('Audio upload failed:', e);
+    });
+    audioRecorderCtrl.reset();
+  }
 
   // Animate the submitted line into the poem
   if (data && data[0]) {
@@ -805,15 +1058,27 @@ function initPrompt() {
   var promptEl = document.getElementById('rh-prompt');
   if (!promptEl) return;
 
-  var index = Math.floor(Math.random() * WRITING_PROMPTS.length);
-  promptEl.textContent = WRITING_PROMPTS[index];
+  var seasonKey = getCurrentSeason();
+  var season = SEASONAL_PROMPTS[seasonKey];
+  var prompts = season.prompts;
+
+  // Show themed banner
+  var bannerEl = document.getElementById('rh-season-banner');
+  if (bannerEl) {
+    bannerEl.textContent = season.emoji + ' ' + season.name + ' \u2014 ' + season.intro;
+    bannerEl.hidden = false;
+    bannerEl.dataset.season = seasonKey;
+  }
+
+  var index = Math.floor(Math.random() * prompts.length);
+  promptEl.textContent = prompts[index];
 
   // Rotate every 8 seconds
   setInterval(function () {
     promptEl.style.opacity = '0';
     setTimeout(function () {
-      index = (index + 1) % WRITING_PROMPTS.length;
-      promptEl.textContent = WRITING_PROMPTS[index];
+      index = (index + 1) % prompts.length;
+      promptEl.textContent = prompts[index];
       promptEl.style.opacity = '1';
     }, 400);
   }, 8000);
@@ -872,6 +1137,25 @@ async function init() {
   subscribeToLines();
   initPrompt();
   initInvite();
+
+  // Reply cancel button
+  var replyCancelBtn = document.getElementById('rh-replying-to-cancel');
+  if (replyCancelBtn) {
+    replyCancelBtn.addEventListener('click', clearReplyTo);
+  }
+
+  // Audio recorder
+  audioRecorderCtrl = initAudioRecorder({
+    recordBtn: document.getElementById('rh-audio-record'),
+    btnText: document.getElementById('rh-audio-btn-text'),
+    wave: document.getElementById('rh-audio-wave'),
+    canvas: document.getElementById('rh-audio-canvas'),
+    preview: document.getElementById('rh-audio-preview'),
+    playBtn: document.getElementById('rh-audio-play'),
+    durationEl: document.getElementById('rh-audio-duration'),
+    deleteBtn: document.getElementById('rh-audio-delete'),
+    timerEl: document.getElementById('rh-audio-timer'),
+  });
 }
 
 function initInvite() {

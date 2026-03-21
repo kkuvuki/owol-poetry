@@ -4083,3 +4083,373 @@ ul, ol {
     animation: none !important;
   }
 }
+
+
+/* ═══════════════════════════════════════════════
+   Reply / Threading
+   ═══════════════════════════════════════════════ */
+
+.rh__replying-to {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  margin-bottom: var(--space-sm);
+  background: rgba(121, 185, 57, 0.08);
+  border-left: 3px solid var(--color-accent-green);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-small);
+}
+
+.rh__replying-to-label {
+  color: var(--color-accent-green);
+  font-family: var(--font-ui);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rh__replying-to-text {
+  color: var(--color-text-secondary);
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.rh__replying-to-cancel {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0 var(--space-xs);
+  transition: color var(--duration-fast) ease;
+}
+
+.rh__replying-to-cancel:hover {
+  color: var(--color-text-primary);
+}
+
+.rh-line__reply {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  padding: 2px;
+  opacity: 0;
+  transition: opacity var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+
+.rh-line:hover .rh-line__reply {
+  opacity: 1;
+}
+
+.rh-line__reply:hover {
+  color: var(--color-accent-green);
+}
+
+/* Threaded view on /poem page */
+.poem-page__line--reply {
+  margin-left: 2rem;
+  padding-left: 1.5rem;
+  border-left: 2px solid rgba(121, 185, 57, 0.2);
+}
+
+.poem-page__view-toggle {
+  margin-top: var(--space-sm);
+}
+
+.poem-page__thread-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-pill);
+  padding: 0.4rem 1rem;
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--duration-fast) ease;
+}
+
+.poem-page__thread-toggle:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-accent-green);
+}
+
+
+/* ═══════════════════════════════════════════════
+   Season Banner
+   ═══════════════════════════════════════════════ */
+
+.rh__season-banner {
+  display: inline-block;
+  padding: 0.35rem 1rem;
+  margin-bottom: var(--space-sm);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.rh__season-banner[data-season="spring"],
+.rh__season-banner[data-season="summer"] {
+  border-color: rgba(121, 185, 57, 0.3);
+  color: var(--color-accent-green);
+}
+
+.rh__season-banner[data-season="autumn"] {
+  border-color: rgba(212, 165, 116, 0.3);
+  color: var(--color-accent-amber);
+}
+
+.rh__season-banner[data-season="winter"] {
+  border-color: rgba(176, 177, 171, 0.2);
+  color: var(--color-text-secondary);
+}
+
+.rh__season-banner[data-season="valentine"] {
+  border-color: rgba(185, 78, 200, 0.3);
+  color: var(--color-accent-purple);
+}
+
+.rh__season-banner[data-season="remembrance"] {
+  border-color: rgba(185, 78, 200, 0.3);
+  color: var(--color-accent-purple);
+}
+
+
+/* ═══════════════════════════════════════════════
+   Share Menu + Toast
+   ═══════════════════════════════════════════════ */
+
+.share-menu {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-xs) 0;
+  min-width: 180px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  animation: fade-in var(--duration-fast) var(--ease-out-expo);
+}
+
+.share-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  cursor: pointer;
+  transition: all var(--duration-fast) ease;
+}
+
+.share-menu__item:hover {
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+}
+
+.share-toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(1rem);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-pill);
+  padding: 0.6rem 1.5rem;
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  color: var(--color-text-primary);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: all 0.3s var(--ease-out-expo);
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.share-toast--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+
+/* ═══════════════════════════════════════════════
+   Audio Recorder
+   ═══════════════════════════════════════════════ */
+
+.rh__audio {
+  margin-top: var(--space-sm);
+}
+
+.rh__audio-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.rh__audio-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-secondary);
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  cursor: pointer;
+  transition: all var(--duration-fast) ease;
+}
+
+.rh__audio-btn:hover {
+  border-color: var(--color-accent-green);
+  color: var(--color-accent-green);
+}
+
+.rh__audio-btn.is-recording {
+  border-color: #e74c3c;
+  color: #e74c3c;
+  animation: pulse-record 1.5s ease infinite;
+}
+
+@keyframes pulse-record {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.3); }
+  50%      { box-shadow: 0 0 0 8px rgba(231, 76, 60, 0); }
+}
+
+.rh__audio-wave canvas {
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+}
+
+.rh__audio-preview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.rh__audio-play,
+.rh__audio-delete {
+  background: none;
+  border: 1px solid var(--color-card-border);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  transition: all var(--duration-fast) ease;
+}
+
+.rh__audio-play:hover {
+  border-color: var(--color-accent-green);
+  color: var(--color-accent-green);
+}
+
+.rh__audio-delete:hover {
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
+.rh__audio-duration {
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  color: var(--color-text-muted);
+}
+
+.rh__audio-timer {
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  color: var(--color-text-muted);
+}
+
+/* Audio play button on lines */
+.rh-line__audio {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  padding: 2px;
+  opacity: 0;
+  transition: opacity var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+
+.rh-line:hover .rh-line__audio {
+  opacity: 1;
+}
+
+.rh-line__audio:hover,
+.rh-line__audio.is-playing {
+  color: var(--color-accent-green);
+}
+
+
+/* ═══════════════════════════════════════════════
+   Translate Popup
+   ═══════════════════════════════════════════════ */
+
+.rh-line__translate {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  padding: 2px;
+  opacity: 0;
+  transition: opacity var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+
+.rh-line:hover .rh-line__translate {
+  opacity: 1;
+}
+
+.rh-line__translate:hover {
+  color: var(--color-accent-green);
+}
+
+.rh-line__translate-popup {
+  position: absolute;
+  transform: translateX(-50%);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-xs);
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+  animation: fade-in var(--duration-fast) var(--ease-out-expo);
+}
+
+.rh-line__translate-link {
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+  transition: all var(--duration-fast) ease;
+  white-space: nowrap;
+}
+
+.rh-line__translate-link:hover {
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+}
