@@ -18,14 +18,13 @@
  */
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import { hmac } from "https://deno.land/x/hmac@v2.0.1/mod.ts";
 
 interface WebhookPayload {
   type: "INSERT" | "UPDATE" | "DELETE";
   table: string;
   record: {
     id: string;
-    line_text: string;
+    text: string;
     author_name: string;
     flagged?: boolean;
     [key: string]: unknown;
@@ -63,7 +62,7 @@ function percentEncode(str: string): string {
 /**
  * Build the OAuth 1.0a Authorization header for the Twitter API v2.
  */
-function buildOAuthHeader(
+async function buildOAuthHeader(
   method: string,
   url: string,
   body: Record<string, string>,
@@ -73,7 +72,7 @@ function buildOAuthHeader(
     accessToken: string;
     accessSecret: string;
   }
-): string {
+): Promise<string> {
   const timestamp = Math.floor(Date.now() / 1000).toString();
   const nonce = generateNonce();
 
@@ -103,12 +102,15 @@ function buildOAuthHeader(
   // Build the signing key
   const signingKey = `${percentEncode(credentials.apiSecret)}&${percentEncode(credentials.accessSecret)}`;
 
-  // Sign with HMAC-SHA1
-  const signatureBytes = hmac("sha1", signingKey, signatureBaseString);
-  const signature =
-    typeof signatureBytes === "string"
-      ? btoa(signatureBytes)
-      : btoa(String.fromCharCode(...new Uint8Array(signatureBytes as ArrayBuffer)));
+  // Sign with HMAC-SHA1 using Web Crypto API
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(signingKey);
+  const messageData = encoder.encode(signatureBaseString);
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw", keyData, { name: "HMAC", hash: "SHA-1" }, false, ["sign"]
+  );
+  const signatureBuffer = await crypto.subtle.sign("HMAC", cryptoKey, messageData);
+  const signature = btoa(String.fromCharCode(...new Uint8Array(signatureBuffer)));
 
   oauthParams["oauth_signature"] = signature;
 
@@ -178,13 +180,14 @@ serve(async (req: Request) => {
     }
 
     // ── Build the tweet ────────────────────────────────────────────────
-    const tweetText = buildTweetText(record.line_text, record.author_name);
+    const authorName = record.author_name || "Anonymous";
+    const tweetText = buildTweetText(record.text, authorName);
 
     // ── Post to Twitter API v2 ─────────────────────────────────────────
     const twitterUrl = "https://api.twitter.com/2/tweets";
     const tweetBody = JSON.stringify({ text: tweetText });
 
-    const authHeader = buildOAuthHeader("POST", twitterUrl, {}, {
+    const authHeader = await buildOAuthHeader("POST", twitterUrl, {}, {
       apiKey,
       apiSecret,
       accessToken,
