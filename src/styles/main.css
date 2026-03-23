@@ -3260,17 +3260,14 @@ ul, ol {
   opacity: 1;
 }
 
-.rh-line__resonate-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-text-muted);
+.rh-line__resonate svg {
   transition: all 0.3s var(--ease-out-expo);
+  fill: var(--color-text-muted);
 }
 
-.rh-line__resonate.is-resonated .rh-line__resonate-dot {
-  background: var(--color-accent-green);
-  box-shadow: 0 0 8px rgba(121, 185, 57, 0.6);
+.rh-line__resonate.is-resonated svg {
+  fill: var(--color-accent-green);
+  filter: drop-shadow(0 0 6px rgba(121, 185, 57, 0.5));
 }
 
 .rh-line__resonate.is-resonated {

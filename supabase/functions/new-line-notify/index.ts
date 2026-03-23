@@ -126,21 +126,37 @@ Deno.serve(async (req) => {
       }), { headers: { 'Content-Type': 'application/json' } });
     }
 
+    // Use verified domain if available, otherwise Resend's default
+    const FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'Ravings <onboarding@resend.dev>';
+
+    const emailPayload = {
+      from: FROM_EMAIL,
+      to: [NOTIFY_EMAIL],
+      subject: `New line: "${record.text.substring(0, 50)}${record.text.length > 50 ? '...' : ''}" — ${record.author_name}`,
+      html: html,
+    };
+
+    console.log('Sending notification to:', NOTIFY_EMAIL, 'from:', FROM_EMAIL);
+
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        from: 'Ravings <hello@itsowol.com>',
-        to: [NOTIFY_EMAIL],
-        subject: `New line: "${record.text.substring(0, 50)}${record.text.length > 50 ? '...' : ''}" — ${record.author_name}`,
-        html: html,
-      }),
+      body: JSON.stringify(emailPayload),
     });
 
     const result = await res.json();
+    console.log('Resend response:', JSON.stringify(result));
+
+    if (result.error) {
+      console.error('Resend error:', result.error);
+      return new Response(JSON.stringify({
+        message: 'Email send failed',
+        error: result.error,
+      }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
 
     return new Response(JSON.stringify({
       message: 'Notification sent',

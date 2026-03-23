@@ -461,6 +461,7 @@ function createLineElement(line) {
   shareBtn.className = 'rh-line__share';
   shareBtn.type = 'button';
   shareBtn.setAttribute('aria-label', 'Share this line');
+  shareBtn.title = 'Share this line';
   shareBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';
   shareBtn.addEventListener('click', function () {
     shareLine(line.text, line.author_name);
@@ -470,6 +471,7 @@ function createLineElement(line) {
   replyBtn.className = 'rh-line__reply';
   replyBtn.type = 'button';
   replyBtn.setAttribute('aria-label', 'Reply to this line');
+  replyBtn.title = 'Reply';
   replyBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>';
   replyBtn.addEventListener('click', function () {
     setReplyTo(line.id, line.text);
@@ -496,11 +498,12 @@ function createLineElement(line) {
   resonanceBtn.className = 'rh-line__resonate';
   resonanceBtn.type = 'button';
   resonanceBtn.setAttribute('aria-label', 'This line moved me');
+  resonanceBtn.title = 'Like this line';
   var resonanceCount = document.createElement('span');
   resonanceCount.className = 'rh-line__resonate-count';
   var count = getCount(line.id);
   resonanceCount.textContent = count > 0 ? count : '';
-  resonanceBtn.innerHTML = '<span class="rh-line__resonate-dot"></span>';
+  resonanceBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M14 9V5a3 3 0 0 0-6 0v1.12L14 9zm5.5 1H15l.77 3.35L10 17.53V21h7l1.94-6.65A2.5 2.5 0 0 0 19.5 10zM1 11h4v10H1z"/></svg>';
   resonanceBtn.appendChild(resonanceCount);
   if (hasResonated(line.id)) resonanceBtn.classList.add('is-resonated');
   resonanceBtn.addEventListener('click', async function () {
@@ -515,6 +518,7 @@ function createLineElement(line) {
   translateBtn.className = 'rh-line__translate';
   translateBtn.type = 'button';
   translateBtn.setAttribute('aria-label', 'Translate this line');
+  translateBtn.title = 'Translate';
   translateBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>';
   translateBtn.addEventListener('click', function (e) {
     e.stopPropagation();
@@ -526,6 +530,7 @@ function createLineElement(line) {
   audioBtn.className = 'rh-line__audio';
   audioBtn.type = 'button';
   audioBtn.setAttribute('aria-label', 'Listen to this line');
+  audioBtn.title = 'Listen';
   audioBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
   audioBtn.hidden = true;
   audioBtn.dataset.lineId = line.id;
