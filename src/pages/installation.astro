@@ -1,0 +1,334 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Installation Mode — Relentlessly Human"
+  description="A fullscreen kiosk display for galleries, cafés, and events — showing the collaborative poem in real-time."
+>
+  <div class="installation" id="installation">
+    <div class="installation__lines" id="installation-lines" aria-live="polite" aria-label="Live poem lines">
+      <!-- Lines injected by JS -->
+    </div>
+
+    <div class="installation__watermark">itsowol.com/poem</div>
+
+    <div class="installation__qr">
+      <img
+        src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://itsowol.com/%23relentlessly-human&color=79B939&bgcolor=13100D"
+        alt="QR code — contribute a line at itsowol.com"
+        width="120"
+        height="120"
+      />
+    </div>
+  </div>
+</Base>
+
+<style>
+  /* Hide all site chrome */
+  :global(header),
+  :global(footer),
+  :global(.skip-link) {
+    display: none !important;
+  }
+
+  :global(body) {
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    background: #13100D;
+  }
+
+  :global(.site-main) {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+
+  .installation {
+    position: fixed;
+    inset: 0;
+    background: #13100D;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 6vh 8vw;
+    z-index: 9999;
+  }
+
+  .installation__lines {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3.2rem;
+    width: 100%;
+    max-width: 960px;
+    flex: 1;
+  }
+
+  /* Individual line block */
+  :global(.installation__line) {
+    opacity: 0;
+    animation: installFadeIn 1.2s ease forwards;
+  }
+
+  :global(.installation__line--exiting) {
+    animation: installFadeOut 0.8s ease forwards;
+  }
+
+  :global(.installation__line-text) {
+    font-family: 'Lora', 'Georgia', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 2.25rem;
+    line-height: 1.45;
+    color: #F5F0EB;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: 0.01em;
+  }
+
+  :global(.installation__line-author) {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: #79B939;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  /* Subtle accent bar */
+  :global(.installation__line)::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: #79B939;
+    opacity: 0.35;
+    margin-bottom: 1rem;
+    border-radius: 1px;
+  }
+
+  .installation__watermark {
+    position: fixed;
+    bottom: 2rem;
+    right: 2.5rem;
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.8rem;
+    color: #79B939;
+    opacity: 0.4;
+    letter-spacing: 0.08em;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .installation__qr {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 2rem;
+    opacity: 0.65;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .installation__qr img {
+    display: block;
+    border-radius: 4px;
+  }
+
+  /* Cursor auto-hide class */
+  :global(.installation--cursor-hidden) {
+    cursor: none !important;
+  }
+  :global(.installation--cursor-hidden *) {
+    cursor: none !important;
+  }
+
+  @keyframes installFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes installFadeOut {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-12px);
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    :global(.installation__line-text) {
+      font-size: 1.5rem;
+    }
+
+    .installation__lines {
+      gap: 2rem;
+    }
+
+    .installation {
+      padding: 4vh 6vw;
+    }
+  }
+
+  @media (min-width: 1400px) {
+    :global(.installation__line-text) {
+      font-size: 2.75rem;
+    }
+  }
+</style>
+
+<script>
+  import { supabase } from '../scripts/supabase.js';
+
+  var MAX_VISIBLE = 8;
+  var visibleLines = [];
+  var container = null;
+  var subscription = null;
+  var cursorTimer = null;
+
+  function createLineEl(line) {
+    var el = document.createElement('div');
+    el.className = 'installation__line';
+    el.dataset.id = line.id;
+
+    var text = document.createElement('p');
+    text.className = 'installation__line-text';
+    text.textContent = line.text;
+
+    var author = document.createElement('span');
+    author.className = 'installation__line-author';
+    author.textContent = line.author_name || 'Anonymous';
+
+    el.appendChild(text);
+    el.appendChild(author);
+    return el;
+  }
+
+  function removeOldestLine() {
+    if (!container || !container.firstElementChild) return;
+    var oldest = container.firstElementChild;
+    oldest.classList.add('installation__line--exiting');
+    setTimeout(function () {
+      if (oldest.parentNode) oldest.parentNode.removeChild(oldest);
+    }, 800);
+  }
+
+  function addLine(line) {
+    if (!container) return;
+
+    // Check for duplicates
+    var exists = visibleLines.some(function (l) { return l.id === line.id; });
+    if (exists) return;
+
+    visibleLines.push(line);
+
+    // If over limit, fade out oldest
+    if (visibleLines.length > MAX_VISIBLE) {
+      visibleLines.shift();
+      removeOldestLine();
+    }
+
+    var el = createLineEl(line);
+    container.appendChild(el);
+  }
+
+  /* ---- Cursor auto-hide ---- */
+  function resetCursorTimer() {
+    document.body.classList.remove('installation--cursor-hidden');
+    clearTimeout(cursorTimer);
+    cursorTimer = setTimeout(function () {
+      document.body.classList.add('installation--cursor-hidden');
+    }, 3000);
+  }
+
+  /* ---- Fullscreen API ---- */
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(function () {});
+    } else {
+      document.exitFullscreen().catch(function () {});
+    }
+  }
+
+  /* ---- Keyboard shortcuts ---- */
+  function handleKeyDown(e) {
+    if (e.key === 'f' || e.key === 'F') {
+      toggleFullscreen();
+    }
+    // Escape is handled natively by the Fullscreen API
+  }
+
+  /* ---- Init ---- */
+  async function initInstallation() {
+    container = document.getElementById('installation-lines');
+    if (!container) return;
+
+    // Cursor auto-hide
+    document.addEventListener('mousemove', resetCursorTimer);
+    document.addEventListener('mousedown', resetCursorTimer);
+    resetCursorTimer();
+
+    // Keyboard
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Fetch the most recent lines
+    var result = await supabase
+      .from('poem_lines')
+      .select('*')
+      .eq('flagged', false)
+      .order('created_at', { ascending: false })
+      .limit(MAX_VISIBLE);
+
+    if (!result.error && result.data && result.data.length > 0) {
+      // Reverse so oldest is first (display order: top=oldest, bottom=newest)
+      var lines = result.data.reverse();
+      // Stagger the initial fade-in
+      lines.forEach(function (line, i) {
+        setTimeout(function () {
+          addLine(line);
+        }, i * 400);
+      });
+    }
+
+    // Subscribe to realtime inserts
+    subscription = supabase
+      .channel('installation_realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'poem_lines' },
+        function (payload) {
+          if (payload.new && !payload.new.flagged) {
+            addLine(payload.new);
+          }
+        }
+      )
+      .subscribe();
+  }
+
+  // Cleanup on navigation
+  document.addEventListener('astro:before-preparation', function () {
+    if (subscription) {
+      subscription.unsubscribe();
+      subscription = null;
+    }
+    document.removeEventListener('mousemove', resetCursorTimer);
+    document.removeEventListener('mousedown', resetCursorTimer);
+    document.removeEventListener('keydown', handleKeyDown);
+    document.body.classList.remove('installation--cursor-hidden');
+    clearTimeout(cursorTimer);
+  });
+
+  document.addEventListener('astro:page-load', initInstallation);
+</script>

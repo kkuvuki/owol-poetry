@@ -1,0 +1,1317 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Poem Branches — Relentlessly Human"
+  description="Fork the poem at any line and write your own alternate path. Choose-your-own-adventure for poetry."
+>
+  <!-- SQL Schema:
+  -- CREATE TABLE poem_branches (
+  --   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  --   name TEXT NOT NULL,
+  --   fork_line_id UUID NOT NULL REFERENCES poem_lines(id),
+  --   created_by TEXT NOT NULL DEFAULT 'Anonymous',
+  --   created_at TIMESTAMPTZ DEFAULT now()
+  -- );
+  -- CREATE TABLE branch_lines (
+  --   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  --   branch_id UUID NOT NULL REFERENCES poem_branches(id) ON DELETE CASCADE,
+  --   text TEXT NOT NULL CHECK (char_length(text) <= 280),
+  --   line_order INTEGER NOT NULL,
+  --   created_at TIMESTAMPTZ DEFAULT now()
+  -- );
+  -->
+
+  <article class="branches-page">
+    <header class="branches-page__header reveal" data-reveal="fade-up">
+      <h1 class="branches-page__title">Poem Branches</h1>
+      <p class="branches-page__subtitle">What if the poem went another way?</p>
+      <div class="branches-page__stats" aria-live="polite">
+        <span class="branches-page__stat" id="branches-total">&mdash;</span>
+        <span class="branches-page__stat-label">branches &middot;</span>
+        <span class="branches-page__stat" id="branches-most-forked-label">most forked:</span>
+        <span class="branches-page__stat branches-page__stat--highlight" id="branches-most-forked">&mdash;</span>
+      </div>
+    </header>
+
+    <!-- View modes -->
+    <div class="branches-page__tabs">
+      <button class="branches-page__tab branches-page__tab--active" id="tab-tree" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="2" x2="12" y2="22"/><polyline points="8 6 12 2 16 6"/><line x1="12" y1="8" x2="20" y2="14"/><line x1="12" y1="14" x2="4" y2="20"/></svg>
+        Tree View
+      </button>
+      <button class="branches-page__tab" id="tab-list" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        All Branches
+      </button>
+      <button class="branches-page__tab" id="tab-create" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Create Branch
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="branches-page__loading" id="branches-loading" aria-live="polite">
+      <span class="rh__loading-dot"></span>
+      <span class="rh__loading-dot"></span>
+      <span class="rh__loading-dot"></span>
+    </div>
+
+    <!-- Tree View -->
+    <section class="branches-page__panel" id="panel-tree">
+      <div class="branches-tree" id="branches-tree" role="tree" aria-label="Poem branch tree">
+        <!-- SVG connecting lines + nodes injected by JS -->
+      </div>
+    </section>
+
+    <!-- List View -->
+    <section class="branches-page__panel" id="panel-list" hidden>
+      <div class="branches-list" id="branches-list" role="list" aria-label="All poem branches">
+        <!-- Branch cards injected by JS -->
+      </div>
+    </section>
+
+    <!-- Create Branch View -->
+    <section class="branches-page__panel" id="panel-create" hidden>
+      <form class="branches-form" id="branches-form" autocomplete="off">
+        <div class="branches-form__group">
+          <label class="branches-form__label" for="branch-fork-line">Fork after this line</label>
+          <select class="branches-form__select" id="branch-fork-line" required>
+            <option value="">Select a line...</option>
+          </select>
+          <p class="branches-form__preview" id="branch-fork-preview"></p>
+        </div>
+
+        <div class="branches-form__group">
+          <label class="branches-form__label" for="branch-name">Branch name</label>
+          <input
+            type="text"
+            id="branch-name"
+            class="branches-form__input"
+            placeholder='e.g., "The Darker Path", "What If We Stayed"'
+            maxlength="100"
+            required
+          />
+        </div>
+
+        <div class="branches-form__group">
+          <label class="branches-form__label">Your alternate continuation <span class="branches-form__hint">(1&ndash;3 lines)</span></label>
+          <div class="branches-form__lines-wrap" id="branch-lines-wrap">
+            <div class="branches-form__line-row">
+              <span class="branches-form__line-num">1</span>
+              <input type="text" class="branches-form__input branches-form__line-input" name="branch-line" placeholder="Your first alternate line..." maxlength="280" required />
+            </div>
+          </div>
+          <button type="button" class="branches-form__add-line" id="branch-add-line">+ Add line</button>
+        </div>
+
+        <div class="branches-form__group">
+          <label class="branches-form__label" for="branch-author">Your name</label>
+          <input
+            type="text"
+            id="branch-author"
+            class="branches-form__input"
+            placeholder="Anonymous"
+            maxlength="60"
+          />
+        </div>
+
+        <button type="submit" class="branches-form__submit" id="branch-submit">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+          Fork the Poem
+        </button>
+        <p class="branches-form__status" id="branch-status"></p>
+      </form>
+    </section>
+
+    <!-- Branch Reader overlay -->
+    <div class="branch-reader" id="branch-reader" hidden>
+      <button class="branch-reader__close" id="branch-reader-close" type="button" aria-label="Close branch reader">&times;</button>
+      <div class="branch-reader__content">
+        <h2 class="branch-reader__name" id="branch-reader-name"></h2>
+        <p class="branch-reader__meta" id="branch-reader-meta"></p>
+        <div class="branch-reader__poem" id="branch-reader-poem">
+          <!-- Main lines + branch lines rendered here -->
+        </div>
+      </div>
+    </div>
+
+    <footer class="branches-page__footer reveal" data-reveal="fade-up">
+      <a href="/poem" class="branches-page__back">&larr; Read the full poem</a>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  /* ── Branches Page ── */
+  .branches-page {
+    max-width: var(--container-narrow);
+    margin: 0 auto;
+    padding: var(--space-3xl) var(--page-gutter) var(--space-2xl);
+  }
+
+  .branches-page__header {
+    text-align: center;
+    margin-bottom: var(--space-xl);
+  }
+
+  .branches-page__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-h1);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    line-height: var(--lh-heading);
+    margin: 0 0 var(--space-xs);
+  }
+
+  .branches-page__subtitle {
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    color: var(--color-text-muted);
+    font-style: italic;
+    margin: 0 0 var(--space-md);
+  }
+
+  .branches-page__stats {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    font-family: var(--font-ui);
+    font-size: var(--fs-small);
+    color: var(--color-text-secondary);
+  }
+
+  .branches-page__stat {
+    font-weight: 600;
+    color: var(--color-accent-green);
+  }
+
+  .branches-page__stat--highlight {
+    color: var(--color-accent-amber);
+    font-style: italic;
+    max-width: 18ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .branches-page__stat-label {
+    color: var(--color-text-muted);
+  }
+
+  /* ── Tabs ── */
+  .branches-page__tabs {
+    display: flex;
+    gap: var(--space-xs);
+    justify-content: center;
+    margin-bottom: var(--space-lg);
+    flex-wrap: wrap;
+  }
+
+  .branches-page__tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.1rem;
+    font-family: var(--font-ui);
+    font-size: var(--fs-small);
+    color: var(--color-text-secondary);
+    background: transparent;
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .branches-page__tab:hover {
+    color: var(--color-text-primary);
+    border-color: var(--color-text-muted);
+  }
+
+  .branches-page__tab--active {
+    color: var(--color-bg);
+    background: var(--color-accent-green);
+    border-color: var(--color-accent-green);
+  }
+
+  .branches-page__tab--active:hover {
+    color: var(--color-bg);
+    background: var(--color-accent-green-hover);
+    border-color: var(--color-accent-green-hover);
+  }
+
+  /* ── Loading ── */
+  .branches-page__loading {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: var(--space-xl) 0;
+  }
+
+  .branches-page__loading[hidden] {
+    display: none;
+  }
+
+  /* ── Panels ── */
+  .branches-page__panel[hidden] {
+    display: none;
+  }
+
+  /* ── Tree View ── */
+  .branches-tree {
+    position: relative;
+    padding: var(--space-md) 0;
+  }
+
+  .branches-tree__node {
+    position: relative;
+    padding: 0.6rem 0.8rem 0.6rem 2.2rem;
+    margin-bottom: 2px;
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    color: var(--color-text-primary);
+    line-height: var(--lh-poem);
+    transition: background var(--duration-fast) var(--ease-out-quart);
+    border-radius: var(--radius-sm);
+  }
+
+  .branches-tree__node:hover {
+    background: var(--color-bg-surface);
+  }
+
+  .branches-tree__node::before {
+    content: '';
+    position: absolute;
+    left: 0.7rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--color-separator);
+  }
+
+  .branches-tree__node:first-child::before {
+    top: 50%;
+  }
+
+  .branches-tree__node:last-child::before {
+    bottom: 50%;
+  }
+
+  .branches-tree__dot {
+    position: absolute;
+    left: 0.45rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-text-muted);
+    border: 2px solid var(--color-bg);
+    z-index: 1;
+  }
+
+  .branches-tree__node--fork .branches-tree__dot {
+    width: 12px;
+    height: 12px;
+    left: 0.35rem;
+    background: var(--color-accent-green);
+    box-shadow: 0 0 8px rgba(121, 185, 57, 0.4);
+  }
+
+  .branches-tree__fork-icon {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.5rem;
+    color: var(--color-accent-green);
+    cursor: pointer;
+    vertical-align: middle;
+  }
+
+  .branches-tree__fork-icon:hover {
+    color: var(--color-accent-green-hover);
+  }
+
+  .branches-tree__fork-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-left: 0.4rem;
+    padding: 0.15rem 0.5rem;
+    font-family: var(--font-ui);
+    font-size: var(--fs-caption);
+    color: var(--color-accent-green);
+    background: rgba(121, 185, 57, 0.1);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    border: none;
+    transition: background var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .branches-tree__fork-badge:hover {
+    background: rgba(121, 185, 57, 0.2);
+  }
+
+  .branches-tree__line-text {
+    display: inline;
+  }
+
+  .branches-tree__line-num {
+    font-family: var(--font-ui);
+    font-size: var(--fs-caption);
+    color: var(--color-text-muted);
+    min-width: 1.5rem;
+    display: inline-block;
+    opacity: 0.5;
+    margin-right: 0.3rem;
+  }
+
+  /* Branch sub-lines in tree */
+  .branches-tree__branch-group {
+    margin-left: 2rem;
+    position: relative;
+    padding-left: 1.2rem;
+    margin-top: 0.25rem;
+    margin-bottom: var(--space-sm);
+  }
+
+  .branches-tree__branch-group::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--color-accent-amber);
+    opacity: 0.4;
+    border-radius: 2px;
+  }
+
+  .branches-tree__branch-header {
+    font-family: var(--font-ui);
+    font-size: var(--fs-small);
+    color: var(--color-accent-amber);
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .branches-tree__branch-header:hover {
+    text-decoration: underline;
+  }
+
+  .branches-tree__branch-line {
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    color: var(--color-text-secondary);
+    line-height: var(--lh-poem);
+    font-style: italic;
+    padding: 0.15rem 0;
+  }
+
+  .branches-tree__connector {
+    position: absolute;
+    top: 0;
+    left: -1rem;
+    width: 1rem;
+    height: 1.2rem;
+    pointer-events: none;
+  }
+
+  .branches-tree__connector path {
+    fill: none;
+    stroke: var(--color-accent-amber);
+    stroke-width: 2;
+    opacity: 0.4;
+  }
+
+  /* ── List View ── */
+  .branches-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .branches-list__empty {
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    color: var(--color-text-muted);
+    font-style: italic;
+    padding: var(--space-2xl) 0;
+  }
+
+  .branch-card {
+    display: block;
+    padding: var(--space-md);
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out-quart);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .branch-card:hover {
+    background: var(--color-bg-elevated);
+    border-color: var(--color-accent-amber);
+    transform: translateY(-1px);
+  }
+
+  .branch-card__name {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    font-weight: 500;
+    color: var(--color-accent-amber);
+    margin: 0 0 0.4rem;
+  }
+
+  .branch-card__fork-line {
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    color: var(--color-text-secondary);
+    font-style: italic;
+    margin: 0 0 0.6rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .branch-card__fork-line::before {
+    content: 'Forks after: ';
+    font-style: normal;
+    color: var(--color-text-muted);
+  }
+
+  .branch-card__meta {
+    display: flex;
+    gap: var(--space-sm);
+    font-family: var(--font-ui);
+    font-size: var(--fs-caption);
+    color: var(--color-text-muted);
+  }
+
+  .branch-card__meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  /* ── Create Form ── */
+  .branches-form {
+    max-width: 36rem;
+    margin: 0 auto;
+  }
+
+  .branches-form__group {
+    margin-bottom: var(--space-lg);
+  }
+
+  .branches-form__label {
+    display: block;
+    font-family: var(--font-ui);
+    font-size: var(--fs-small);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-xs);
+  }
+
+  .branches-form__hint {
+    font-weight: 400;
+    color: var(--color-text-muted);
+  }
+
+  .branches-form__input,
+  .branches-form__select {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    color: var(--color-text-primary);
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--radius-sm);
+    outline: none;
+    transition: border-color var(--duration-fast) var(--ease-out-quart);
+    box-sizing: border-box;
+  }
+
+  .branches-form__input::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  .branches-form__input:focus,
+  .branches-form__select:focus {
+    border-color: var(--color-accent-green);
+  }
+
+  .branches-form__select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23908F8A' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+    cursor: pointer;
+  }
+
+  .branches-form__select option {
+    background: var(--color-bg-surface);
+    color: var(--color-text-primary);
+  }
+
+  .branches-form__preview {
+    margin-top: 0.5rem;
+    padding: 0.6rem 0.8rem;
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    font-style: italic;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-elevated);
+    border-left: 3px solid var(--color-accent-green);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    min-height: 1.5rem;
+  }
+
+  .branches-form__preview:empty {
+    display: none;
+  }
+
+  .branches-form__lines-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .branches-form__line-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .branches-form__line-num {
+    font-family: var(--font-ui);
+    font-size: var(--fs-caption);
+    color: var(--color-accent-amber);
+    min-width: 1.2rem;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .branches-form__line-input {
+    flex: 1;
+  }
+
+  .branches-form__add-line {
+    display: inline-block;
+    margin-top: 0.4rem;
+    padding: 0.3rem 0.8rem;
+    font-family: var(--font-ui);
+    font-size: var(--fs-caption);
+    color: var(--color-accent-green);
+    background: transparent;
+    border: 1px dashed rgba(121, 185, 57, 0.3);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .branches-form__add-line:hover {
+    background: rgba(121, 185, 57, 0.08);
+    border-color: var(--color-accent-green);
+  }
+
+  .branches-form__add-line[disabled] {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .branches-form__submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-family: var(--font-ui);
+    font-size: var(--fs-body);
+    font-weight: 600;
+    color: var(--color-bg);
+    background: var(--color-accent-green);
+    border: none;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .branches-form__submit:hover {
+    background: var(--color-accent-green-hover);
+    transform: translateY(-1px);
+  }
+
+  .branches-form__submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .branches-form__status {
+    margin-top: var(--space-sm);
+    font-family: var(--font-ui);
+    font-size: var(--fs-small);
+    color: var(--color-accent-green);
+  }
+
+  .branches-form__status--error {
+    color: #e55;
+  }
+
+  /* ── Branch Reader Overlay ── */
+  .branch-reader {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: var(--color-bg);
+    overflow-y: auto;
+    animation: branchReaderIn var(--duration-base) var(--ease-out-expo);
+  }
+
+  .branch-reader[hidden] {
+    display: none;
+  }
+
+  @keyframes branchReaderIn {
+    from { opacity: 0; transform: translateY(2rem); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .branch-reader__close {
+    position: fixed;
+    top: var(--space-md);
+    right: var(--space-md);
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-card-border);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1001;
+    transition: all var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .branch-reader__close:hover {
+    color: var(--color-text-primary);
+    background: var(--color-bg-surface);
+  }
+
+  .branch-reader__content {
+    max-width: var(--container-narrow);
+    margin: 0 auto;
+    padding: var(--space-3xl) var(--page-gutter) var(--space-2xl);
+  }
+
+  .branch-reader__name {
+    font-family: var(--font-display);
+    font-size: var(--fs-h2);
+    font-weight: 500;
+    color: var(--color-accent-amber);
+    margin: 0 0 var(--space-xs);
+    text-align: center;
+  }
+
+  .branch-reader__meta {
+    font-family: var(--font-ui);
+    font-size: var(--fs-small);
+    color: var(--color-text-muted);
+    text-align: center;
+    margin: 0 0 var(--space-xl);
+  }
+
+  .branch-reader__poem {
+    position: relative;
+  }
+
+  .branch-reader__line {
+    position: relative;
+    padding: 0.5rem 0 0.5rem 2rem;
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    color: var(--color-text-primary);
+    line-height: var(--lh-poem);
+  }
+
+  .branch-reader__line::before {
+    content: '';
+    position: absolute;
+    left: 0.7rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--color-separator);
+  }
+
+  .branch-reader__line-dot {
+    position: absolute;
+    left: 0.45rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-text-muted);
+    z-index: 1;
+  }
+
+  /* The fork point line */
+  .branch-reader__line--fork {
+    color: var(--color-accent-green);
+  }
+
+  .branch-reader__line--fork .branch-reader__line-dot {
+    width: 12px;
+    height: 12px;
+    left: 0.35rem;
+    background: var(--color-accent-green);
+    box-shadow: 0 0 8px rgba(121, 185, 57, 0.4);
+  }
+
+  /* Divergence marker */
+  .branch-reader__diverge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: var(--space-sm) 0 var(--space-sm) 2rem;
+    font-family: var(--font-ui);
+    font-size: var(--fs-caption);
+    color: var(--color-accent-amber);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    position: relative;
+  }
+
+  .branch-reader__diverge::before {
+    content: '';
+    position: absolute;
+    left: 0.7rem;
+    top: 0;
+    height: 50%;
+    width: 2px;
+    background: var(--color-separator);
+  }
+
+  .branch-reader__diverge-svg {
+    flex-shrink: 0;
+  }
+
+  /* Branch continuation lines */
+  .branch-reader__line--branch {
+    color: var(--color-accent-amber);
+    font-style: italic;
+  }
+
+  .branch-reader__line--branch::before {
+    background: var(--color-accent-amber);
+    opacity: 0.4;
+  }
+
+  .branch-reader__line--branch .branch-reader__line-dot {
+    background: var(--color-accent-amber);
+    box-shadow: 0 0 6px rgba(212, 165, 116, 0.3);
+  }
+
+  /* ── Footer ── */
+  .branches-page__footer {
+    text-align: center;
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--color-separator);
+    margin-top: var(--space-2xl);
+  }
+
+  .branches-page__back {
+    font-family: var(--font-ui);
+    font-size: var(--fs-small);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color var(--duration-fast);
+  }
+
+  .branches-page__back:hover {
+    color: var(--color-accent-green);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .branches-page__tabs {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .branches-page__tab {
+      justify-content: center;
+    }
+
+    .branch-card__meta {
+      flex-wrap: wrap;
+    }
+
+    .branches-tree__branch-group {
+      margin-left: 1rem;
+    }
+  }
+</style>
+
+<script>
+  import { supabase } from '../scripts/supabase.js';
+
+  var allLines = [];
+  var allBranches = [];
+  var branchLinesMap = {};
+
+  /* ── Tab switching ── */
+  function initTabs() {
+    var tabs = document.querySelectorAll('.branches-page__tab');
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var panelId = 'panel-' + tab.id.replace('tab-', '');
+        tabs.forEach(function (t) { t.classList.remove('branches-page__tab--active'); });
+        tab.classList.add('branches-page__tab--active');
+        document.querySelectorAll('.branches-page__panel').forEach(function (p) { p.hidden = true; });
+        var panel = document.getElementById(panelId);
+        if (panel) panel.hidden = false;
+      });
+    });
+  }
+
+  /* ── Stats ── */
+  function updateStats() {
+    var totalEl = document.getElementById('branches-total');
+    var mostForkedEl = document.getElementById('branches-most-forked');
+    if (totalEl) totalEl.textContent = allBranches.length;
+
+    if (mostForkedEl && allBranches.length > 0) {
+      // Count forks per line
+      var forkCounts = {};
+      allBranches.forEach(function (b) {
+        forkCounts[b.fork_line_id] = (forkCounts[b.fork_line_id] || 0) + 1;
+      });
+      var maxId = Object.keys(forkCounts).reduce(function (a, b) {
+        return forkCounts[a] >= forkCounts[b] ? a : b;
+      });
+      var line = allLines.find(function (l) { return l.id === maxId; });
+      if (line) {
+        var preview = line.text.length > 30 ? line.text.substring(0, 30) + '...' : line.text;
+        mostForkedEl.textContent = '"' + preview + '" (' + forkCounts[maxId] + ')';
+      }
+    } else if (mostForkedEl) {
+      mostForkedEl.textContent = '\u2014';
+    }
+  }
+
+  /* ── Tree View ── */
+  function renderTree() {
+    var container = document.getElementById('branches-tree');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (allLines.length === 0) {
+      container.innerHTML = '<p class="branches-list__empty">No poem lines yet.</p>';
+      return;
+    }
+
+    // Build fork map: lineId -> [branches]
+    var forkMap = {};
+    allBranches.forEach(function (b) {
+      if (!forkMap[b.fork_line_id]) forkMap[b.fork_line_id] = [];
+      forkMap[b.fork_line_id].push(b);
+    });
+
+    allLines.forEach(function (line, i) {
+      var hasForks = forkMap[line.id] && forkMap[line.id].length > 0;
+      var node = document.createElement('div');
+      node.className = 'branches-tree__node' + (hasForks ? ' branches-tree__node--fork' : '');
+
+      var dot = document.createElement('span');
+      dot.className = 'branches-tree__dot';
+      node.appendChild(dot);
+
+      var numSpan = document.createElement('span');
+      numSpan.className = 'branches-tree__line-num';
+      numSpan.textContent = (i + 1);
+      node.appendChild(numSpan);
+
+      var textSpan = document.createElement('span');
+      textSpan.className = 'branches-tree__line-text';
+      textSpan.textContent = line.text;
+      node.appendChild(textSpan);
+
+      if (hasForks) {
+        var badge = document.createElement('button');
+        badge.className = 'branches-tree__fork-badge';
+        badge.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg> ' + forkMap[line.id].length + ' branch' + (forkMap[line.id].length > 1 ? 'es' : '');
+        node.appendChild(badge);
+
+        // Toggle to show/hide branches inline
+        var branchGroupEl = null;
+        badge.addEventListener('click', function () {
+          if (branchGroupEl) {
+            branchGroupEl.remove();
+            branchGroupEl = null;
+            return;
+          }
+          branchGroupEl = document.createElement('div');
+          branchGroupEl.className = 'branches-tree__branch-group';
+
+          // SVG connector curve
+          var connSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          connSvg.setAttribute('class', 'branches-tree__connector');
+          connSvg.setAttribute('viewBox', '0 0 16 20');
+          var connPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          connPath.setAttribute('d', 'M0,0 C0,14 16,6 16,20');
+          connSvg.appendChild(connPath);
+          branchGroupEl.appendChild(connSvg);
+
+          forkMap[line.id].forEach(function (branch) {
+            var header = document.createElement('div');
+            header.className = 'branches-tree__branch-header';
+            header.textContent = branch.name;
+            header.addEventListener('click', function () { openBranchReader(branch); });
+            branchGroupEl.appendChild(header);
+
+            var bLines = branchLinesMap[branch.id] || [];
+            bLines.forEach(function (bl) {
+              var blEl = document.createElement('div');
+              blEl.className = 'branches-tree__branch-line';
+              blEl.textContent = bl.text;
+              branchGroupEl.appendChild(blEl);
+            });
+          });
+
+          node.parentNode.insertBefore(branchGroupEl, node.nextSibling);
+        });
+      }
+
+      container.appendChild(node);
+    });
+  }
+
+  /* ── List View ── */
+  function renderList() {
+    var container = document.getElementById('branches-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (allBranches.length === 0) {
+      container.innerHTML = '<p class="branches-list__empty">No branches yet. Be the first to fork the poem.</p>';
+      return;
+    }
+
+    allBranches.forEach(function (branch) {
+      var card = document.createElement('div');
+      card.className = 'branch-card';
+      card.setAttribute('role', 'listitem');
+      card.addEventListener('click', function () { openBranchReader(branch); });
+
+      var name = document.createElement('h3');
+      name.className = 'branch-card__name';
+      name.textContent = branch.name;
+
+      var forkLine = allLines.find(function (l) { return l.id === branch.fork_line_id; });
+      var forkLineEl = document.createElement('p');
+      forkLineEl.className = 'branch-card__fork-line';
+      forkLineEl.textContent = forkLine ? forkLine.text : '(unknown line)';
+
+      var meta = document.createElement('div');
+      meta.className = 'branch-card__meta';
+
+      var bLines = branchLinesMap[branch.id] || [];
+
+      meta.innerHTML =
+        '<span class="branch-card__meta-item">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> ' +
+          (branch.created_by || 'Anonymous') +
+        '</span>' +
+        '<span class="branch-card__meta-item">' +
+          bLines.length + ' line' + (bLines.length !== 1 ? 's' : '') +
+        '</span>' +
+        '<span class="branch-card__meta-item">' +
+          new Date(branch.created_at).toLocaleDateString() +
+        '</span>';
+
+      card.appendChild(name);
+      card.appendChild(forkLineEl);
+      card.appendChild(meta);
+      container.appendChild(card);
+    });
+  }
+
+  /* ── Branch Reader ── */
+  function openBranchReader(branch) {
+    var reader = document.getElementById('branch-reader');
+    var nameEl = document.getElementById('branch-reader-name');
+    var metaEl = document.getElementById('branch-reader-meta');
+    var poemEl = document.getElementById('branch-reader-poem');
+    if (!reader || !poemEl) return;
+
+    nameEl.textContent = branch.name;
+    metaEl.textContent = 'by ' + (branch.created_by || 'Anonymous') + ' \u00b7 ' + new Date(branch.created_at).toLocaleDateString();
+
+    poemEl.innerHTML = '';
+
+    // Find fork line index
+    var forkIndex = allLines.findIndex(function (l) { return l.id === branch.fork_line_id; });
+    if (forkIndex === -1) forkIndex = 0;
+
+    // Render main poem up to and including fork point
+    for (var i = 0; i <= forkIndex; i++) {
+      var lineDiv = document.createElement('div');
+      lineDiv.className = 'branch-reader__line' + (i === forkIndex ? ' branch-reader__line--fork' : '');
+
+      var dot = document.createElement('span');
+      dot.className = 'branch-reader__line-dot';
+      lineDiv.appendChild(dot);
+
+      var textNode = document.createTextNode(allLines[i].text);
+      lineDiv.appendChild(textNode);
+      poemEl.appendChild(lineDiv);
+    }
+
+    // Divergence marker
+    var diverge = document.createElement('div');
+    diverge.className = 'branch-reader__diverge';
+    diverge.innerHTML =
+      '<svg class="branch-reader__diverge-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+        '<polyline points="16 3 21 3 21 8"/>' +
+        '<line x1="4" y1="20" x2="21" y2="3"/>' +
+        '<polyline points="21 16 21 21 16 21"/>' +
+        '<line x1="15" y1="15" x2="21" y2="21"/>' +
+      '</svg>' +
+      ' The poem diverges here';
+    poemEl.appendChild(diverge);
+
+    // Render branch lines
+    var bLines = branchLinesMap[branch.id] || [];
+    bLines.forEach(function (bl) {
+      var lineDiv = document.createElement('div');
+      lineDiv.className = 'branch-reader__line branch-reader__line--branch';
+
+      var dot = document.createElement('span');
+      dot.className = 'branch-reader__line-dot';
+      lineDiv.appendChild(dot);
+
+      var textNode = document.createTextNode(bl.text);
+      lineDiv.appendChild(textNode);
+      poemEl.appendChild(lineDiv);
+    });
+
+    reader.hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeBranchReader() {
+    var reader = document.getElementById('branch-reader');
+    if (reader) reader.hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  /* ── Create Form ── */
+  function populateForkSelect() {
+    var select = document.getElementById('branch-fork-line');
+    if (!select) return;
+
+    // Clear existing options except placeholder
+    while (select.options.length > 1) select.remove(1);
+
+    allLines.forEach(function (line, i) {
+      var opt = document.createElement('option');
+      opt.value = line.id;
+      var preview = line.text.length > 50 ? line.text.substring(0, 50) + '...' : line.text;
+      opt.textContent = (i + 1) + '. ' + preview;
+      select.appendChild(opt);
+    });
+
+    select.addEventListener('change', function () {
+      var preview = document.getElementById('branch-fork-preview');
+      if (!preview) return;
+      var line = allLines.find(function (l) { return l.id === select.value; });
+      preview.textContent = line ? '"' + line.text + '"' : '';
+    });
+  }
+
+  function initAddLineButton() {
+    var addBtn = document.getElementById('branch-add-line');
+    var wrap = document.getElementById('branch-lines-wrap');
+    if (!addBtn || !wrap) return;
+
+    addBtn.addEventListener('click', function () {
+      var rows = wrap.querySelectorAll('.branches-form__line-row');
+      if (rows.length >= 3) return;
+
+      var row = document.createElement('div');
+      row.className = 'branches-form__line-row';
+      row.innerHTML =
+        '<span class="branches-form__line-num">' + (rows.length + 1) + '</span>' +
+        '<input type="text" class="branches-form__input branches-form__line-input" name="branch-line" placeholder="Continue the alternate path..." maxlength="280" />';
+      wrap.appendChild(row);
+
+      if (rows.length + 1 >= 3) {
+        addBtn.disabled = true;
+      }
+    });
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    var status = document.getElementById('branch-status');
+    var submitBtn = document.getElementById('branch-submit');
+
+    var forkLineId = document.getElementById('branch-fork-line').value;
+    var branchName = document.getElementById('branch-name').value.trim();
+    var authorName = (document.getElementById('branch-author').value.trim()) || 'Anonymous';
+    var lineInputs = document.querySelectorAll('input[name="branch-line"]');
+
+    var lines = [];
+    lineInputs.forEach(function (input) {
+      var text = input.value.trim();
+      if (text) lines.push(text);
+    });
+
+    if (!forkLineId || !branchName || lines.length === 0) {
+      status.textContent = 'Please fill in all required fields.';
+      status.className = 'branches-form__status branches-form__status--error';
+      return;
+    }
+
+    submitBtn.disabled = true;
+    status.textContent = 'Creating branch...';
+    status.className = 'branches-form__status';
+
+    // Insert branch
+    var branchResult = await supabase
+      .from('poem_branches')
+      .insert({ name: branchName, fork_line_id: forkLineId, created_by: authorName })
+      .select()
+      .single();
+
+    if (branchResult.error) {
+      status.textContent = 'Failed to create branch: ' + branchResult.error.message;
+      status.className = 'branches-form__status branches-form__status--error';
+      submitBtn.disabled = false;
+      return;
+    }
+
+    var branchId = branchResult.data.id;
+
+    // Insert branch lines
+    var branchLines = lines.map(function (text, i) {
+      return { branch_id: branchId, text: text, line_order: i + 1 };
+    });
+
+    var linesResult = await supabase
+      .from('branch_lines')
+      .insert(branchLines)
+      .select();
+
+    if (linesResult.error) {
+      status.textContent = 'Branch created but lines failed: ' + linesResult.error.message;
+      status.className = 'branches-form__status branches-form__status--error';
+      submitBtn.disabled = false;
+      return;
+    }
+
+    // Update local state
+    allBranches.push(branchResult.data);
+    branchLinesMap[branchId] = linesResult.data.sort(function (a, b) { return a.line_order - b.line_order; });
+
+    updateStats();
+    renderTree();
+    renderList();
+
+    // Reset form
+    document.getElementById('branches-form').reset();
+    document.getElementById('branch-fork-preview').textContent = '';
+    var wrap = document.getElementById('branch-lines-wrap');
+    while (wrap.children.length > 1) wrap.removeChild(wrap.lastChild);
+    document.getElementById('branch-add-line').disabled = false;
+
+    status.textContent = 'Branch "' + branchName + '" created!';
+    status.className = 'branches-form__status';
+    submitBtn.disabled = false;
+
+    // Switch to tree view
+    document.getElementById('tab-tree').click();
+  }
+
+  /* ── Init ── */
+  async function initBranches() {
+    var loading = document.getElementById('branches-loading');
+
+    initTabs();
+
+    // Fetch poem lines
+    var linesResult = await supabase
+      .from('poem_lines')
+      .select('id, text, author_name, created_at')
+      .eq('flagged', false)
+      .order('created_at', { ascending: true })
+      .limit(2000);
+
+    if (!linesResult.error && linesResult.data) {
+      allLines = linesResult.data;
+    }
+
+    // Fetch branches
+    var branchesResult = await supabase
+      .from('poem_branches')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (!branchesResult.error && branchesResult.data) {
+      allBranches = branchesResult.data;
+    }
+
+    // Fetch all branch lines
+    if (allBranches.length > 0) {
+      var branchIds = allBranches.map(function (b) { return b.id; });
+      var blResult = await supabase
+        .from('branch_lines')
+        .select('*')
+        .in('branch_id', branchIds)
+        .order('line_order', { ascending: true });
+
+      if (!blResult.error && blResult.data) {
+        blResult.data.forEach(function (bl) {
+          if (!branchLinesMap[bl.branch_id]) branchLinesMap[bl.branch_id] = [];
+          branchLinesMap[bl.branch_id].push(bl);
+        });
+      }
+    }
+
+    if (loading) loading.hidden = true;
+
+    updateStats();
+    renderTree();
+    renderList();
+    populateForkSelect();
+    initAddLineButton();
+
+    // Form submit
+    var form = document.getElementById('branches-form');
+    if (form) form.addEventListener('submit', handleSubmit);
+
+    // Branch reader close
+    var closeBtn = document.getElementById('branch-reader-close');
+    if (closeBtn) closeBtn.addEventListener('click', closeBranchReader);
+
+    // Escape to close reader
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeBranchReader();
+    });
+  }
+
+  document.addEventListener('astro:page-load', initBranches);
+</script>

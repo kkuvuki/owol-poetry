@@ -1,0 +1,767 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Spread the Word — Relentlessly Human"
+  description="Download print-ready posters, stickers, and cards to spread the collaborative poem in your community."
+>
+  <article class="print-page">
+    <header class="print-page__header reveal" data-reveal="fade-up">
+      <h1 class="print-page__title">Spread the Word</h1>
+      <p class="print-page__subtitle">Print these and put them everywhere</p>
+      <p class="print-page__desc">
+        Download posters, table cards, stickers, and social media assets.
+        Put them in cafes, libraries, bus stops, bathrooms &mdash; anywhere a stranger might pause long enough to scan a QR code and add their line to the poem.
+      </p>
+    </header>
+
+    <div class="print-page__grid">
+
+      <!-- A4 Poster -->
+      <div class="print-page__card reveal" data-reveal="fade-up">
+        <div class="print-page__card-header">
+          <h2 class="print-page__card-title">A4 Poster</h2>
+          <span class="print-page__card-size">2480 &times; 3508px &middot; 300dpi</span>
+        </div>
+        <p class="print-page__card-desc">
+          Full-size poster with the latest lines from the poem. Pin it to a notice board, tape it in a window, wheat-paste it on a wall.
+        </p>
+        <div class="print-page__preview-area" id="preview-poster">
+          <canvas id="canvas-poster" style="display:none;"></canvas>
+          <img id="img-poster" class="print-page__preview-img" alt="A4 Poster preview" style="display:none;" />
+          <p class="print-page__preview-placeholder">Click Preview to generate</p>
+        </div>
+        <div class="print-page__card-actions">
+          <button class="print-page__btn print-page__btn--preview" data-template="poster" type="button">Preview</button>
+          <button class="print-page__btn print-page__btn--download" data-template="poster" type="button" disabled>Download PNG</button>
+        </div>
+      </div>
+
+      <!-- Cafe Table Card -->
+      <div class="print-page__card reveal" data-reveal="fade-up">
+        <div class="print-page__card-header">
+          <h2 class="print-page__card-title">Cafe Table Card</h2>
+          <span class="print-page__card-size">1050 &times; 1500px</span>
+        </div>
+        <p class="print-page__card-desc">
+          Small and elegant, meant to stand on tables. Perfect for cafes, waiting rooms, and co-working spaces.
+        </p>
+        <div class="print-page__preview-area" id="preview-cafe">
+          <canvas id="canvas-cafe" style="display:none;"></canvas>
+          <img id="img-cafe" class="print-page__preview-img" alt="Cafe card preview" style="display:none;" />
+          <p class="print-page__preview-placeholder">Click Preview to generate</p>
+        </div>
+        <div class="print-page__card-actions">
+          <button class="print-page__btn print-page__btn--preview" data-template="cafe" type="button">Preview</button>
+          <button class="print-page__btn print-page__btn--download" data-template="cafe" type="button" disabled>Download PNG</button>
+        </div>
+      </div>
+
+      <!-- Sticker -->
+      <div class="print-page__card reveal" data-reveal="fade-up">
+        <div class="print-page__card-header">
+          <h2 class="print-page__card-title">Sticker</h2>
+          <span class="print-page__card-size">1080 &times; 1080px</span>
+        </div>
+        <p class="print-page__card-desc">
+          Bold and minimal. Works at any size. Slap it on a laptop, a lamppost, a notebook.
+        </p>
+        <div class="print-page__preview-area" id="preview-sticker">
+          <canvas id="canvas-sticker" style="display:none;"></canvas>
+          <img id="img-sticker" class="print-page__preview-img" alt="Sticker preview" style="display:none;" />
+          <p class="print-page__preview-placeholder">Click Preview to generate</p>
+        </div>
+        <div class="print-page__card-actions">
+          <button class="print-page__btn print-page__btn--preview" data-template="sticker" type="button">Preview</button>
+          <button class="print-page__btn print-page__btn--download" data-template="sticker" type="button" disabled>Download PNG</button>
+        </div>
+      </div>
+
+      <!-- Instagram Story -->
+      <div class="print-page__card reveal" data-reveal="fade-up">
+        <div class="print-page__card-header">
+          <h2 class="print-page__card-title">Instagram Story</h2>
+          <span class="print-page__card-size">1080 &times; 1920px</span>
+        </div>
+        <p class="print-page__card-desc">
+          Share the latest line on your story. Swipe-up style CTA with QR code for anyone watching.
+        </p>
+        <div class="print-page__preview-area" id="preview-story">
+          <canvas id="canvas-story" style="display:none;"></canvas>
+          <img id="img-story" class="print-page__preview-img" alt="Instagram Story preview" style="display:none;" />
+          <p class="print-page__preview-placeholder">Click Preview to generate</p>
+        </div>
+        <div class="print-page__card-actions">
+          <button class="print-page__btn print-page__btn--preview" data-template="story" type="button">Preview</button>
+          <button class="print-page__btn print-page__btn--download" data-template="story" type="button" disabled>Download PNG</button>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="print-page__footer reveal" data-reveal="fade-up">
+      <p class="print-page__footer-note">
+        All materials link to <strong>itsowol.com</strong> where anyone can add their line to the poem.
+        No permission needed &mdash; print as many as you want.
+      </p>
+      <a href="/poem" class="print-page__back">&larr; Back to the poem</a>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .print-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+  }
+
+  .print-page__header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .print-page__title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 0.5rem;
+  }
+
+  .print-page__subtitle {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--color-accent-green);
+    margin: 0 0 1.5rem;
+  }
+
+  .print-page__desc {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  .print-page__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    .print-page__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .print-page__card {
+    background: var(--color-bg-surface);
+    border: 1px solid rgba(239, 240, 237, 0.06);
+    border-radius: 12px;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: border-color 0.3s ease;
+  }
+
+  .print-page__card:hover {
+    border-color: rgba(121, 185, 57, 0.2);
+  }
+
+  .print-page__card-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .print-page__card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+
+  .print-page__card-size {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
+  .print-page__card-desc {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .print-page__preview-area {
+    position: relative;
+    background: var(--color-bg-elevated);
+    border-radius: 8px;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .print-page__preview-placeholder {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .print-page__preview-img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+
+  .print-page__card-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: auto;
+  }
+
+  .print-page__btn {
+    flex: 1;
+    padding: 0.7rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+  }
+
+  .print-page__btn--preview {
+    background: rgba(121, 185, 57, 0.15);
+    color: var(--color-accent-green);
+  }
+
+  .print-page__btn--preview:hover {
+    background: rgba(121, 185, 57, 0.25);
+  }
+
+  .print-page__btn--download {
+    background: var(--color-accent-green);
+    color: var(--color-bg);
+  }
+
+  .print-page__btn--download:hover:not(:disabled) {
+    background: #8ad044;
+  }
+
+  .print-page__btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .print-page__btn.is-loading {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  .print-page__footer {
+    text-align: center;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(239, 240, 237, 0.06);
+  }
+
+  .print-page__footer-note {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+    max-width: 500px;
+    margin: 0 auto 1.5rem;
+  }
+
+  .print-page__footer-note strong {
+    color: var(--color-accent-green);
+  }
+
+  .print-page__back {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .print-page__back:hover {
+    color: var(--color-text-primary);
+  }
+</style>
+
+<script>
+  import { supabase } from '../scripts/supabase.js';
+
+  var QR_URL = 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=https://itsowol.com/%23relentlessly-human&color=79B939&bgcolor=13100D';
+  var recentLines = [];
+  var latestLine = '';
+  var qrImage = null;
+  var generatedBlobs = {};
+
+  /* ---- Colours ---- */
+  var BG       = '#13100D';
+  var BG_SURF  = '#1C1916';
+  var GREEN    = '#79B939';
+  var WHITE    = '#EFF0ED';
+  var MUTED    = '#908F8A';
+  var SECONDARY = '#B0B1AB';
+
+  /* ---- Helpers ---- */
+  function loadImage(src) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function () { resolve(img); };
+      img.onerror = reject;
+      img.src = src;
+    });
+  }
+
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+    var words = text.split(' ');
+    var line = '';
+    var lines = [];
+    for (var i = 0; i < words.length; i++) {
+      var test = line + words[i] + ' ';
+      if (ctx.measureText(test).width > maxWidth && line !== '') {
+        lines.push(line.trim());
+        line = words[i] + ' ';
+      } else {
+        line = test;
+      }
+    }
+    lines.push(line.trim());
+    for (var j = 0; j < lines.length; j++) {
+      ctx.fillText(lines[j], x, y + j * lineHeight);
+    }
+    return lines.length;
+  }
+
+  /* ---- Template generators ---- */
+
+  function generatePoster(canvas) {
+    var W = 2480, H = 3508;
+    canvas.width = W;
+    canvas.height = H;
+    var ctx = canvas.getContext('2d');
+
+    // Background
+    ctx.fillStyle = BG;
+    ctx.fillRect(0, 0, W, H);
+
+    // Top accent line
+    ctx.fillStyle = GREEN;
+    ctx.fillRect(0, 0, W, 12);
+
+    // Title
+    ctx.fillStyle = WHITE;
+    ctx.font = 'bold 160px Playfair Display, serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Relentlessly', W / 2, 450);
+    ctx.fillText('Human', W / 2, 630);
+
+    // Subtitle
+    ctx.fillStyle = SECONDARY;
+    ctx.font = 'italic 56px Lora, serif';
+    ctx.fillText('A poem being written by strangers, for strangers', W / 2, 780);
+
+    // Divider
+    ctx.fillStyle = GREEN;
+    ctx.fillRect(W / 2 - 200, 870, 400, 4);
+
+    // Recent lines
+    ctx.font = 'italic 64px Lora, serif';
+    ctx.fillStyle = WHITE;
+    ctx.textAlign = 'center';
+    var lineY = 1050;
+    var displayLines = recentLines.slice(0, 3);
+    for (var i = 0; i < displayLines.length; i++) {
+      var text = '"' + displayLines[i].text + '"';
+      var numWrapped = wrapText(ctx, text, W / 2, lineY, W - 400, 85);
+      lineY += numWrapped * 85 + 60;
+    }
+    if (displayLines.length === 0) {
+      ctx.fillStyle = MUTED;
+      ctx.fillText('The poem awaits your voice...', W / 2, lineY);
+      lineY += 120;
+    }
+
+    // QR code
+    if (qrImage) {
+      var qrSize = 600;
+      var qrX = (W - qrSize) / 2;
+      var qrY = Math.max(lineY + 120, 2100);
+
+      // QR background pad
+      ctx.fillStyle = BG_SURF;
+      ctx.beginPath();
+      ctx.roundRect(qrX - 40, qrY - 40, qrSize + 80, qrSize + 80, 24);
+      ctx.fill();
+
+      ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
+
+      // CTA below QR
+      ctx.fillStyle = GREEN;
+      ctx.font = 'bold 72px Nunito Sans, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Scan to add your line', W / 2, qrY + qrSize + 130);
+    }
+
+    // Bottom accent
+    ctx.fillStyle = GREEN;
+    ctx.fillRect(0, H - 12, W, 12);
+
+    // URL at bottom
+    ctx.fillStyle = MUTED;
+    ctx.font = '44px Nunito Sans, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('itsowol.com', W / 2, H - 80);
+  }
+
+  function generateCafe(canvas) {
+    var W = 1050, H = 1500;
+    canvas.width = W;
+    canvas.height = H;
+    var ctx = canvas.getContext('2d');
+
+    // Background
+    ctx.fillStyle = BG;
+    ctx.fillRect(0, 0, W, H);
+
+    // Elegant border
+    ctx.strokeStyle = GREEN;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.roundRect(40, 40, W - 80, H - 80, 20);
+    ctx.stroke();
+
+    // Inner border
+    ctx.strokeStyle = 'rgba(121, 185, 57, 0.2)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(56, 56, W - 112, H - 112, 16);
+    ctx.stroke();
+
+    // Top text
+    ctx.fillStyle = SECONDARY;
+    ctx.font = 'italic 36px Lora, serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('While you wait,', W / 2, 220);
+
+    ctx.fillStyle = WHITE;
+    ctx.font = 'bold 56px Playfair Display, serif';
+    ctx.fillText('write a line', W / 2, 300);
+
+    // Decorative dots
+    ctx.fillStyle = GREEN;
+    for (var d = 0; d < 3; d++) {
+      ctx.beginPath();
+      ctx.arc(W / 2 - 20 + d * 20, 370, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // QR code
+    if (qrImage) {
+      var qrSize = 400;
+      var qrX = (W - qrSize) / 2;
+      var qrY = 440;
+      ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
+    }
+
+    // Tagline
+    ctx.fillStyle = GREEN;
+    ctx.font = '600 32px Nunito Sans, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Add your line to the poem', W / 2, 940);
+
+    // Description
+    ctx.fillStyle = MUTED;
+    ctx.font = '26px Nunito Sans, sans-serif';
+    ctx.fillText('A poem being written by strangers,', W / 2, 1040);
+    ctx.fillText('for strangers.', W / 2, 1080);
+
+    // Divider
+    ctx.fillStyle = GREEN;
+    ctx.fillRect(W / 2 - 60, 1150, 120, 2);
+
+    // URL
+    ctx.fillStyle = WHITE;
+    ctx.font = '600 34px Nunito Sans, sans-serif';
+    ctx.fillText('itsowol.com/poem', W / 2, 1240);
+
+    // Bottom line
+    ctx.fillStyle = GREEN;
+    ctx.fillRect(W / 2 - 160, H - 100, 320, 3);
+  }
+
+  function generateSticker(canvas) {
+    var W = 1080, H = 1080;
+    canvas.width = W;
+    canvas.height = H;
+    var ctx = canvas.getContext('2d');
+
+    // Background
+    ctx.fillStyle = BG;
+    ctx.fillRect(0, 0, W, H);
+
+    // Border
+    ctx.strokeStyle = GREEN;
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.roundRect(30, 30, W - 60, H - 60, 24);
+    ctx.stroke();
+
+    // Bold title
+    ctx.fillStyle = GREEN;
+    ctx.font = 'bold 96px Nunito Sans, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('ADD YOUR', W / 2, 220);
+    ctx.fillText('LINE', W / 2, 330);
+
+    // QR code
+    if (qrImage) {
+      var qrSize = 360;
+      var qrX = (W - qrSize) / 2;
+      var qrY = 400;
+      ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
+    }
+
+    // Arrow pointing to QR
+    ctx.fillStyle = GREEN;
+    ctx.font = '32px Nunito Sans, sans-serif';
+    ctx.fillText('scan me', W / 2, 820);
+
+    // Divider
+    ctx.fillStyle = 'rgba(121, 185, 57, 0.3)';
+    ctx.fillRect(W / 2 - 80, 860, 160, 2);
+
+    // URL
+    ctx.fillStyle = WHITE;
+    ctx.font = '600 38px Nunito Sans, sans-serif';
+    ctx.fillText('itsowol.com', W / 2, 930);
+
+    // Tagline
+    ctx.fillStyle = MUTED;
+    ctx.font = 'italic 26px Lora, serif';
+    ctx.fillText('a poem by strangers', W / 2, 1000);
+  }
+
+  function generateStory(canvas) {
+    var W = 1080, H = 1920;
+    canvas.width = W;
+    canvas.height = H;
+    var ctx = canvas.getContext('2d');
+
+    // Background gradient
+    var grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, '#1a1612');
+    grad.addColorStop(0.5, BG);
+    grad.addColorStop(1, '#0d0b09');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Decorative top element
+    ctx.fillStyle = GREEN;
+    ctx.fillRect(W / 2 - 40, 120, 80, 4);
+
+    // "Join the poem" header
+    ctx.fillStyle = SECONDARY;
+    ctx.font = 'italic 42px Lora, serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Join the poem', W / 2, 260);
+
+    // Title
+    ctx.fillStyle = WHITE;
+    ctx.font = 'bold 72px Playfair Display, serif';
+    ctx.fillText('Relentlessly', W / 2, 420);
+    ctx.fillText('Human', W / 2, 510);
+
+    // Decorative line
+    ctx.fillStyle = GREEN;
+    ctx.fillRect(W / 2 - 120, 580, 240, 3);
+
+    // Latest line
+    if (latestLine) {
+      ctx.fillStyle = WHITE;
+      ctx.font = 'italic 52px Lora, serif';
+      ctx.textAlign = 'center';
+      var quoted = '"' + latestLine + '"';
+      wrapText(ctx, quoted, W / 2, 740, W - 160, 72);
+    } else {
+      ctx.fillStyle = MUTED;
+      ctx.font = 'italic 48px Lora, serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('The poem awaits your voice...', W / 2, 740);
+    }
+
+    // Description
+    ctx.fillStyle = MUTED;
+    ctx.font = '32px Nunito Sans, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('A poem being written by strangers,', W / 2, 1000);
+    ctx.fillText('one line at a time', W / 2, 1050);
+
+    // QR code
+    if (qrImage) {
+      var qrSize = 380;
+      var qrX = (W - qrSize) / 2;
+      var qrY = 1160;
+
+      // QR background
+      ctx.fillStyle = BG_SURF;
+      ctx.beginPath();
+      ctx.roundRect(qrX - 30, qrY - 30, qrSize + 60, qrSize + 60, 20);
+      ctx.fill();
+
+      ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
+    }
+
+    // CTA
+    ctx.fillStyle = GREEN;
+    ctx.font = 'bold 44px Nunito Sans, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Add your line', W / 2, 1660);
+
+    // Swipe up indicator
+    ctx.strokeStyle = GREEN;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(W / 2 - 15, 1740);
+    ctx.lineTo(W / 2, 1720);
+    ctx.lineTo(W / 2 + 15, 1740);
+    ctx.stroke();
+
+    ctx.fillStyle = MUTED;
+    ctx.font = '28px Nunito Sans, sans-serif';
+    ctx.fillText('itsowol.com', W / 2, 1800);
+  }
+
+  /* ---- Template dispatcher ---- */
+  var generators = {
+    poster: generatePoster,
+    cafe: generateCafe,
+    sticker: generateSticker,
+    story: generateStory
+  };
+
+  function canvasToBlob(canvas) {
+    return new Promise(function (resolve) {
+      canvas.toBlob(function (blob) { resolve(blob); }, 'image/png');
+    });
+  }
+
+  async function handlePreview(template) {
+    var canvas = document.getElementById('canvas-' + template);
+    var img = document.getElementById('img-' + template);
+    var placeholder = document.querySelector('#preview-' + template + ' .print-page__preview-placeholder');
+    var previewBtn = document.querySelector('[data-template="' + template + '"].print-page__btn--preview');
+    var downloadBtn = document.querySelector('[data-template="' + template + '"].print-page__btn--download');
+
+    if (!canvas || !generators[template]) return;
+
+    previewBtn.textContent = 'Generating...';
+    previewBtn.classList.add('is-loading');
+
+    try {
+      // Ensure QR is loaded
+      if (!qrImage) {
+        qrImage = await loadImage(QR_URL);
+      }
+
+      generators[template](canvas);
+
+      // Convert canvas to image for preview
+      var dataUrl = canvas.toDataURL('image/png');
+      img.src = dataUrl;
+      img.style.display = 'block';
+      if (placeholder) placeholder.style.display = 'none';
+
+      // Store blob for download
+      generatedBlobs[template] = await canvasToBlob(canvas);
+
+      // Enable download
+      downloadBtn.disabled = false;
+    } catch (e) {
+      console.error('Generation failed for ' + template + ':', e);
+      if (placeholder) placeholder.textContent = 'Generation failed. Try again.';
+    } finally {
+      previewBtn.textContent = 'Preview';
+      previewBtn.classList.remove('is-loading');
+    }
+  }
+
+  function handleDownload(template) {
+    var blob = generatedBlobs[template];
+    if (!blob) return;
+
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'relentlessly-human-' + template + '.png';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function initPrintPage() {
+    // Fetch recent lines from supabase
+    try {
+      var result = await supabase
+        .from('poem_lines')
+        .select('text, author_name')
+        .eq('flagged', false)
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      if (result.data && result.data.length > 0) {
+        recentLines = result.data.reverse();
+        latestLine = result.data[result.data.length - 1].text;
+      }
+    } catch (e) {
+      console.warn('Could not fetch poem lines:', e);
+    }
+
+    // Pre-load QR code
+    try {
+      qrImage = await loadImage(QR_URL);
+    } catch (e) {
+      console.warn('Could not load QR code:', e);
+    }
+
+    // Bind preview buttons
+    var previewBtns = document.querySelectorAll('.print-page__btn--preview');
+    previewBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        handlePreview(btn.dataset.template);
+      });
+    });
+
+    // Bind download buttons
+    var downloadBtns = document.querySelectorAll('.print-page__btn--download');
+    downloadBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        handleDownload(btn.dataset.template);
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initPrintPage);
+</script>

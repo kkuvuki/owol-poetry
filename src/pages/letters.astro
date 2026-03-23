@@ -1,0 +1,843 @@
+---
+// Supabase table required:
+// CREATE TABLE letters (
+//   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+//   addressed_to TEXT NOT NULL,
+//   body TEXT NOT NULL CHECK (char_length(body) <= 500),
+//   signed_from TEXT DEFAULT 'a stranger',
+//   hearts INTEGER DEFAULT 0,
+//   created_at TIMESTAMPTZ DEFAULT now(),
+//   flagged BOOLEAN DEFAULT false
+// );
+
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Letters to Strangers — OwOL"
+  description="Leave anonymous letters for people you'll never meet. A digital post office for the human heart."
+>
+  <article class="letters">
+    <header class="letters__header reveal" data-reveal="fade-up">
+      <h1 class="letters__title">Letters to Strangers</h1>
+      <p class="letters__subtitle">Leave words for someone you'll never meet.</p>
+    </header>
+
+    <!-- Write Section -->
+    <section class="letters__write reveal" data-reveal="fade-up">
+      <form class="letters__form" id="letters-form" autocomplete="off">
+        <div class="letters__field">
+          <label class="letters__label" for="letters-to">To:</label>
+          <input
+            type="text"
+            id="letters-to"
+            class="letters__input"
+            placeholder="the one who almost stayed"
+            maxlength="120"
+            required
+          />
+          <div class="letters__suggestions">
+            <button type="button" class="letters__suggestion" data-to="my younger self">my younger self</button>
+            <button type="button" class="letters__suggestion" data-to="the stranger on the train">the stranger on the train</button>
+            <button type="button" class="letters__suggestion" data-to="anyone who needs this today">anyone who needs this today</button>
+            <button type="button" class="letters__suggestion" data-to="the one I never thanked">the one I never thanked</button>
+          </div>
+        </div>
+
+        <div class="letters__field">
+          <label class="letters__label sr-only" for="letters-body">Your letter</label>
+          <textarea
+            id="letters-body"
+            class="letters__textarea"
+            placeholder="Write your letter..."
+            maxlength="500"
+            rows="6"
+            required
+          ></textarea>
+          <span class="letters__char-count" id="letters-char-count">0 / 500</span>
+        </div>
+
+        <div class="letters__field letters__field--sign">
+          <label class="letters__label" for="letters-from">From:</label>
+          <input
+            type="text"
+            id="letters-from"
+            class="letters__input letters__input--from"
+            placeholder="a fellow traveler"
+            maxlength="80"
+          />
+        </div>
+
+        <button type="submit" class="letters__submit" id="letters-submit">
+          Leave this letter
+        </button>
+
+        <p class="letters__status" id="letters-status" aria-live="polite" hidden></p>
+      </form>
+    </section>
+
+    <!-- Browse Section -->
+    <section class="letters__browse reveal" data-reveal="fade-up">
+      <div class="letters__browse-header">
+        <h2 class="letters__browse-title">Open a letter</h2>
+        <button class="letters__shuffle-btn" id="letters-shuffle" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+          Find another letter
+        </button>
+      </div>
+
+      <div class="letters__loading" id="letters-loading" aria-live="polite">
+        <span class="rh__loading-dot"></span>
+        <span class="rh__loading-dot"></span>
+        <span class="rh__loading-dot"></span>
+      </div>
+
+      <div class="letters__grid" id="letters-grid" role="list" aria-label="Anonymous letters">
+        <!-- Letters injected by JS -->
+      </div>
+    </section>
+
+    <footer class="letters__footer reveal" data-reveal="fade-up">
+      <a href="/" class="letters__back">&larr; Back to Ravings</a>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .letters {
+    max-width: 52rem;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+  }
+
+  /* Header */
+  .letters__header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .letters__title {
+    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: var(--color-text, #1a1a1a);
+    margin: 0 0 0.5rem;
+  }
+
+  .letters__subtitle {
+    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--color-text-muted, #6b6b6b);
+    margin: 0;
+  }
+
+  /* Write Section */
+  .letters__write {
+    margin-bottom: 4rem;
+    background: linear-gradient(135deg, #faf6f0 0%, #f5efe6 100%);
+    border: 1px solid #e8dfd2;
+    border-radius: 4px;
+    padding: 2.5rem 2rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  }
+
+  .letters__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .letters__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    position: relative;
+  }
+
+  .letters__field--sign {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .letters__label {
+    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--color-text-muted, #6b6b6b);
+  }
+
+  .letters__input,
+  .letters__textarea {
+    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-size: 1rem;
+    color: var(--color-text, #1a1a1a);
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid #d9cfc0;
+    border-radius: 3px;
+    padding: 0.65rem 0.85rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    width: 100%;
+  }
+
+  .letters__input:focus,
+  .letters__textarea:focus {
+    border-color: #b8a990;
+    box-shadow: 0 0 0 3px rgba(184, 169, 144, 0.15);
+  }
+
+  .letters__input::placeholder,
+  .letters__textarea::placeholder {
+    color: #b5a998;
+    font-style: italic;
+  }
+
+  .letters__input--from {
+    flex: 1;
+  }
+
+  .letters__textarea {
+    resize: vertical;
+    min-height: 7rem;
+    line-height: 1.7;
+  }
+
+  .letters__char-count {
+    font-size: 0.78rem;
+    color: #b5a998;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .letters__char-count--warn {
+    color: #c47a3a;
+  }
+
+  .letters__char-count--full {
+    color: #b94a4a;
+  }
+
+  .letters__suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.2rem;
+  }
+
+  .letters__suggestion {
+    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-size: 0.78rem;
+    font-style: italic;
+    color: #8a7d6f;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid #ddd4c7;
+    border-radius: 20px;
+    padding: 0.25rem 0.7rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .letters__suggestion:hover {
+    background: rgba(255, 255, 255, 0.85);
+    color: #5a5047;
+  }
+
+  .letters__submit {
+    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-size: 1rem;
+    font-style: italic;
+    color: #5a4a3a;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid #c9bfb0;
+    border-radius: 3px;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    align-self: flex-end;
+  }
+
+  .letters__submit:hover {
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  .letters__submit:active {
+    transform: scale(0.98);
+  }
+
+  .letters__submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .letters__status {
+    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-size: 0.9rem;
+    font-style: italic;
+    text-align: center;
+    color: #6b8f6b;
+    margin: 0;
+  }
+
+  .letters__status--error {
+    color: #b94a4a;
+  }
+
+  /* Browse Section */
+  .letters__browse {
+    margin-bottom: 3rem;
+  }
+
+  .letters__browse-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .letters__browse-title {
+    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--color-text, #1a1a1a);
+    margin: 0;
+  }
+
+  .letters__shuffle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-size: 0.85rem;
+    font-style: italic;
+    color: #8a7d6f;
+    background: transparent;
+    border: 1px solid #d9cfc0;
+    border-radius: 3px;
+    padding: 0.45rem 0.9rem;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .letters__shuffle-btn:hover {
+    color: #5a4a3a;
+    border-color: #b8a990;
+  }
+
+  .letters__loading {
+    display: flex;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 2rem 0;
+  }
+
+  .letters__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  /* Letter Card */
+  .letters__card {
+    background: linear-gradient(145deg, #faf6f0 0%, #f3ece2 50%, #efe8dc 100%);
+    border: 1px solid #e0d6c8;
+    border-radius: 2px;
+    padding: 1.8rem 1.6rem 1.4rem;
+    box-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.04),
+      0 4px 16px rgba(0, 0, 0, 0.03);
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+  }
+
+  .letters__card:nth-child(3n+1) {
+    transform: rotate(-0.6deg);
+  }
+
+  .letters__card:nth-child(3n+2) {
+    transform: rotate(0.4deg);
+  }
+
+  .letters__card:nth-child(3n+3) {
+    transform: rotate(-0.2deg);
+  }
+
+  .letters__card:hover {
+    transform: rotate(0deg) translateY(-2px);
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.06),
+      0 8px 24px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Faux paper edge */
+  .letters__card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      #e0d6c8 10%,
+      #d6cbb8 30%,
+      #e0d6c8 50%,
+      #d6cbb8 70%,
+      #e0d6c8 90%,
+      transparent 100%
+    );
+    border-radius: 2px 2px 0 0;
+    opacity: 0.7;
+  }
+
+  .letters__card-to {
+    font-style: italic;
+    font-size: 0.88rem;
+    color: #8a7d6f;
+    margin: 0 0 0.75rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .letters__card-body {
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: #3d3630;
+    margin: 0 0 1rem;
+    white-space: pre-line;
+    word-break: break-word;
+  }
+
+  .letters__card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .letters__card-from {
+    font-style: italic;
+    font-size: 0.82rem;
+    color: #a69882;
+  }
+
+  .letters__heart-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-size: 0.8rem;
+    color: #b5a090;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.3rem 0.5rem;
+    border-radius: 3px;
+    transition: color 0.2s, background 0.15s;
+  }
+
+  .letters__heart-btn:hover {
+    color: #c47a6a;
+    background: rgba(196, 122, 106, 0.08);
+  }
+
+  .letters__heart-btn--active {
+    color: #c47a6a;
+  }
+
+  .letters__heart-icon {
+    font-size: 1rem;
+    line-height: 1;
+    transition: transform 0.2s;
+  }
+
+  .letters__heart-btn:active .letters__heart-icon {
+    transform: scale(1.3);
+  }
+
+  .letters__empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-style: italic;
+    color: var(--color-text-muted, #6b6b6b);
+    padding: 3rem 0;
+  }
+
+  /* Card entrance animation */
+  @keyframes letter-appear {
+    from {
+      opacity: 0;
+      transform: translateY(12px) rotate(0deg);
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .letters__card--animate {
+    animation: letter-appear 0.4s ease both;
+  }
+
+  /* Footer */
+  .letters__footer {
+    text-align: center;
+    padding-top: 2rem;
+  }
+
+  .letters__back {
+    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-size: 0.9rem;
+    color: var(--color-text-muted, #6b6b6b);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .letters__back:hover {
+    color: var(--color-text, #1a1a1a);
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .letters {
+      padding: 2.5rem 1rem 4rem;
+    }
+
+    .letters__write {
+      padding: 1.5rem 1.2rem;
+    }
+
+    .letters__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .letters__card:nth-child(n) {
+      transform: rotate(0deg);
+    }
+
+    .letters__card:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  /* Dark mode adjustments */
+  :global(.dark) .letters__write {
+    background: linear-gradient(135deg, #2a2520 0%, #252017 100%);
+    border-color: #3d362e;
+  }
+
+  :global(.dark) .letters__input,
+  :global(.dark) .letters__textarea {
+    background: rgba(0, 0, 0, 0.25);
+    border-color: #3d362e;
+    color: #e8dfd2;
+  }
+
+  :global(.dark) .letters__input:focus,
+  :global(.dark) .letters__textarea:focus {
+    border-color: #5a4a3a;
+    box-shadow: 0 0 0 3px rgba(90, 74, 58, 0.2);
+  }
+
+  :global(.dark) .letters__input::placeholder,
+  :global(.dark) .letters__textarea::placeholder {
+    color: #6b5d50;
+  }
+
+  :global(.dark) .letters__suggestion {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: #3d362e;
+    color: #8a7d6f;
+  }
+
+  :global(.dark) .letters__suggestion:hover {
+    background: rgba(0, 0, 0, 0.35);
+    color: #b5a998;
+  }
+
+  :global(.dark) .letters__submit {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: #3d362e;
+    color: #c9bfb0;
+  }
+
+  :global(.dark) .letters__submit:hover {
+    background: rgba(0, 0, 0, 0.35);
+  }
+
+  :global(.dark) .letters__card {
+    background: linear-gradient(145deg, #2a2520 0%, #252017 50%, #201c15 100%);
+    border-color: #3d362e;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+
+  :global(.dark) .letters__card::before {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      #3d362e 10%,
+      #4a3f33 30%,
+      #3d362e 50%,
+      #4a3f33 70%,
+      #3d362e 90%,
+      transparent 100%
+    );
+  }
+
+  :global(.dark) .letters__card-to {
+    color: #8a7d6f;
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+  }
+
+  :global(.dark) .letters__card-body {
+    color: #d6cbb8;
+  }
+
+  :global(.dark) .letters__card-from {
+    color: #6b5d50;
+  }
+
+  :global(.dark) .letters__shuffle-btn {
+    border-color: #3d362e;
+  }
+
+  :global(.dark) .letters__shuffle-btn:hover {
+    color: #c9bfb0;
+    border-color: #5a4a3a;
+  }
+</style>
+
+<script>
+  import { supabase } from '../scripts/supabase.js';
+
+  var allLetters = [];
+  var hearted = {};
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = a[i];
+      a[i] = a[j];
+      a[j] = tmp;
+    }
+    return a;
+  }
+
+  function createCardEl(letter, i) {
+    var el = document.createElement('div');
+    el.className = 'letters__card letters__card--animate';
+    el.setAttribute('role', 'listitem');
+    if (typeof i === 'number') {
+      el.style.animationDelay = (i * 80) + 'ms';
+    }
+
+    var to = document.createElement('p');
+    to.className = 'letters__card-to';
+    to.textContent = 'To: ' + letter.addressed_to;
+
+    var body = document.createElement('p');
+    body.className = 'letters__card-body';
+    body.textContent = letter.body;
+
+    var footer = document.createElement('div');
+    footer.className = 'letters__card-footer';
+
+    var from = document.createElement('span');
+    from.className = 'letters__card-from';
+    from.textContent = '— ' + (letter.signed_from || 'a stranger');
+
+    var heartBtn = document.createElement('button');
+    heartBtn.className = 'letters__heart-btn';
+    heartBtn.type = 'button';
+    heartBtn.setAttribute('aria-label', 'Heart this letter');
+    if (hearted[letter.id]) heartBtn.classList.add('letters__heart-btn--active');
+
+    var heartIcon = document.createElement('span');
+    heartIcon.className = 'letters__heart-icon';
+    heartIcon.textContent = hearted[letter.id] ? '\u2764' : '\u2661';
+
+    var heartCount = document.createElement('span');
+    heartCount.textContent = letter.hearts || '';
+
+    heartBtn.appendChild(heartIcon);
+    heartBtn.appendChild(heartCount);
+
+    heartBtn.addEventListener('click', async function () {
+      if (hearted[letter.id]) return;
+      hearted[letter.id] = true;
+
+      // Save to localStorage
+      try {
+        localStorage.setItem('letters_hearted', JSON.stringify(hearted));
+      } catch (e) { /* ignore */ }
+
+      heartBtn.classList.add('letters__heart-btn--active');
+      heartIcon.textContent = '\u2764';
+      letter.hearts = (letter.hearts || 0) + 1;
+      heartCount.textContent = letter.hearts;
+
+      await supabase
+        .from('letters')
+        .update({ hearts: letter.hearts })
+        .eq('id', letter.id);
+    });
+
+    footer.appendChild(from);
+    footer.appendChild(heartBtn);
+
+    el.appendChild(to);
+    el.appendChild(body);
+    el.appendChild(footer);
+
+    return el;
+  }
+
+  function renderLetters(letters) {
+    var grid = document.getElementById('letters-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    if (letters.length === 0) {
+      grid.innerHTML = '<p class="letters__empty">No letters yet. Be the first to leave one.</p>';
+      return;
+    }
+
+    letters.forEach(function (letter, i) {
+      grid.appendChild(createCardEl(letter, i));
+    });
+  }
+
+  async function initLetters() {
+    var form = document.getElementById('letters-form');
+    var bodyInput = document.getElementById('letters-body');
+    var charCount = document.getElementById('letters-char-count');
+    var toInput = document.getElementById('letters-to');
+    var fromInput = document.getElementById('letters-from');
+    var submitBtn = document.getElementById('letters-submit');
+    var statusEl = document.getElementById('letters-status');
+    var loading = document.getElementById('letters-loading');
+    var shuffleBtn = document.getElementById('letters-shuffle');
+    var grid = document.getElementById('letters-grid');
+
+    // Restore hearted state
+    try {
+      var saved = localStorage.getItem('letters_hearted');
+      if (saved) hearted = JSON.parse(saved);
+    } catch (e) { /* ignore */ }
+
+    // Char counter
+    if (bodyInput && charCount) {
+      bodyInput.addEventListener('input', function () {
+        var len = bodyInput.value.length;
+        charCount.textContent = len + ' / 500';
+        charCount.className = 'letters__char-count';
+        if (len >= 480) charCount.classList.add('letters__char-count--full');
+        else if (len >= 400) charCount.classList.add('letters__char-count--warn');
+      });
+    }
+
+    // Suggestion buttons
+    var suggestions = document.querySelectorAll('.letters__suggestion');
+    suggestions.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (toInput) {
+          toInput.value = btn.dataset.to;
+          toInput.focus();
+        }
+      });
+    });
+
+    // Submit form
+    if (form) {
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!toInput || !bodyInput) return;
+
+        var addressedTo = toInput.value.trim();
+        var body = bodyInput.value.trim();
+        var signedFrom = (fromInput && fromInput.value.trim()) || 'a stranger';
+
+        if (!addressedTo || !body) return;
+
+        submitBtn.disabled = true;
+        statusEl.hidden = true;
+
+        var result = await supabase
+          .from('letters')
+          .insert([{
+            addressed_to: addressedTo,
+            body: body,
+            signed_from: signedFrom
+          }])
+          .select();
+
+        submitBtn.disabled = false;
+
+        if (result.error) {
+          statusEl.textContent = 'Something went wrong. Try again.';
+          statusEl.className = 'letters__status letters__status--error';
+          statusEl.hidden = false;
+          return;
+        }
+
+        // Success
+        statusEl.textContent = 'Your letter has been left for someone to find.';
+        statusEl.className = 'letters__status';
+        statusEl.hidden = false;
+        form.reset();
+        charCount.textContent = '0 / 500';
+        charCount.className = 'letters__char-count';
+
+        // Add the new letter to the grid
+        if (result.data && result.data[0]) {
+          allLetters.unshift(result.data[0]);
+          var card = createCardEl(result.data[0], 0);
+          if (grid && grid.firstChild) {
+            grid.insertBefore(card, grid.firstChild);
+          } else if (grid) {
+            grid.innerHTML = '';
+            grid.appendChild(card);
+          }
+        }
+
+        // Clear status after a few seconds
+        setTimeout(function () { statusEl.hidden = true; }, 5000);
+      });
+    }
+
+    // Fetch letters
+    var result = await supabase
+      .from('letters')
+      .select('*')
+      .eq('flagged', false)
+      .order('created_at', { ascending: false })
+      .limit(200);
+
+    if (loading) loading.hidden = true;
+
+    if (result.error || !result.data) {
+      if (grid) grid.innerHTML = '<p class="letters__empty">Could not load letters.</p>';
+      return;
+    }
+
+    allLetters = result.data;
+    renderLetters(shuffle(allLetters));
+
+    // Shuffle button
+    if (shuffleBtn) {
+      shuffleBtn.addEventListener('click', function () {
+        renderLetters(shuffle(allLetters));
+        // Scroll to grid
+        if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  }
+
+  document.addEventListener('astro:page-load', initLetters);
+</script>

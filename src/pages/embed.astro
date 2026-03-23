@@ -1,0 +1,439 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Embed the Poem — Relentlessly Human"
+  description="Add a live poem widget to your website. Show the latest line from Relentlessly Human, a collaborative poem written by strangers."
+>
+  <article class="embed-page">
+    <header class="embed-page__header reveal" data-reveal="fade-up">
+      <h1 class="embed-page__title">Embed the Poem</h1>
+      <p class="embed-page__subtitle">
+        Add a live line from <em>Relentlessly Human</em> to any website.<br />
+        One script tag. No dependencies. No iframe.
+      </p>
+    </header>
+
+    <!-- Live Preview: Dark -->
+    <section class="embed-page__section reveal" data-reveal="fade-up">
+      <h2 class="embed-page__section-title">Dark theme</h2>
+      <div class="embed-page__preview embed-page__preview--dark">
+        <div id="preview-dark"></div>
+      </div>
+    </section>
+
+    <!-- Live Preview: Light -->
+    <section class="embed-page__section reveal" data-reveal="fade-up">
+      <h2 class="embed-page__section-title">Light theme</h2>
+      <div class="embed-page__preview embed-page__preview--light">
+        <div id="preview-light"></div>
+      </div>
+    </section>
+
+    <!-- Embed Code -->
+    <section class="embed-page__section reveal" data-reveal="fade-up">
+      <h2 class="embed-page__section-title">Get the embed code</h2>
+      <p class="embed-page__text">
+        Copy and paste this into your HTML. That's it.
+      </p>
+      <div class="embed-page__code-block">
+        <pre class="embed-page__code"><code>&lt;script src="https://itsowol.com/embed.js"&gt;&lt;/script&gt;</code></pre>
+        <button class="embed-page__copy" id="copy-btn" type="button" aria-label="Copy embed code">
+          Copy
+        </button>
+      </div>
+    </section>
+
+    <!-- Configuration -->
+    <section class="embed-page__section reveal" data-reveal="fade-up">
+      <h2 class="embed-page__section-title">Configuration</h2>
+      <p class="embed-page__text">
+        Customize the widget with data attributes on the script tag.
+      </p>
+
+      <div class="embed-page__options">
+        <div class="embed-page__option">
+          <code class="embed-page__attr">data-theme</code>
+          <span class="embed-page__values">"dark" | "light"</span>
+          <span class="embed-page__default">Default: dark</span>
+          <p class="embed-page__desc">Set the color theme to match your site.</p>
+        </div>
+
+        <div class="embed-page__option">
+          <code class="embed-page__attr">data-width</code>
+          <span class="embed-page__values">Any CSS width</span>
+          <span class="embed-page__default">Default: 100%</span>
+          <p class="embed-page__desc">Control the widget width. Accepts px, %, rem, etc.</p>
+        </div>
+
+        <div class="embed-page__option">
+          <code class="embed-page__attr">data-show-cta</code>
+          <span class="embed-page__values">"true" | "false"</span>
+          <span class="embed-page__default">Default: true</span>
+          <p class="embed-page__desc">Show or hide the "Add your line" button.</p>
+        </div>
+      </div>
+
+      <h3 class="embed-page__example-title">Example with options</h3>
+      <div class="embed-page__code-block">
+        <pre class="embed-page__code"><code>&lt;script src="https://itsowol.com/embed.js"
+  data-theme="light"
+  data-width="400px"
+  data-show-cta="false"&gt;
+&lt;/script&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- Details -->
+    <section class="embed-page__section reveal" data-reveal="fade-up">
+      <h2 class="embed-page__section-title">How it works</h2>
+      <ul class="embed-page__list">
+        <li>The widget uses <strong>Shadow DOM</strong> so its styles never conflict with your site.</li>
+        <li>It fetches the latest poem line from the public API and <strong>auto-refreshes every 5 minutes</strong>.</li>
+        <li>No cookies, no tracking, no external dependencies.</li>
+        <li>Lightweight: under 5 KB, zero dependencies.</li>
+      </ul>
+    </section>
+
+    <footer class="embed-page__footer reveal" data-reveal="fade-up">
+      <a href="/poem" class="embed-page__back">&larr; Read the full poem</a>
+      <a href="/" class="embed-page__back">&larr; Back to Ravings</a>
+    </footer>
+  </article>
+</Base>
+
+<script>
+  function initEmbedPage() {
+    // --- Live previews using the actual embed widget ---
+    var API_URL = '/api/poem.json?limit=1';
+
+    function buildWidget(container, theme) {
+      var t = theme === 'light' ? {
+        bg: '#FAFAF8', border: 'rgba(0,0,0,0.08)', text: '#1A1A18',
+        textMuted: '#6B6B65', accent: '#5A9A1F', accentHover: '#4A8518',
+        accentText: '#FFFFFF', glow: 'rgba(90,154,31,0.06)',
+      } : {
+        bg: '#13100D', border: 'rgba(255,255,255,0.08)', text: '#EFF0ED',
+        textMuted: '#7A7B75', accent: '#79B939', accentHover: '#8cc94a',
+        accentText: '#13100D', glow: 'rgba(121,185,57,0.06)',
+      };
+
+      var host = document.createElement('div');
+      container.appendChild(host);
+      var shadow = host.attachShadow({ mode: 'closed' });
+
+      var style = document.createElement('style');
+      style.textContent = [
+        ':host { display: block; }',
+        '.rh-widget { font-family: Georgia, "Times New Roman", serif; background: ' + t.bg + '; color: ' + t.text + '; padding: 28px; border-radius: 14px; border: 1px solid ' + t.border + '; box-shadow: 0 4px 24px rgba(0,0,0,0.12); max-width: 520px; box-sizing: border-box; }',
+        '.rh-widget__header { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }',
+        '.rh-widget__icon { width: 6px; height: 6px; border-radius: 50%; background: ' + t.accent + '; animation: rh-pulse 3s ease-in-out infinite; }',
+        '.rh-widget__label { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: ' + t.textMuted + '; margin: 0; }',
+        '.rh-widget__line { font-style: italic; font-size: 18px; line-height: 1.65; margin: 0 0 8px; min-height: 1.65em; }',
+        '.rh-widget__line--loading { opacity: 0.3; }',
+        '.rh-widget__author { font-family: -apple-system, sans-serif; font-size: 12px; color: ' + t.textMuted + '; margin: 0 0 20px; }',
+        '.rh-widget__divider { height: 1px; background: ' + t.border + '; margin: 0 0 16px; }',
+        '.rh-widget__footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }',
+        '.rh-widget__subtitle { font-family: -apple-system, sans-serif; font-size: 11px; color: ' + t.textMuted + '; margin: 0; }',
+        '.rh-widget__cta { font-family: -apple-system, sans-serif; font-size: 12px; font-weight: 600; color: ' + t.accentText + '; background: ' + t.accent + '; padding: 7px 18px; border-radius: 20px; text-decoration: none; transition: background 0.2s; }',
+        '.rh-widget__cta:hover { background: ' + t.accentHover + '; }',
+        '.rh-widget__brand { font-family: -apple-system, sans-serif; font-size: 10px; color: ' + t.textMuted + '; text-decoration: none; opacity: 0.5; margin-top: 12px; display: block; text-align: right; }',
+        '@keyframes rh-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }',
+      ].join('\n');
+      shadow.appendChild(style);
+
+      var w = document.createElement('div');
+      w.className = 'rh-widget';
+
+      w.innerHTML = [
+        '<div class="rh-widget__header"><span class="rh-widget__icon"></span><p class="rh-widget__label">Live from the poem</p></div>',
+        '<p class="rh-widget__line rh-widget__line--loading">\u2026</p>',
+        '<p class="rh-widget__author">\u00A0</p>',
+        '<div class="rh-widget__divider"></div>',
+        '<div class="rh-widget__footer"><p class="rh-widget__subtitle">From Relentlessly Human</p><a class="rh-widget__cta" href="https://itsowol.com/#relentlessly-human" target="_blank" rel="noopener">Add your line \u2192</a></div>',
+        '<a class="rh-widget__brand" href="https://itsowol.com" target="_blank" rel="noopener">itsowol.com</a>',
+      ].join('');
+      shadow.appendChild(w);
+
+      var lineEl = w.querySelector('.rh-widget__line');
+      var authorEl = w.querySelector('.rh-widget__author');
+
+      fetch(API_URL)
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data.lines && data.lines.length > 0) {
+            var line = data.lines[0];
+            lineEl.className = 'rh-widget__line';
+            lineEl.textContent = '\u201C' + line.text + '\u201D';
+            authorEl.textContent = '\u2014 ' + line.author;
+          }
+        })
+        .catch(function () {
+          lineEl.className = 'rh-widget__line';
+          lineEl.textContent = 'A poem written by strangers, one line at a time.';
+        });
+    }
+
+    var darkContainer = document.getElementById('preview-dark');
+    var lightContainer = document.getElementById('preview-light');
+    if (darkContainer) buildWidget(darkContainer, 'dark');
+    if (lightContainer) buildWidget(lightContainer, 'light');
+
+    // --- Copy button ---
+    var copyBtn = document.getElementById('copy-btn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        var code = '<script src="https://itsowol.com/embed.js"><\/script>';
+        navigator.clipboard.writeText(code).then(function () {
+          copyBtn.textContent = 'Copied!';
+          setTimeout(function () { copyBtn.textContent = 'Copy'; }, 2000);
+        });
+      });
+    }
+  }
+
+  document.addEventListener('astro:page-load', initEmbedPage);
+</script>
+
+<style>
+  .embed-page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+  }
+
+  .embed-page__header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+  }
+
+  .embed-page__title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 500;
+    color: var(--color-text, #EFF0ED);
+    margin: 0 0 0.75rem;
+    letter-spacing: -0.01em;
+  }
+
+  .embed-page__subtitle {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1.05rem;
+    color: var(--color-text-muted, #7A7B75);
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  .embed-page__section {
+    margin-bottom: 3.5rem;
+  }
+
+  .embed-page__section-title {
+    font-family: 'Nunito Sans', -apple-system, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-muted, #7A7B75);
+    margin: 0 0 1.25rem;
+  }
+
+  .embed-page__text {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1rem;
+    color: var(--color-text-muted, #7A7B75);
+    line-height: 1.7;
+    margin: 0 0 1.25rem;
+  }
+
+  /* Previews */
+  .embed-page__preview {
+    border-radius: 16px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .embed-page__preview--dark {
+    background: #1a1714;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .embed-page__preview--light {
+    background: #E8E8E4;
+    border: 1px solid rgba(0,0,0,0.06);
+  }
+
+  /* Code block */
+  .embed-page__code-block {
+    position: relative;
+    background: #1a1714;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+  }
+
+  .embed-page__code {
+    margin: 0;
+    font-family: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: #c8c8c0;
+    white-space: pre;
+  }
+
+  .embed-page__code code {
+    color: inherit;
+  }
+
+  .embed-page__copy {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    font-family: 'Nunito Sans', -apple-system, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #13100D;
+    background: #79B939;
+    border: none;
+    padding: 5px 14px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .embed-page__copy:hover {
+    background: #8cc94a;
+  }
+
+  /* Configuration options */
+  .embed-page__options {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .embed-page__option {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 0.25rem 1rem;
+    align-items: center;
+  }
+
+  .embed-page__attr {
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 0.85rem;
+    color: #79B939;
+    font-weight: 600;
+    grid-row: 1;
+  }
+
+  .embed-page__values {
+    font-family: 'Nunito Sans', -apple-system, sans-serif;
+    font-size: 0.8rem;
+    color: var(--color-text-muted, #7A7B75);
+    grid-row: 1;
+  }
+
+  .embed-page__default {
+    font-family: 'Nunito Sans', -apple-system, sans-serif;
+    font-size: 0.75rem;
+    color: var(--color-text-muted, #7A7B75);
+    opacity: 0.6;
+    grid-row: 1;
+    text-align: right;
+  }
+
+  .embed-page__desc {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 0.9rem;
+    color: var(--color-text-muted, #7A7B75);
+    margin: 0;
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .embed-page__example-title {
+    font-family: 'Nunito Sans', -apple-system, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-muted, #7A7B75);
+    margin: 0 0 0.75rem;
+  }
+
+  /* How it works */
+  .embed-page__list {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 0.95rem;
+    color: var(--color-text-muted, #7A7B75);
+    line-height: 1.8;
+    padding-left: 1.25rem;
+    margin: 0;
+  }
+
+  .embed-page__list li {
+    margin-bottom: 0.5rem;
+  }
+
+  .embed-page__list strong {
+    color: var(--color-text, #EFF0ED);
+    font-weight: 600;
+  }
+
+  /* Footer */
+  .embed-page__footer {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .embed-page__back {
+    font-family: 'Nunito Sans', -apple-system, sans-serif;
+    font-size: 0.9rem;
+    color: var(--color-text-muted, #7A7B75);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .embed-page__back:hover {
+    color: var(--color-text, #EFF0ED);
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .embed-page {
+      padding: 2.5rem 1rem 4rem;
+    }
+
+    .embed-page__option {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+      gap: 0.25rem;
+    }
+
+    .embed-page__default {
+      text-align: left;
+    }
+
+    .embed-page__preview {
+      padding: 1.25rem;
+    }
+
+    .embed-page__footer {
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+  }
+</style>

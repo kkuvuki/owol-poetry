@@ -13,6 +13,12 @@ import { shareLine } from './share-card.js';
 import { fetchResonanceCounts, fetchUserResonance, toggleResonance, getCount, hasResonated } from './resonance.js';
 import { initAudioRecorder, uploadAudio, getAudioUrl } from './audio-recorder.js';
 import { showProofModal } from './proof-of-authorship.js';
+import { initInkTrail } from './ink-trail.js';
+import { initDayNightTheme } from './day-night-theme.js';
+import { analyzeRhythm, getWritingHint } from './rhythm-detection.js';
+import { getContributorStats, checkMilestones, showMilestoneAnimation } from './contributor-streaks.js';
+import { isMilestone, showMilestoneCelebration } from './milestone-moments.js';
+import { initReferralTracking, getReferredBy, buildShareUrl } from './referral-tracking.js';
 
 const STORAGE_KEY = 'rh_contributed';
 
@@ -809,7 +815,16 @@ function showContributeForm() {
 function initForm() {
   if (!els.form || !els.lineInput || !els.nameInput || !els.covenant || !els.submit) return;
 
-  // Character count
+  // Rhythm hint element (injected below input)
+  var rhythmHintEl = document.createElement('div');
+  rhythmHintEl.className = 'rhythm-hint';
+  rhythmHintEl.hidden = true;
+  if (els.lineInput.parentNode) {
+    els.lineInput.parentNode.insertBefore(rhythmHintEl, els.lineInput.nextSibling);
+  }
+  var rhythmDebounce = null;
+
+  // Character count + rhythm detection
   els.lineInput.addEventListener('input', function () {
     const len = this.value.length;
     if (els.charCount) {
@@ -818,10 +833,41 @@ function initForm() {
       els.charCount.classList.toggle('is-at-limit', len >= 150);
     }
     validateForm();
+
+    // Rhythm hint (debounced)
+    clearTimeout(rhythmDebounce);
+    var draft = this.value.trim();
+    if (draft.length > 10 && currentLines.length > 0) {
+      rhythmDebounce = setTimeout(function () {
+        try {
+          var hint = getWritingHint(currentLines.slice(-3), draft);
+          if (hint && hint.hint) {
+            rhythmHintEl.textContent = hint.hint;
+            rhythmHintEl.hidden = false;
+          } else {
+            rhythmHintEl.hidden = true;
+          }
+        } catch (_e) {
+          rhythmHintEl.hidden = true;
+        }
+      }, 600);
+    } else {
+      rhythmHintEl.hidden = true;
+    }
   });
 
   els.nameInput.addEventListener('input', validateForm);
   els.covenant.addEventListener('change', validateForm);
+
+  // Chain notification opt-in: show email field when checked
+  var chainCheckbox = document.getElementById('rh-chain-notify');
+  var chainEmail = document.getElementById('rh-chain-email');
+  if (chainCheckbox && chainEmail) {
+    chainCheckbox.addEventListener('change', function () {
+      chainEmail.hidden = !this.checked;
+      if (this.checked) chainEmail.focus();
+    });
+  }
 
   // Focus mode: dim surroundings when writing
   var rhSection = document.querySelector('.rh');
@@ -911,6 +957,14 @@ async function handleSubmit(e) {
 
   const fingerprint = generateFingerprint();
 
+  // Collect chain notification email if opted in
+  var chainCheckbox = document.getElementById('rh-chain-notify');
+  var chainEmailInput = document.getElementById('rh-chain-email');
+  var notificationEmail = null;
+  if (chainCheckbox && chainCheckbox.checked && chainEmailInput && chainEmailInput.value.trim()) {
+    notificationEmail = chainEmailInput.value.trim();
+  }
+
   var insertPayload = {
     text: text,
     author_name: authorName,
@@ -919,6 +973,13 @@ async function handleSubmit(e) {
   };
   if (replyToId) {
     insertPayload.reply_to = replyToId;
+  }
+  if (notificationEmail) {
+    insertPayload.notification_email = notificationEmail;
+  }
+  var referredBy = getReferredBy();
+  if (referredBy) {
+    insertPayload.referred_by = referredBy;
   }
 
   const { data, error } = await supabase.from('poem_lines').insert([
@@ -955,6 +1016,30 @@ async function handleSubmit(e) {
     animateNewLine(data[0]);
     // Show proof of authorship modal (non-blocking)
     showProofModal(data[0]);
+
+    // Check for line-count milestones (e.g., #100, #500)
+    var totalAfter = currentLines.length + 1;
+    if (isMilestone(totalAfter)) {
+      setTimeout(function () {
+        showMilestoneCelebration(totalAfter, text, authorName);
+      }, 3000);
+    }
+
+    // Check for contributor milestones
+    try {
+      var authorLines = currentLines.filter(function (l) {
+        return (l.author_name || '').toLowerCase().trim() === authorName.toLowerCase().trim();
+      });
+      authorLines.push(data[0]);
+      var stats = getContributorStats(authorName, authorLines);
+      var milestones = checkMilestones(stats);
+      if (milestones.length > 0) {
+        // Show the highest earned milestone
+        setTimeout(function () {
+          showMilestoneAnimation(milestones[milestones.length - 1], document.body);
+        }, 2000);
+      }
+    } catch (_e) { /* ignore milestone errors */ }
   }
 
   // Transition: hide form, show afterglow
@@ -1151,6 +1236,15 @@ async function init() {
   if (replyCancelBtn) {
     replyCancelBtn.addEventListener('click', clearReplyTo);
   }
+
+  // Referral tracking
+  initReferralTracking();
+
+  // Ink trail effect (cursor-following glow)
+  initInkTrail();
+
+  // Day/night subtle theme shifts
+  initDayNightTheme();
 
   // Audio recorder
   audioRecorderCtrl = initAudioRecorder({

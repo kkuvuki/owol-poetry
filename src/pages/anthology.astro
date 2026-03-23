@@ -1,0 +1,783 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="The Anthology — Relentlessly Human" description="The collaborative poem, organized by year as a literary anthology.">
+  <article class="anthology">
+    <header class="anthology__header reveal" data-reveal="fade-up">
+      <h1 class="anthology__title">The Anthology</h1>
+      <p class="anthology__subtitle">A year of collective voice</p>
+      <nav class="anthology__years" id="anthology-years" aria-label="Select year">
+        <!-- Year tabs injected by JS -->
+      </nav>
+    </header>
+
+    <div class="anthology__loading" id="anthology-loading" aria-live="polite">
+      <span class="rh__loading-dot"></span>
+      <span class="rh__loading-dot"></span>
+      <span class="rh__loading-dot"></span>
+    </div>
+
+    <div class="anthology__book" id="anthology-book">
+      <!-- Monthly chapters injected by JS -->
+    </div>
+
+    <section class="anthology__summary" id="anthology-summary" hidden>
+      <h2 class="anthology__summary-heading">Year in Review</h2>
+      <div class="anthology__summary-grid" id="anthology-summary-grid">
+        <!-- Stats injected by JS -->
+      </div>
+    </section>
+
+    <footer class="anthology__footer reveal" data-reveal="fade-up">
+      <button class="anthology__export-btn" id="anthology-export" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export as text
+      </button>
+      <a href="/#relentlessly-human" class="anthology__cta">Add your line &rarr;</a>
+      <a href="/" class="anthology__back">&larr; Back to Ravings</a>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .anthology {
+    max-width: 52rem;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+    font-family: 'EB Garamond', 'Georgia', serif;
+    color: var(--rh-ink, #1a1a1a);
+  }
+
+  /* Header */
+  .anthology__header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--rh-border, #e0d8cf);
+  }
+
+  .anthology__title {
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    margin: 0 0 0.3rem;
+    color: var(--rh-ink, #1a1a1a);
+  }
+
+  .anthology__subtitle {
+    font-size: 1.1rem;
+    color: var(--rh-muted, #8a7f72);
+    font-style: italic;
+    margin: 0 0 2rem;
+    letter-spacing: 0.04em;
+  }
+
+  /* Year tabs */
+  .anthology__years {
+    display: flex;
+    justify-content: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+  }
+
+  .anthology__year-tab {
+    background: none;
+    border: 1px solid var(--rh-border, #e0d8cf);
+    padding: 0.45rem 1.4rem;
+    font-family: 'EB Garamond', 'Georgia', serif;
+    font-size: 1.05rem;
+    cursor: pointer;
+    color: var(--rh-muted, #8a7f72);
+    border-radius: 2px;
+    transition: all 0.25s ease;
+  }
+
+  .anthology__year-tab:hover {
+    color: var(--rh-ink, #1a1a1a);
+    border-color: var(--rh-ink, #1a1a1a);
+  }
+
+  .anthology__year-tab--active {
+    background: var(--rh-ink, #1a1a1a);
+    color: var(--rh-bg, #faf8f5);
+    border-color: var(--rh-ink, #1a1a1a);
+  }
+
+  /* Loading */
+  .anthology__loading {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 4rem 0;
+  }
+
+  .anthology__loading[hidden] {
+    display: none;
+  }
+
+  /* Book body */
+  .anthology__book {
+    min-height: 20rem;
+  }
+
+  /* Monthly chapter */
+  .anthology__chapter {
+    margin-bottom: 4rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--rh-border, #e0d8cf);
+  }
+
+  .anthology__chapter:last-child {
+    border-bottom: none;
+  }
+
+  .anthology__month-name {
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--rh-muted, #8a7f72);
+    margin: 0 0 1.5rem;
+    text-align: center;
+  }
+
+  /* Epigraph */
+  .anthology__epigraph {
+    text-align: center;
+    margin: 0 auto 2.5rem;
+    max-width: 36rem;
+    padding: 1.5rem 2rem;
+    position: relative;
+  }
+
+  .anthology__epigraph::before {
+    content: '\201C';
+    position: absolute;
+    top: -0.3rem;
+    left: 0.5rem;
+    font-size: 4rem;
+    color: var(--rh-border, #e0d8cf);
+    font-family: 'EB Garamond', 'Georgia', serif;
+    line-height: 1;
+  }
+
+  .anthology__epigraph-text {
+    font-size: 1.2rem;
+    font-style: italic;
+    line-height: 1.7;
+    color: var(--rh-ink, #1a1a1a);
+    margin: 0;
+  }
+
+  /* Lines */
+  .anthology__lines {
+    list-style: none;
+    margin: 0 0 2rem;
+    padding: 0;
+  }
+
+  .anthology__line {
+    font-size: 1.1rem;
+    line-height: 1.85;
+    padding: 0.15rem 0 0.15rem 1.5rem;
+    color: var(--rh-ink, #1a1a1a);
+    position: relative;
+  }
+
+  /* Drop cap on first line of each month */
+  .anthology__line--first {
+    padding-left: 0;
+  }
+
+  .anthology__line--first::first-letter {
+    font-size: 3.2em;
+    float: left;
+    line-height: 0.8;
+    padding-right: 0.08em;
+    margin-top: 0.05em;
+    font-weight: 400;
+    color: var(--rh-ink, #1a1a1a);
+  }
+
+  .anthology__line-author {
+    font-size: 0.75rem;
+    color: var(--rh-muted, #8a7f72);
+    font-style: italic;
+    margin-left: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .anthology__line:hover .anthology__line-author {
+    opacity: 1;
+  }
+
+  /* Month footer stats */
+  .anthology__month-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1.5rem;
+    margin-top: 1rem;
+    border-top: 1px dotted var(--rh-border, #e0d8cf);
+    font-size: 0.85rem;
+    color: var(--rh-muted, #8a7f72);
+    font-style: italic;
+  }
+
+  .anthology__month-mood {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .anthology__mood-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* Year summary */
+  .anthology__summary {
+    margin-top: 3rem;
+    padding: 3rem 2rem;
+    background: var(--rh-surface, rgba(0,0,0,0.02));
+    border-radius: 4px;
+    border: 1px solid var(--rh-border, #e0d8cf);
+  }
+
+  .anthology__summary[hidden] {
+    display: none;
+  }
+
+  .anthology__summary-heading {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 400;
+    font-style: italic;
+    margin: 0 0 2rem;
+    color: var(--rh-ink, #1a1a1a);
+  }
+
+  .anthology__summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1.5rem;
+  }
+
+  .anthology__stat-card {
+    text-align: center;
+    padding: 1.2rem 1rem;
+  }
+
+  .anthology__stat-value {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: var(--rh-ink, #1a1a1a);
+    margin-bottom: 0.25rem;
+  }
+
+  .anthology__stat-label {
+    font-size: 0.8rem;
+    color: var(--rh-muted, #8a7f72);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .anthology__stat-detail {
+    display: block;
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--rh-muted, #8a7f72);
+    margin-top: 0.3rem;
+    max-width: 20rem;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Footer */
+  .anthology__footer {
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--rh-border, #e0d8cf);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .anthology__export-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: 1px solid var(--rh-border, #e0d8cf);
+    padding: 0.6rem 1.6rem;
+    font-family: 'EB Garamond', 'Georgia', serif;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--rh-ink, #1a1a1a);
+    border-radius: 2px;
+    transition: all 0.25s ease;
+  }
+
+  .anthology__export-btn:hover {
+    background: var(--rh-ink, #1a1a1a);
+    color: var(--rh-bg, #faf8f5);
+    border-color: var(--rh-ink, #1a1a1a);
+  }
+
+  .anthology__cta {
+    font-size: 1rem;
+    color: var(--rh-ink, #1a1a1a);
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 0.1rem;
+    transition: opacity 0.2s;
+  }
+
+  .anthology__cta:hover {
+    opacity: 0.6;
+  }
+
+  .anthology__back {
+    font-size: 0.9rem;
+    color: var(--rh-muted, #8a7f72);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .anthology__back:hover {
+    color: var(--rh-ink, #1a1a1a);
+  }
+
+  /* Empty state */
+  .anthology__empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--rh-muted, #8a7f72);
+    font-style: italic;
+    font-size: 1.1rem;
+  }
+
+  /* Print styles */
+  @media print {
+    .anthology__years,
+    .anthology__footer,
+    .anthology__export-btn {
+      display: none;
+    }
+
+    .anthology__chapter {
+      break-inside: avoid;
+    }
+
+    .anthology__line-author {
+      opacity: 1;
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .anthology {
+      padding: 2.5rem 1rem 4rem;
+    }
+
+    .anthology__epigraph {
+      padding: 1rem 1.2rem;
+    }
+
+    .anthology__epigraph::before {
+      font-size: 3rem;
+      left: 0;
+    }
+
+    .anthology__month-meta {
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: center;
+    }
+
+    .anthology__summary-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>
+
+<script>
+  import { supabase } from '../scripts/supabase.js';
+
+  var MONTH_NAMES = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  var MOOD_WORDS = {
+    joy: { words: ['happy', 'joy', 'laugh', 'smile', 'bright', 'light', 'love', 'warm', 'sun', 'dance', 'sing', 'glow', 'bloom', 'hope', 'delight', 'bliss'], color: '#e8b931' },
+    sorrow: { words: ['sad', 'cry', 'tear', 'grief', 'mourn', 'loss', 'pain', 'ache', 'hurt', 'weep', 'sorrow', 'dark', 'shadow', 'hollow', 'empty'], color: '#5b7fa5' },
+    wonder: { words: ['wonder', 'dream', 'star', 'sky', 'moon', 'magic', 'mystery', 'vast', 'infinite', 'cosmos', 'shimmer', 'imagine', 'awe'], color: '#9b72cf' },
+    anger: { words: ['anger', 'rage', 'fire', 'burn', 'fury', 'storm', 'fight', 'scream', 'roar', 'blaze', 'fierce'], color: '#c94a3f' },
+    peace: { words: ['peace', 'calm', 'still', 'quiet', 'gentle', 'soft', 'rest', 'silence', 'breathe', 'serene', 'ease', 'tender'], color: '#6aaa7a' },
+    longing: { words: ['miss', 'long', 'yearn', 'want', 'wish', 'remember', 'memory', 'gone', 'far', 'wait', 'distant', 'home'], color: '#c78d5e' }
+  };
+
+  var allLines = [];
+  var linesByYear = {};
+  var currentYear = null;
+
+  function organizeByYear(lines) {
+    var grouped = {};
+    lines.forEach(function (line) {
+      var date = new Date(line.created_at);
+      var year = date.getFullYear();
+      var month = date.getMonth();
+      if (!grouped[year]) grouped[year] = {};
+      if (!grouped[year][month]) grouped[year][month] = [];
+      grouped[year][month].push(line);
+    });
+    return grouped;
+  }
+
+  function getUniqueVoices(lines) {
+    var seen = {};
+    lines.forEach(function (l) {
+      var name = (l.author_name || '').toLowerCase().trim();
+      if (name) seen[name] = true;
+    });
+    return Object.keys(seen).length;
+  }
+
+  function detectMood(lines) {
+    var scores = {};
+    Object.keys(MOOD_WORDS).forEach(function (mood) { scores[mood] = 0; });
+
+    lines.forEach(function (line) {
+      var text = (line.text || '').toLowerCase();
+      Object.keys(MOOD_WORDS).forEach(function (mood) {
+        MOOD_WORDS[mood].words.forEach(function (word) {
+          if (text.indexOf(word) !== -1) scores[mood]++;
+        });
+      });
+    });
+
+    var best = 'wonder';
+    var bestScore = 0;
+    Object.keys(scores).forEach(function (mood) {
+      if (scores[mood] > bestScore) {
+        bestScore = scores[mood];
+        best = mood;
+      }
+    });
+
+    return best;
+  }
+
+  function findEpigraph(lines) {
+    // If we had resonance data we'd use it; for now pick the longest line
+    // as a proxy for the most evocative statement
+    if (lines.length === 0) return null;
+    var best = lines[0];
+    lines.forEach(function (l) {
+      if ((l.text || '').length > (best.text || '').length && (l.text || '').length < 200) {
+        best = l;
+      }
+    });
+    return best;
+  }
+
+  function renderYearTabs(years) {
+    var nav = document.getElementById('anthology-years');
+    if (!nav) return;
+    nav.innerHTML = '';
+
+    years.forEach(function (year) {
+      var btn = document.createElement('button');
+      btn.className = 'anthology__year-tab';
+      btn.textContent = year;
+      btn.type = 'button';
+      btn.setAttribute('aria-label', 'Show ' + year + ' anthology');
+      if (year === currentYear) btn.classList.add('anthology__year-tab--active');
+      btn.addEventListener('click', function () {
+        currentYear = year;
+        renderYear(year);
+        // Update active tab
+        nav.querySelectorAll('.anthology__year-tab').forEach(function (t) {
+          t.classList.remove('anthology__year-tab--active');
+        });
+        btn.classList.add('anthology__year-tab--active');
+      });
+      nav.appendChild(btn);
+    });
+  }
+
+  function renderYear(year) {
+    var book = document.getElementById('anthology-book');
+    var summarySection = document.getElementById('anthology-summary');
+    if (!book) return;
+    book.innerHTML = '';
+
+    var months = linesByYear[year];
+    if (!months) {
+      book.innerHTML = '<p class="anthology__empty">No lines recorded for ' + year + '.</p>';
+      if (summarySection) summarySection.hidden = true;
+      return;
+    }
+
+    // Render each month that has lines
+    var monthIndices = Object.keys(months).map(Number).sort(function (a, b) { return a - b; });
+
+    monthIndices.forEach(function (monthIdx) {
+      var monthLines = months[monthIdx];
+      if (!monthLines || monthLines.length === 0) return;
+
+      var chapter = document.createElement('section');
+      chapter.className = 'anthology__chapter';
+
+      // Month name
+      var heading = document.createElement('h2');
+      heading.className = 'anthology__month-name';
+      heading.textContent = MONTH_NAMES[monthIdx];
+      chapter.appendChild(heading);
+
+      // Epigraph
+      var epigraphLine = findEpigraph(monthLines);
+      if (epigraphLine) {
+        var epigraph = document.createElement('blockquote');
+        epigraph.className = 'anthology__epigraph';
+        var epText = document.createElement('p');
+        epText.className = 'anthology__epigraph-text';
+        epText.textContent = epigraphLine.text;
+        epigraph.appendChild(epText);
+        chapter.appendChild(epigraph);
+      }
+
+      // Lines
+      var list = document.createElement('div');
+      list.className = 'anthology__lines';
+      list.setAttribute('role', 'list');
+
+      monthLines.forEach(function (line, i) {
+        var el = document.createElement('div');
+        el.className = 'anthology__line';
+        el.setAttribute('role', 'listitem');
+        if (i === 0) el.classList.add('anthology__line--first');
+
+        var textNode = document.createTextNode(line.text);
+        el.appendChild(textNode);
+
+        var author = document.createElement('span');
+        author.className = 'anthology__line-author';
+        author.textContent = '\u2014 ' + (line.author_name || 'Anonymous');
+        el.appendChild(author);
+
+        list.appendChild(el);
+      });
+
+      chapter.appendChild(list);
+
+      // Month stats
+      var meta = document.createElement('div');
+      meta.className = 'anthology__month-meta';
+
+      var voices = getUniqueVoices(monthLines);
+      var statsSpan = document.createElement('span');
+      statsSpan.textContent = monthLines.length + ' line' + (monthLines.length !== 1 ? 's' : '') + ' by ' + voices + ' voice' + (voices !== 1 ? 's' : '');
+      meta.appendChild(statsSpan);
+
+      // Mood indicator
+      var mood = detectMood(monthLines);
+      var moodSpan = document.createElement('span');
+      moodSpan.className = 'anthology__month-mood';
+      var dot = document.createElement('span');
+      dot.className = 'anthology__mood-dot';
+      dot.style.backgroundColor = MOOD_WORDS[mood].color;
+      moodSpan.appendChild(dot);
+      moodSpan.appendChild(document.createTextNode(mood));
+      meta.appendChild(moodSpan);
+
+      chapter.appendChild(meta);
+      book.appendChild(chapter);
+    });
+
+    // Year summary
+    renderYearSummary(year, months, monthIndices);
+  }
+
+  function renderYearSummary(year, months, monthIndices) {
+    var summarySection = document.getElementById('anthology-summary');
+    var grid = document.getElementById('anthology-summary-grid');
+    if (!summarySection || !grid) return;
+
+    // Gather all lines for the year
+    var yearLines = [];
+    monthIndices.forEach(function (m) {
+      yearLines = yearLines.concat(months[m]);
+    });
+
+    if (yearLines.length === 0) {
+      summarySection.hidden = true;
+      return;
+    }
+
+    summarySection.hidden = false;
+    grid.innerHTML = '';
+
+    var totalLines = yearLines.length;
+    var totalVoices = getUniqueVoices(yearLines);
+
+    // Most active month
+    var activeMonth = monthIndices[0];
+    var activeCount = 0;
+    monthIndices.forEach(function (m) {
+      if (months[m].length > activeCount) {
+        activeCount = months[m].length;
+        activeMonth = m;
+      }
+    });
+
+    // Longest and shortest lines
+    var longest = yearLines[0];
+    var shortest = yearLines[0];
+    yearLines.forEach(function (l) {
+      if ((l.text || '').length > (longest.text || '').length) longest = l;
+      if ((l.text || '').length < (shortest.text || '').length) shortest = l;
+    });
+
+    // Most prolific voice
+    var voiceCounts = {};
+    yearLines.forEach(function (l) {
+      var name = (l.author_name || 'Anonymous').trim();
+      var key = name.toLowerCase();
+      if (!voiceCounts[key]) voiceCounts[key] = { name: name, count: 0 };
+      voiceCounts[key].count++;
+    });
+    var prolific = { name: 'Anonymous', count: 0 };
+    Object.keys(voiceCounts).forEach(function (k) {
+      if (voiceCounts[k].count > prolific.count) prolific = voiceCounts[k];
+    });
+
+    var stats = [
+      { value: totalLines, label: 'Total Lines' },
+      { value: totalVoices, label: 'Voices', detail: null },
+      { value: MONTH_NAMES[activeMonth], label: 'Most Active Month', detail: activeCount + ' lines' },
+      { value: prolific.name, label: 'Most Prolific Voice', detail: prolific.count + ' lines' },
+      { value: (longest.text || '').length + ' chars', label: 'Longest Line', detail: '"' + truncate(longest.text, 40) + '"' },
+      { value: (shortest.text || '').length + ' chars', label: 'Shortest Line', detail: '"' + truncate(shortest.text, 40) + '"' }
+    ];
+
+    stats.forEach(function (s) {
+      var card = document.createElement('div');
+      card.className = 'anthology__stat-card';
+
+      var val = document.createElement('span');
+      val.className = 'anthology__stat-value';
+      val.textContent = s.value;
+      card.appendChild(val);
+
+      var label = document.createElement('span');
+      label.className = 'anthology__stat-label';
+      label.textContent = s.label;
+      card.appendChild(label);
+
+      if (s.detail) {
+        var detail = document.createElement('span');
+        detail.className = 'anthology__stat-detail';
+        detail.textContent = s.detail;
+        card.appendChild(detail);
+      }
+
+      grid.appendChild(card);
+    });
+  }
+
+  function truncate(str, len) {
+    if (!str) return '';
+    if (str.length <= len) return str;
+    return str.substring(0, len) + '\u2026';
+  }
+
+  function exportAnthology() {
+    if (!currentYear || !linesByYear[currentYear]) return;
+
+    var months = linesByYear[currentYear];
+    var monthIndices = Object.keys(months).map(Number).sort(function (a, b) { return a - b; });
+
+    var text = 'THE ANTHOLOGY \u2014 ' + currentYear + '\n';
+    text += 'Relentlessly Human \u2014 itsowol.com/anthology\n';
+    text += '\u2501'.repeat(44) + '\n\n';
+
+    monthIndices.forEach(function (m) {
+      var lines = months[m];
+      if (!lines || lines.length === 0) return;
+
+      text += '\n' + MONTH_NAMES[m].toUpperCase() + '\n';
+      text += '\u2500'.repeat(MONTH_NAMES[m].length) + '\n\n';
+
+      lines.forEach(function (line) {
+        text += '  ' + line.text + '\n';
+      });
+
+      var voices = getUniqueVoices(lines);
+      text += '\n  [' + lines.length + ' lines \u00b7 ' + voices + ' voices]\n';
+    });
+
+    text += '\n' + '\u2501'.repeat(44) + '\n';
+
+    // Year total
+    var total = 0;
+    monthIndices.forEach(function (m) { total += months[m].length; });
+    text += total + ' lines \u00b7 ' + currentYear + '\n';
+
+    var blob = new Blob([text], { type: 'text/plain' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'anthology-' + currentYear + '.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function initAnthology() {
+    var loading = document.getElementById('anthology-loading');
+    var book = document.getElementById('anthology-book');
+    var exportBtn = document.getElementById('anthology-export');
+    if (!book) return;
+
+    if (exportBtn) exportBtn.addEventListener('click', exportAnthology);
+
+    // Fetch all lines
+    var result = await supabase
+      .from('poem_lines')
+      .select('*')
+      .eq('flagged', false)
+      .order('created_at', { ascending: true })
+      .limit(5000);
+
+    if (loading) loading.hidden = true;
+
+    if (result.error || !result.data || result.data.length === 0) {
+      book.innerHTML = '<p class="anthology__empty">No lines yet. The anthology awaits its first voice.</p>';
+      return;
+    }
+
+    allLines = result.data;
+    linesByYear = organizeByYear(allLines);
+
+    // Get sorted years
+    var years = Object.keys(linesByYear).map(Number).sort(function (a, b) { return b - a; });
+    currentYear = years[0]; // Default to most recent year
+
+    renderYearTabs(years);
+    renderYear(currentYear);
+  }
+
+  document.addEventListener('astro:page-load', initAnthology);
+</script>

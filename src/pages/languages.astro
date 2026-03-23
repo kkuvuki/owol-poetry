@@ -1,0 +1,775 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Many Tongues, One Poem — Ravings"
+  description="The poem speaks every language. Start or join parallel poems in different languages, each growing independently."
+>
+  <article class="lang-page">
+    <header class="lang-page__header reveal" data-reveal="fade-up">
+      <h1 class="lang-page__title">Many Tongues, One Poem</h1>
+      <p class="lang-page__subtitle">The poem speaks every language</p>
+    </header>
+
+    <!-- Language grid -->
+    <section class="lang-page__grid" id="lang-grid" aria-label="Available languages">
+      <!-- Cards injected by JS -->
+    </section>
+
+    <!-- Selected language poem view -->
+    <section class="lang-page__poem" id="lang-poem" hidden>
+      <button class="lang-page__back-btn" id="lang-back" type="button">&larr; All languages</button>
+
+      <div class="lang-page__poem-header" id="lang-poem-header">
+        <span class="lang-page__poem-flag" id="lang-poem-flag"></span>
+        <h2 class="lang-page__poem-title" id="lang-poem-title"></h2>
+        <span class="lang-page__poem-count" id="lang-poem-count">0 lines</span>
+      </div>
+
+      <div class="lang-page__poem-loading" id="lang-poem-loading" aria-live="polite">
+        <span class="rh__loading-dot"></span>
+        <span class="rh__loading-dot"></span>
+        <span class="rh__loading-dot"></span>
+      </div>
+
+      <div class="lang-page__poem-lines" id="lang-poem-lines" role="list" aria-label="Poem lines">
+        <!-- Lines injected by JS -->
+      </div>
+
+      <!-- Contribution form -->
+      <form class="lang-page__form" id="lang-form" autocomplete="off">
+        <div class="lang-page__form-fields">
+          <label for="lang-line-input" class="sr-only">Your line</label>
+          <input
+            type="text"
+            id="lang-line-input"
+            class="lang-page__input lang-page__input--line"
+            placeholder="Write a line..."
+            maxlength="280"
+            required
+          />
+          <label for="lang-name-input" class="sr-only">Your name</label>
+          <input
+            type="text"
+            id="lang-name-input"
+            class="lang-page__input lang-page__input--name"
+            placeholder="Your name"
+            maxlength="60"
+          />
+          <button type="submit" class="lang-page__submit" id="lang-submit">Add line</button>
+        </div>
+        <p class="lang-page__form-hint">Write in the language of this poem. 280 characters max.</p>
+      </form>
+    </section>
+
+    <footer class="lang-page__footer reveal" data-reveal="fade-up">
+      <a href="/" class="lang-page__home-link">&larr; Back to Ravings</a>
+    </footer>
+  </article>
+</Base>
+
+<!-- SQL for the parallel_poems table:
+-- CREATE TABLE parallel_poems (
+--   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+--   language_code TEXT NOT NULL,
+--   text TEXT NOT NULL CHECK (char_length(text) <= 280),
+--   author_name TEXT NOT NULL DEFAULT 'Anonymous',
+--   created_at TIMESTAMPTZ DEFAULT now(),
+--   flagged BOOLEAN DEFAULT false
+-- );
+-->
+
+<script>
+  import { supabase } from '../scripts/supabase.js';
+
+  var LANGUAGES = [
+    { code: 'es', flag: '\uD83C\uDDEA\uD83C\uDDF8', name: 'Spanish',    nameNative: 'Espa\u00f1ol',  dir: 'ltr', script: 'latin' },
+    { code: 'fr', flag: '\uD83C\uDDEB\uD83C\uDDF7', name: 'French',     nameNative: 'Fran\u00e7ais', dir: 'ltr', script: 'latin' },
+    { code: 'pt', flag: '\uD83C\uDDE7\uD83C\uDDF7', name: 'Portuguese', nameNative: 'Portugu\u00eas',dir: 'ltr', script: 'latin' },
+    { code: 'ja', flag: '\uD83C\uDDEF\uD83C\uDDF5', name: 'Japanese',   nameNative: '\u65E5\u672C\u8A9E',       dir: 'ltr', script: 'cjk' },
+    { code: 'ar', flag: '\uD83C\uDDF8\uD83C\uDDE6', name: 'Arabic',     nameNative: '\u0627\u0644\u0639\u0631\u0628\u064A\u0629',     dir: 'rtl', script: 'arabic' },
+    { code: 'zh', flag: '\uD83C\uDDE8\uD83C\uDDF3', name: 'Chinese',    nameNative: '\u4E2D\u6587',       dir: 'ltr', script: 'cjk' },
+    { code: 'hi', flag: '\uD83C\uDDEE\uD83C\uDDF3', name: 'Hindi',      nameNative: '\u0939\u093F\u0928\u094D\u0926\u0940',      dir: 'ltr', script: 'devanagari' },
+    { code: 'sw', flag: '\uD83C\uDDF0\uD83C\uDDEA', name: 'Swahili',    nameNative: 'Kiswahili',dir: 'ltr', script: 'latin' },
+    { code: 'de', flag: '\uD83C\uDDE9\uD83C\uDDEA', name: 'German',     nameNative: 'Deutsch',  dir: 'ltr', script: 'latin' },
+    { code: 'ko', flag: '\uD83C\uDDF0\uD83C\uDDF7', name: 'Korean',     nameNative: '\uD55C\uAD6D\uC5B4',       dir: 'ltr', script: 'hangul' },
+    { code: 'it', flag: '\uD83C\uDDEE\uD83C\uDDF9', name: 'Italian',    nameNative: 'Italiano', dir: 'ltr', script: 'latin' },
+    { code: 'tr', flag: '\uD83C\uDDF9\uD83C\uDDF7', name: 'Turkish',    nameNative: 'T\u00fcrk\u00e7e',  dir: 'ltr', script: 'latin' },
+  ];
+
+  var currentLang = null;
+  var currentLines = [];
+  var subscription = null;
+  var lineCounts = {};
+
+  function createCard(lang) {
+    var card = document.createElement('button');
+    card.className = 'lang-card';
+    card.type = 'button';
+    card.dataset.code = lang.code;
+    card.setAttribute('aria-label', 'Join the ' + lang.name + ' poem');
+
+    card.innerHTML =
+      '<span class="lang-card__flag">' + lang.flag + '</span>' +
+      '<span class="lang-card__name">' + lang.name + '</span>' +
+      '<span class="lang-card__native">' + lang.nameNative + '</span>' +
+      '<span class="lang-card__count" id="lang-count-' + lang.code + '">0 lines</span>' +
+      '<span class="lang-card__join">Join</span>';
+
+    card.addEventListener('click', function () {
+      selectLanguage(lang);
+    });
+    return card;
+  }
+
+  async function fetchCounts() {
+    // Fetch line counts per language
+    for (var i = 0; i < LANGUAGES.length; i++) {
+      var lang = LANGUAGES[i];
+      var result = await supabase
+        .from('parallel_poems')
+        .select('id', { count: 'exact', head: true })
+        .eq('language_code', lang.code)
+        .eq('flagged', false);
+
+      var count = result.count || 0;
+      lineCounts[lang.code] = count;
+      var el = document.getElementById('lang-count-' + lang.code);
+      if (el) el.textContent = count + (count === 1 ? ' line' : ' lines');
+    }
+  }
+
+  async function selectLanguage(lang) {
+    currentLang = lang;
+
+    // Show poem section, hide grid
+    var grid = document.getElementById('lang-grid');
+    var poem = document.getElementById('lang-poem');
+    if (grid) grid.hidden = true;
+    if (poem) poem.hidden = false;
+
+    // Set header
+    var flagEl = document.getElementById('lang-poem-flag');
+    var titleEl = document.getElementById('lang-poem-title');
+    var countEl = document.getElementById('lang-poem-count');
+    if (flagEl) flagEl.textContent = lang.flag;
+    if (titleEl) titleEl.textContent = lang.name + ' \u2014 ' + lang.nameNative;
+    if (countEl) countEl.textContent = '';
+
+    // Set text direction on lines container
+    var linesContainer = document.getElementById('lang-poem-lines');
+    if (linesContainer) {
+      linesContainer.dir = lang.dir;
+      linesContainer.className = 'lang-page__poem-lines';
+      if (lang.script === 'cjk') linesContainer.classList.add('lang-page__poem-lines--cjk');
+      if (lang.script === 'arabic') linesContainer.classList.add('lang-page__poem-lines--arabic');
+      if (lang.script === 'devanagari') linesContainer.classList.add('lang-page__poem-lines--devanagari');
+      if (lang.script === 'hangul') linesContainer.classList.add('lang-page__poem-lines--hangul');
+    }
+
+    // Set form placeholder
+    var lineInput = document.getElementById('lang-line-input');
+    if (lineInput) {
+      lineInput.dir = lang.dir;
+      lineInput.placeholder = lang.dir === 'rtl' ? '...\u0627\u0643\u062A\u0628 \u0633\u0637\u0631\u064B\u0627' : 'Write a line...';
+    }
+
+    // Show loading
+    var loading = document.getElementById('lang-poem-loading');
+    if (loading) loading.hidden = false;
+    if (linesContainer) linesContainer.innerHTML = '';
+
+    // Fetch lines
+    var result = await supabase
+      .from('parallel_poems')
+      .select('*')
+      .eq('language_code', lang.code)
+      .eq('flagged', false)
+      .order('created_at', { ascending: true })
+      .limit(1000);
+
+    if (loading) loading.hidden = true;
+
+    currentLines = (result.data || []);
+    renderPoemLines(currentLines);
+    if (countEl) countEl.textContent = currentLines.length + (currentLines.length === 1 ? ' line' : ' lines');
+
+    // Subscribe to realtime
+    if (subscription) {
+      subscription.unsubscribe();
+      subscription = null;
+    }
+    subscription = supabase
+      .channel('parallel_poems_' + lang.code)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'parallel_poems', filter: 'language_code=eq.' + lang.code },
+        function (payload) {
+          if (payload.new && !payload.new.flagged) {
+            var exists = currentLines.some(function (l) { return l.id === payload.new.id; });
+            if (exists) return;
+            currentLines.push(payload.new);
+            appendLineEl(payload.new, true);
+            if (countEl) countEl.textContent = currentLines.length + (currentLines.length === 1 ? ' line' : ' lines');
+          }
+        }
+      )
+      .subscribe();
+  }
+
+  function renderPoemLines(lines) {
+    var container = document.getElementById('lang-poem-lines');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (lines.length === 0) {
+      container.innerHTML = '<p class="lang-page__empty">No lines yet. Be the first to write in this language.</p>';
+      return;
+    }
+
+    lines.forEach(function (line, i) {
+      appendLineEl(line, false, i);
+    });
+  }
+
+  function appendLineEl(line, isNew, index) {
+    var container = document.getElementById('lang-poem-lines');
+    if (!container) return;
+
+    // Remove empty message if present
+    var empty = container.querySelector('.lang-page__empty');
+    if (empty) empty.remove();
+
+    var el = document.createElement('div');
+    el.className = 'lang-page__line';
+    el.setAttribute('role', 'listitem');
+    if (isNew) el.classList.add('lang-page__line--new');
+    if (typeof index === 'number') {
+      el.style.animationDelay = Math.min(index * 40, 2000) + 'ms';
+    }
+
+    var text = document.createElement('p');
+    text.className = 'lang-page__line-text';
+    text.textContent = line.text;
+
+    var meta = document.createElement('span');
+    meta.className = 'lang-page__line-meta';
+    meta.textContent = line.author_name || 'Anonymous';
+
+    el.appendChild(text);
+    el.appendChild(meta);
+    container.appendChild(el);
+
+    if (isNew) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+  }
+
+  function goBack() {
+    var grid = document.getElementById('lang-grid');
+    var poem = document.getElementById('lang-poem');
+    if (grid) grid.hidden = false;
+    if (poem) poem.hidden = true;
+    currentLang = null;
+    currentLines = [];
+    if (subscription) {
+      subscription.unsubscribe();
+      subscription = null;
+    }
+    // Refresh counts
+    fetchCounts();
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!currentLang) return;
+
+    var lineInput = document.getElementById('lang-line-input');
+    var nameInput = document.getElementById('lang-name-input');
+    var submitBtn = document.getElementById('lang-submit');
+    if (!lineInput) return;
+
+    var text = lineInput.value.trim();
+    if (!text) return;
+
+    var authorName = (nameInput && nameInput.value.trim()) || 'Anonymous';
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Adding...';
+    }
+
+    var result = await supabase
+      .from('parallel_poems')
+      .insert({
+        language_code: currentLang.code,
+        text: text,
+        author_name: authorName,
+      })
+      .select();
+
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Add line';
+    }
+
+    if (result.error) {
+      console.error('Failed to add line:', result.error);
+      return;
+    }
+
+    lineInput.value = '';
+    // Don't clear name — they might want to add more lines
+  }
+
+  function initPage() {
+    var grid = document.getElementById('lang-grid');
+    if (!grid) return;
+
+    // Build cards
+    LANGUAGES.forEach(function (lang) {
+      grid.appendChild(createCard(lang));
+    });
+
+    // Back button
+    var backBtn = document.getElementById('lang-back');
+    if (backBtn) backBtn.addEventListener('click', goBack);
+
+    // Form
+    var form = document.getElementById('lang-form');
+    if (form) form.addEventListener('submit', handleSubmit);
+
+    // Fetch counts
+    fetchCounts();
+  }
+
+  // Cleanup on navigation
+  document.addEventListener('astro:before-preparation', function () {
+    if (subscription) {
+      subscription.unsubscribe();
+      subscription = null;
+    }
+  });
+
+  document.addEventListener('astro:page-load', initPage);
+</script>
+
+<style>
+  /* ── Page layout ── */
+  .lang-page {
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+  }
+
+  .lang-page__header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .lang-page__title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 600;
+    color: var(--ink, #1a1612);
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .lang-page__subtitle {
+    font-family: 'Lora', serif;
+    font-size: 1.15rem;
+    color: var(--ink-muted, #6b5e52);
+    font-style: italic;
+    margin: 0;
+  }
+
+  /* ── Language grid ── */
+  .lang-page__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+
+  .lang-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 1.5rem 1rem;
+    background: var(--paper, #faf8f5);
+    border: 1px solid var(--border, #e8e0d8);
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    font-family: 'Nunito Sans', sans-serif;
+    text-align: center;
+    -webkit-appearance: none;
+    appearance: none;
+    color: inherit;
+  }
+
+  .lang-card:hover,
+  .lang-card:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border-color: var(--accent, #c4956a);
+  }
+
+  .lang-card:focus-visible {
+    outline: 2px solid var(--accent, #c4956a);
+    outline-offset: 2px;
+  }
+
+  .lang-card__flag {
+    font-size: 2.4rem;
+    line-height: 1;
+  }
+
+  .lang-card__name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--ink, #1a1612);
+  }
+
+  .lang-card__native {
+    font-size: 0.85rem;
+    color: var(--ink-muted, #6b5e52);
+    font-style: italic;
+  }
+
+  .lang-card__count {
+    font-size: 0.78rem;
+    color: var(--ink-muted, #6b5e52);
+    margin-top: 0.15rem;
+  }
+
+  .lang-card__join {
+    display: inline-block;
+    margin-top: 0.4rem;
+    padding: 0.3rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent, #c4956a);
+    border: 1px solid var(--accent, #c4956a);
+    border-radius: 2rem;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .lang-card:hover .lang-card__join {
+    background: var(--accent, #c4956a);
+    color: #fff;
+  }
+
+  /* ── Selected language poem ── */
+  .lang-page__back-btn {
+    display: inline-block;
+    background: none;
+    border: none;
+    color: var(--accent, #c4956a);
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.25rem 0;
+    margin-bottom: 1.5rem;
+    transition: opacity 0.15s;
+  }
+
+  .lang-page__back-btn:hover {
+    opacity: 0.7;
+  }
+
+  .lang-page__poem-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .lang-page__poem-flag {
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  .lang-page__poem-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--ink, #1a1612);
+    margin: 0;
+  }
+
+  .lang-page__poem-count {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--ink-muted, #6b5e52);
+  }
+
+  /* ── Loading dots ── */
+  .lang-page__poem-loading {
+    display: flex;
+    gap: 0.4rem;
+    justify-content: center;
+    padding: 2rem 0;
+  }
+
+  .lang-page__poem-loading[hidden] {
+    display: none;
+  }
+
+  /* ── Poem lines ── */
+  .lang-page__poem-lines {
+    margin-bottom: 2.5rem;
+    min-height: 4rem;
+  }
+
+  .lang-page__empty {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    color: var(--ink-muted, #6b5e52);
+    text-align: center;
+    padding: 3rem 0;
+  }
+
+  .lang-page__line {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border-faint, #f0ebe5);
+    animation: langFadeIn 0.5s ease both;
+  }
+
+  .lang-page__line--new {
+    animation: langSlideIn 0.6s ease both;
+    background: rgba(196, 149, 106, 0.06);
+  }
+
+  .lang-page__line-text {
+    font-family: 'Lora', serif;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--ink, #1a1612);
+    margin: 0;
+    flex: 1;
+  }
+
+  .lang-page__line-meta {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.75rem;
+    color: var(--ink-muted, #6b5e52);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── Script-specific styles ── */
+
+  /* Arabic: right-to-left */
+  .lang-page__poem-lines--arabic .lang-page__line {
+    flex-direction: row-reverse;
+  }
+
+  .lang-page__poem-lines--arabic .lang-page__line-text {
+    font-family: 'Noto Sans Arabic', 'Lora', serif;
+    text-align: right;
+    font-size: 1.15rem;
+    line-height: 1.9;
+  }
+
+  /* CJK: larger line-height, optional vertical */
+  .lang-page__poem-lines--cjk .lang-page__line-text {
+    font-family: 'Noto Sans JP', 'Noto Sans SC', 'Lora', serif;
+    font-size: 1.1rem;
+    line-height: 1.9;
+    letter-spacing: 0.04em;
+  }
+
+  /* Devanagari */
+  .lang-page__poem-lines--devanagari .lang-page__line-text {
+    font-family: 'Noto Sans Devanagari', 'Lora', serif;
+    font-size: 1.1rem;
+    line-height: 1.8;
+  }
+
+  /* Hangul (Korean) */
+  .lang-page__poem-lines--hangul .lang-page__line-text {
+    font-family: 'Noto Sans KR', 'Lora', serif;
+    font-size: 1.05rem;
+    line-height: 1.8;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Contribution form ── */
+  .lang-page__form {
+    background: var(--paper, #faf8f5);
+    border: 1px solid var(--border, #e8e0d8);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .lang-page__form-fields {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .lang-page__input {
+    font-family: 'Lora', serif;
+    font-size: 0.95rem;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--border, #e8e0d8);
+    border-radius: 0.5rem;
+    background: #fff;
+    color: var(--ink, #1a1612);
+    transition: border-color 0.15s ease;
+  }
+
+  .lang-page__input:focus {
+    outline: none;
+    border-color: var(--accent, #c4956a);
+  }
+
+  .lang-page__input--line {
+    flex: 2;
+    min-width: 12rem;
+  }
+
+  .lang-page__input--name {
+    flex: 1;
+    min-width: 8rem;
+  }
+
+  .lang-page__submit {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 0.6rem 1.4rem;
+    background: var(--accent, #c4956a);
+    color: #fff;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: opacity 0.15s ease, transform 0.1s ease;
+    white-space: nowrap;
+  }
+
+  .lang-page__submit:hover {
+    opacity: 0.88;
+  }
+
+  .lang-page__submit:active {
+    transform: scale(0.97);
+  }
+
+  .lang-page__submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .lang-page__form-hint {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.75rem;
+    color: var(--ink-muted, #6b5e52);
+    margin: 0.6rem 0 0;
+  }
+
+  /* ── Footer ── */
+  .lang-page__footer {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-faint, #f0ebe5);
+  }
+
+  .lang-page__home-link {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--accent, #c4956a);
+    text-decoration: none;
+    font-weight: 600;
+    transition: opacity 0.15s;
+  }
+
+  .lang-page__home-link:hover {
+    opacity: 0.7;
+  }
+
+  /* ── Animations ── */
+  @keyframes langFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes langSlideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 40rem) {
+    .lang-page {
+      padding: 2.5rem 1rem 4rem;
+    }
+
+    .lang-page__grid {
+      grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+      gap: 0.75rem;
+    }
+
+    .lang-card {
+      padding: 1rem 0.75rem;
+    }
+
+    .lang-card__flag {
+      font-size: 1.8rem;
+    }
+
+    .lang-page__form-fields {
+      flex-direction: column;
+    }
+
+    .lang-page__input--line,
+    .lang-page__input--name {
+      min-width: unset;
+    }
+
+    .lang-page__poem-header {
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+  }
+
+  /* ── Dark mode ── */
+  @media (prefers-color-scheme: dark) {
+    .lang-card {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .lang-card:hover,
+    .lang-card:focus-visible {
+      border-color: var(--accent, #c4956a);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .lang-page__form {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .lang-page__input {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.12);
+      color: var(--ink, #e8e0d8);
+    }
+
+    .lang-page__line--new {
+      background: rgba(196, 149, 106, 0.1);
+    }
+  }
+</style>

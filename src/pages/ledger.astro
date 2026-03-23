@@ -1,0 +1,555 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Public Ledger — Relentlessly Human" description="A transparent record of every contribution to the collaborative poem.">
+  <article class="ledger">
+    <header class="ledger__header reveal" data-reveal="fade-up">
+      <h1 class="ledger__title">Public Ledger</h1>
+      <p class="ledger__subtitle">Every contribution, verified and timestamped.</p>
+      <div class="ledger__stats" id="ledger-stats" aria-live="polite">
+        <div class="ledger__stat-block">
+          <span class="ledger__stat-value" id="ledger-total">&mdash;</span>
+          <span class="ledger__stat-label">Total entries</span>
+        </div>
+        <div class="ledger__stat-block">
+          <span class="ledger__stat-value" id="ledger-contributors">&mdash;</span>
+          <span class="ledger__stat-label">Contributors</span>
+        </div>
+        <div class="ledger__stat-block">
+          <span class="ledger__stat-value" id="ledger-first-date">&mdash;</span>
+          <span class="ledger__stat-label">First entry</span>
+        </div>
+        <div class="ledger__stat-block">
+          <span class="ledger__stat-value" id="ledger-latest-date">&mdash;</span>
+          <span class="ledger__stat-label">Latest entry</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="ledger__search">
+      <label for="ledger-search" class="sr-only">Filter by author</label>
+      <input
+        type="search"
+        id="ledger-search"
+        class="ledger__search-input"
+        placeholder="Filter by author..."
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="ledger__body">
+      <div class="ledger__loading" id="ledger-loading" aria-live="polite">
+        <span class="rh__loading-dot"></span>
+        <span class="rh__loading-dot"></span>
+        <span class="rh__loading-dot"></span>
+      </div>
+
+      <div class="ledger__table-header" id="ledger-table-header" hidden>
+        <span class="ledger__col ledger__col--num">#</span>
+        <span class="ledger__col ledger__col--hash">Hash</span>
+        <span class="ledger__col ledger__col--text">Line</span>
+        <span class="ledger__col ledger__col--author">Author</span>
+        <span class="ledger__col ledger__col--time">Timestamp</span>
+        <span class="ledger__col ledger__col--verify"></span>
+      </div>
+
+      <div class="ledger__entries" id="ledger-entries" role="list" aria-label="Provenance ledger">
+        <!-- Entries injected by JS -->
+      </div>
+    </div>
+
+    <footer class="ledger__footer reveal" data-reveal="fade-up">
+      <a href="/#relentlessly-human" class="ledger__cta">Add your line &rarr;</a>
+      <a href="/poem" class="ledger__back">&larr; Read the full poem</a>
+    </footer>
+  </article>
+</Base>
+
+<script>
+  import { supabase } from '../scripts/supabase.js';
+
+  var allEntries = [];
+
+  async function computeHash(id, text, author, timestamp) {
+    var raw = String(id) + String(text) + String(author) + String(timestamp);
+    var encoded = new TextEncoder().encode(raw);
+    var buffer = await crypto.subtle.digest('SHA-256', encoded);
+    var bytes = new Uint8Array(buffer);
+    var hex = '';
+    for (var i = 0; i < bytes.length; i++) {
+      hex += bytes[i].toString(16).padStart(2, '0');
+    }
+    return hex;
+  }
+
+  function formatDate(dateStr) {
+    var d = new Date(dateStr);
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  function formatTimestamp(dateStr) {
+    var d = new Date(dateStr);
+    return d.toLocaleDateString('en-US', {
+      year: 'numeric', month: 'short', day: 'numeric'
+    }) + ' ' + d.toLocaleTimeString('en-US', {
+      hour: '2-digit', minute: '2-digit', hour12: true
+    });
+  }
+
+  function createEntryEl(entry, index, hash) {
+    var el = document.createElement('div');
+    el.className = 'ledger__entry';
+    el.setAttribute('role', 'listitem');
+    el.dataset.author = (entry.author_name || '').toLowerCase().trim();
+    el.style.animationDelay = Math.min(index * 20, 2000) + 'ms';
+
+    var shortHash = hash.substring(0, 16);
+
+    el.innerHTML =
+      '<span class="ledger__col ledger__col--num">#' + (index + 1) + '</span>' +
+      '<span class="ledger__col ledger__col--hash" title="' + shortHash + '">' + shortHash + '</span>' +
+      '<span class="ledger__col ledger__col--text"><em>' + escapeHtml(entry.text) + '</em></span>' +
+      '<span class="ledger__col ledger__col--author">' + escapeHtml(entry.author_name || 'Anonymous') + '</span>' +
+      '<span class="ledger__col ledger__col--time">' + formatTimestamp(entry.created_at) + '</span>' +
+      '<span class="ledger__col ledger__col--verify">' +
+        '<button class="ledger__verify-btn" type="button" aria-label="Verify hash" data-hash="' + hash + '">Verify</button>' +
+      '</span>';
+
+    var btn = el.querySelector('.ledger__verify-btn');
+    btn.addEventListener('click', function () {
+      var fullHash = this.getAttribute('data-hash');
+      if (this.classList.contains('ledger__verify-btn--expanded')) {
+        this.classList.remove('ledger__verify-btn--expanded');
+        this.textContent = 'Verify';
+        return;
+      }
+      this.classList.add('ledger__verify-btn--expanded');
+      this.textContent = fullHash;
+    });
+
+    return el;
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  async function renderEntries(entries) {
+    var container = document.getElementById('ledger-entries');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (entries.length === 0) {
+      container.innerHTML = '<p class="ledger__empty">No entries found.</p>';
+      return;
+    }
+
+    for (var i = 0; i < entries.length; i++) {
+      var entry = entries[i];
+      var hash = await computeHash(entry.id, entry.text, entry.author_name, entry.created_at);
+      container.appendChild(createEntryEl(entry, i, hash));
+    }
+  }
+
+  function updateStats(entries) {
+    var totalEl = document.getElementById('ledger-total');
+    var contribEl = document.getElementById('ledger-contributors');
+    var firstEl = document.getElementById('ledger-first-date');
+    var latestEl = document.getElementById('ledger-latest-date');
+
+    if (totalEl) totalEl.textContent = entries.length;
+
+    if (contribEl) {
+      var seen = {};
+      entries.forEach(function (e) {
+        var name = (e.author_name || '').toLowerCase().trim();
+        if (name) seen[name] = true;
+      });
+      contribEl.textContent = Object.keys(seen).length;
+    }
+
+    if (firstEl && entries.length > 0) {
+      firstEl.textContent = formatDate(entries[0].created_at);
+    }
+    if (latestEl && entries.length > 0) {
+      latestEl.textContent = formatDate(entries[entries.length - 1].created_at);
+    }
+  }
+
+  async function initLedger() {
+    var container = document.getElementById('ledger-entries');
+    var loading = document.getElementById('ledger-loading');
+    var tableHeader = document.getElementById('ledger-table-header');
+    var searchInput = document.getElementById('ledger-search');
+    if (!container) return;
+
+    var result = await supabase
+      .from('poem_lines')
+      .select('*')
+      .eq('flagged', false)
+      .order('created_at', { ascending: true })
+      .limit(5000);
+
+    if (loading) loading.hidden = true;
+
+    if (result.error || !result.data || result.data.length === 0) {
+      container.innerHTML = '<p class="ledger__empty">No entries yet.</p>';
+      return;
+    }
+
+    allEntries = result.data;
+    if (tableHeader) tableHeader.hidden = false;
+    updateStats(allEntries);
+    await renderEntries(allEntries);
+
+    // Author filter
+    var filterTimeout = null;
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        clearTimeout(filterTimeout);
+        var query = this.value.trim().toLowerCase();
+        filterTimeout = setTimeout(async function () {
+          if (!query) {
+            await renderEntries(allEntries);
+            return;
+          }
+          var filtered = allEntries.filter(function (e) {
+            return (e.author_name || '').toLowerCase().indexOf(query) !== -1;
+          });
+          await renderEntries(filtered);
+        }, 250);
+      });
+    }
+  }
+
+  document.addEventListener('astro:page-load', initLedger);
+</script>
+
+<style>
+  .ledger {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+    min-height: 100vh;
+  }
+
+  .ledger__header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .ledger__title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    color: var(--color-cream, #F5F0EB);
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .ledger__subtitle {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 1.1rem;
+    color: var(--color-muted, #A89F94);
+    margin: 0 0 2rem;
+  }
+
+  .ledger__stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    padding: 1.25rem 1.5rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+  }
+
+  .ledger__stat-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .ledger__stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-cream, #F5F0EB);
+  }
+
+  .ledger__stat-label {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted, #A89F94);
+  }
+
+  .ledger__search {
+    max-width: 360px;
+    margin: 0 auto 2rem;
+  }
+
+  .ledger__search-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--color-cream, #F5F0EB);
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .ledger__search-input::placeholder {
+    color: var(--color-muted, #A89F94);
+  }
+
+  .ledger__search-input:focus {
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  .ledger__body {
+    margin-bottom: 3rem;
+  }
+
+  .ledger__loading {
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 3rem 0;
+  }
+
+  .ledger__table-header {
+    display: grid;
+    grid-template-columns: 60px 160px 1fr 140px 180px 80px;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px 8px 0 0;
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-muted, #A89F94);
+    font-weight: 600;
+  }
+
+  .ledger__entries {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+  }
+
+  .ledger__entry {
+    display: grid;
+    grid-template-columns: 60px 160px 1fr 140px 180px 80px;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--color-cream, #F5F0EB);
+    animation: ledger-fade-in 0.4s ease both;
+    transition: background 0.15s;
+  }
+
+  .ledger__entry:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .ledger__entry:last-child {
+    border-bottom: none;
+  }
+
+  @keyframes ledger-fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .ledger__col--num {
+    font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 0.8rem;
+    color: var(--color-muted, #A89F94);
+    font-weight: 600;
+  }
+
+  .ledger__col--hash {
+    font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 0.75rem;
+    color: #7EB8A2;
+    letter-spacing: 0.02em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ledger__col--text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--color-cream, #F5F0EB);
+  }
+
+  .ledger__col--text em {
+    font-family: 'Lora', serif;
+    font-style: italic;
+  }
+
+  .ledger__col--author {
+    font-size: 0.85rem;
+    color: var(--color-muted, #A89F94);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ledger__col--time {
+    font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 0.72rem;
+    color: var(--color-muted, #A89F94);
+    white-space: nowrap;
+  }
+
+  .ledger__verify-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: var(--color-cream, #F5F0EB);
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+
+  .ledger__verify-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .ledger__verify-btn--expanded {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    background: #1A1612;
+    border: 1px solid rgba(126, 184, 162, 0.4);
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: #7EB8A2;
+    word-break: break-all;
+    max-width: 90vw;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  }
+
+  .ledger__empty {
+    text-align: center;
+    padding: 3rem;
+    color: var(--color-muted, #A89F94);
+    font-family: 'Nunito Sans', sans-serif;
+    font-style: italic;
+  }
+
+  .ledger__footer {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 2rem;
+  }
+
+  .ledger__cta {
+    display: inline-block;
+    padding: 0.8rem 2rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: var(--color-cream, #F5F0EB);
+    font-family: 'Nunito Sans', sans-serif;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .ledger__cta:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  .ledger__back {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--color-muted, #A89F94);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .ledger__back:hover {
+    color: var(--color-cream, #F5F0EB);
+  }
+
+  /* Responsive: stack on mobile */
+  @media (max-width: 860px) {
+    .ledger__table-header {
+      display: none;
+    }
+
+    .ledger__entry {
+      grid-template-columns: 1fr;
+      gap: 0.35rem;
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .ledger__col--num {
+      font-size: 0.75rem;
+    }
+
+    .ledger__col--hash {
+      font-size: 0.7rem;
+    }
+
+    .ledger__col--text {
+      white-space: normal;
+      font-size: 1rem;
+    }
+
+    .ledger__col--verify {
+      margin-top: 0.25rem;
+    }
+
+    .ledger__stats {
+      gap: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .ledger {
+      padding: 2.5rem 1rem 4rem;
+    }
+
+    .ledger__stats {
+      gap: 0.75rem;
+      padding: 1rem;
+    }
+
+    .ledger__stat-value {
+      font-size: 1.2rem;
+    }
+  }
+</style>
