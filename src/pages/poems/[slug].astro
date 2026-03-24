@@ -44,7 +44,7 @@ const readingTime = Math.max(1, Math.ceil(wordCount / 200));
     "inLanguage": "en"
   })} />
 
-  <article class="poem-single" aria-label={poem.data.title}>
+  <article class="poem-single" data-poem={slug} aria-label={poem.data.title}>
     <header class="poem-single__header reveal" data-reveal="fade-up">
       <div class="poem-single__meta">
         {poem.data.theme && (
@@ -102,9 +102,10 @@ const readingTime = Math.max(1, Math.ceil(wordCount / 200));
   </article>
 </Base>
 
-<script define:vars={{ theme: poem.data.theme || 'Resilience', audioSlug: slug }}>
+<script define:vars={{ theme: poem.data.theme || 'Resilience', audioSlug: slug, poemSlug: slug }}>
   window.__poemTheme = theme;
   window.__poemAudioSlug = audioSlug;
+  window.__poemSlug = poemSlug;
 </script>
 <script>
   import { initPoemBg, destroyPoemBg } from '../../scripts/poem-bg.js';
@@ -112,7 +113,7 @@ const readingTime = Math.max(1, Math.ceil(wordCount / 200));
   function setupBg() {
     destroyPoemBg();
     if (document.querySelector('.poem-single')) {
-      initPoemBg(window.__poemTheme);
+      initPoemBg(window.__poemTheme, window.__poemSlug);
     }
   }
 

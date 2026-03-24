@@ -9,7 +9,7 @@ import OwolBridge from '../components/OwolBridge.astro';
 import Teaser from '../components/Teaser.astro';
 
 const allPoems = (await getCollection('poems')).sort((a, b) => a.data.order - b.data.order);
-const poems = allPoems.slice(0, 6);
+const poems = allPoems.slice(0, 4);
 ---
 
 <Base>
