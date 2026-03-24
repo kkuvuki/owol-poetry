@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/line/:id",
+      "destination": "/line"
+    }
+  ]
+}

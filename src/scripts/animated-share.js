@@ -15,7 +15,7 @@
 
 var CARD_W = 1080;
 var CARD_H = 1080;
-var DURATION = 3000; // total animation length in ms
+var DURATION = 6000; // total animation length in ms
 var FPS = 30;
 var MAX_CHARS_PER_LINE = 35;
 
@@ -101,14 +101,14 @@ export function createAnimatedCard(text, authorName, options) {
   var playing = false;
 
   // Timeline thresholds (normalised 0-1)
-  var T_FADE_END = 0.1;       // 0 - 0.3s
-  var T_ACCENT_END = 0.1;     // accent sweeps during fade
-  var T_TYPE_START = 0.1;     // 0.3s
-  var T_TYPE_END = 0.667;     // 2.0s
-  var T_AUTHOR_START = 0.667; // 2.0s
-  var T_AUTHOR_END = 0.833;   // 2.5s
-  var T_FOOTER_START = 0.833; // 2.5s
-  var T_FOOTER_END = 1.0;     // 3.0s
+  var T_FADE_END = 0.05;       // 0 - 0.3s
+  var T_ACCENT_END = 0.05;     // accent sweeps during fade
+  var T_TYPE_START = 0.05;     // 0.3s
+  var T_TYPE_END = 0.75;       // 4.5s — slower, more deliberate typing
+  var T_AUTHOR_START = 0.75;   // 4.5s
+  var T_AUTHOR_END = 0.875;    // 5.25s
+  var T_FOOTER_START = 0.875;  // 5.25s
+  var T_FOOTER_END = 1.0;      // 6.0s
 
   /**
    * Renders a single frame at progress t (0-1).
@@ -185,7 +185,7 @@ export function createAnimatedCard(text, authorName, options) {
       }
 
       // Blinking cursor
-      var cursorVisible = (Math.floor(t * 8) % 2 === 0) || typeProgress < 1;
+      var cursorVisible = (Math.floor(t * 4) % 2 === 0) || typeProgress < 1;
       if (cursorVisible && typeProgress < 1) {
         // Find cursor position at end of currently visible text
         var cursorLineIdx = 0;

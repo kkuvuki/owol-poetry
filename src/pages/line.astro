@@ -1,0 +1,218 @@
+---
+import Base from '../layouts/Base.astro';
+
+// Static page — data fetched client-side from Supabase
+// Vercel rewrite maps /line/:id → /line so the ID is read from the URL client-side
+
+const title = 'A Line from Relentlessly Human';
+const description = 'A line from the collaborative poem, written by strangers, for strangers.';
+---
+
+<Base title={title} description={description}>
+  <article class="line-page" id="line-page">
+    <div class="line-page__loading" id="line-loading">
+      <span class="rh__loading-dot"></span>
+      <span class="rh__loading-dot"></span>
+      <span class="rh__loading-dot"></span>
+    </div>
+  </article>
+</Base>
+
+<script>
+  import { supabase } from '../scripts/supabase.js';
+
+  async function initLinePage() {
+    var container = document.getElementById('line-page');
+    var loading = document.getElementById('line-loading');
+    if (!container) return;
+
+    // Extract ID from URL path: /line/some-uuid
+    var pathParts = window.location.pathname.split('/');
+    var lineIndex = pathParts.indexOf('line');
+    var id = lineIndex >= 0 ? pathParts[lineIndex + 1] : null;
+
+    if (!id) {
+      container.innerHTML = '<p style="text-align:center;color:#908F8A;">Line not found. <a href="/poem" style="color:#79B939;">Read the full poem &rarr;</a></p>';
+      return;
+    }
+
+    // Fetch the line
+    var result = await supabase
+      .from('poem_lines')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (loading) loading.hidden = true;
+
+    if (result.error || !result.data) {
+      container.innerHTML = '<p style="text-align:center;color:#908F8A;">Line not found. <a href="/poem" style="color:#79B939;">Read the full poem &rarr;</a></p>';
+      return;
+    }
+
+    var line = result.data;
+    var authorName = line.author_name || 'Anonymous';
+
+    // Update page title
+    document.title = '\u201C' + line.text.substring(0, 60) + '\u201D \u2014 ' + authorName;
+
+    // Fetch surrounding lines
+    var prevResult = await supabase
+      .from('poem_lines')
+      .select('id, text, author_name')
+      .eq('flagged', false)
+      .lt('created_at', line.created_at)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    var nextResult = await supabase
+      .from('poem_lines')
+      .select('id, text, author_name')
+      .eq('flagged', false)
+      .gt('created_at', line.created_at)
+      .order('created_at', { ascending: true })
+      .limit(1);
+
+    var prevLine = (prevResult.data && prevResult.data[0]) || null;
+    var nextLine = (nextResult.data && nextResult.data[0]) || null;
+
+    var date = new Date(line.created_at);
+    var dateStr = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    var timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+    var canonicalUrl = window.location.origin + '/line/' + id;
+    var resonanceCount = line.resonance_count || 0;
+
+    // Build the page HTML
+    var html = '';
+
+    if (prevLine) {
+      html += '<div class="line-page__context line-page__context--before">';
+      html += '<a href="/line/' + prevLine.id + '" class="line-page__context-link">';
+      html += '<span class="line-page__context-text">' + esc(prevLine.text) + '</span>';
+      html += '<span class="line-page__context-author">' + esc(prevLine.author_name) + '</span>';
+      html += '</a></div>';
+    }
+
+    html += '<div class="line-page__featured">';
+    html += '<blockquote class="line-page__quote"><p class="line-page__text">' + esc(line.text) + '</p></blockquote>';
+    html += '<div class="line-page__attribution">';
+    html += '<span class="line-page__author">' + esc(authorName) + '</span>';
+    html += '<time class="line-page__date">' + dateStr + ' at ' + timeStr + '</time>';
+    html += '</div>';
+    if (resonanceCount > 0) {
+      html += '<div class="line-page__resonance">';
+      html += '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+      html += '<span>' + resonanceCount + ' resonance' + (resonanceCount !== 1 ? 's' : '') + '</span>';
+      html += '</div>';
+    }
+    html += '</div>';
+
+    if (nextLine) {
+      html += '<div class="line-page__context line-page__context--after">';
+      html += '<a href="/line/' + nextLine.id + '" class="line-page__context-link">';
+      html += '<span class="line-page__context-text">' + esc(nextLine.text) + '</span>';
+      html += '<span class="line-page__context-author">' + esc(nextLine.author_name) + '</span>';
+      html += '</a></div>';
+    }
+
+    // Share buttons
+    html += '<div class="line-page__actions">';
+    html += '<button class="line-page__share-btn" id="share-copy" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy link</button>';
+    html += '<button class="line-page__share-btn" id="share-twitter" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> Post</button>';
+    if (navigator.share) {
+      html += '<button class="line-page__share-btn" id="share-native" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Share</button>';
+    }
+    html += '</div>';
+
+    html += '<nav class="line-page__nav">';
+    html += '<a href="/poem" class="line-page__nav-link">Read the full poem &rarr;</a>';
+    html += '<a href="/#relentlessly-human" class="line-page__nav-link line-page__nav-link--cta">Add your own line &rarr;</a>';
+    html += '</nav>';
+
+    container.innerHTML = html;
+
+    // Wire share buttons
+    var copyBtn = document.getElementById('share-copy');
+    if (copyBtn) copyBtn.addEventListener('click', function () {
+      navigator.clipboard.writeText(canonicalUrl).then(function () {
+        copyBtn.textContent = 'Copied!';
+        setTimeout(function () { copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy link'; }, 2000);
+      });
+    });
+
+    var twitterBtn = document.getElementById('share-twitter');
+    if (twitterBtn) twitterBtn.addEventListener('click', function () {
+      var text = '\u201C' + line.text + '\u201D \u2014 ' + authorName + '\n\nFrom Relentlessly Human\n';
+      window.open('https://x.com/intent/post?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(canonicalUrl), '_blank');
+    });
+
+    var nativeBtn = document.getElementById('share-native');
+    if (nativeBtn) nativeBtn.addEventListener('click', function () {
+      navigator.share({ title: '\u201C' + line.text + '\u201D', text: 'A line from Relentlessly Human', url: canonicalUrl }).catch(function () {});
+    });
+  }
+
+  function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+  document.addEventListener('astro:page-load', initLinePage);
+</script>
+
+<style>
+  .line-page {
+    max-width: 48rem;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-md);
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-lg);
+  }
+  .line-page__loading { display: flex; gap: 8px; justify-content: center; padding: 4rem 0; }
+  .line-page__context { width: 100%; opacity: 0.4; transition: opacity 0.3s ease; }
+  .line-page__context:hover { opacity: 0.7; }
+  .line-page__context-link {
+    display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
+    text-decoration: none; color: inherit; padding: var(--space-sm); border-radius: 0.5rem;
+    transition: background 0.3s ease;
+  }
+  .line-page__context-link:hover { background: var(--color-bg-surface); }
+  .line-page__context-text { font-family: var(--font-body); font-style: italic; font-size: var(--fs-body); color: var(--color-text-secondary); text-align: center; line-height: var(--lh-poem); }
+  .line-page__context-author { font-family: var(--font-ui); font-size: var(--fs-caption); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .line-page__context--before { border-bottom: 1px solid var(--color-separator); padding-bottom: var(--space-sm); }
+  .line-page__context--after { border-top: 1px solid var(--color-separator); padding-top: var(--space-sm); }
+  .line-page__featured { width: 100%; display: flex; flex-direction: column; align-items: center; gap: var(--space-md); padding: var(--space-xl) 0; }
+  .line-page__quote { margin: 0; padding: 0; }
+  .line-page__text {
+    font-family: var(--font-display); font-style: italic;
+    font-size: clamp(1.75rem, 4vw + 0.5rem, 3rem); font-weight: 400;
+    color: var(--color-text-primary); text-align: center;
+    line-height: var(--lh-heading); max-width: 40rem; margin: 0;
+  }
+  .line-page__attribution { display: flex; flex-direction: column; align-items: center; gap: 0.375rem; }
+  .line-page__author { font-family: var(--font-ui); font-size: var(--fs-small); font-weight: 600; color: var(--color-accent-green); text-transform: uppercase; letter-spacing: 0.15em; }
+  .line-page__date { font-family: var(--font-ui); font-size: var(--fs-caption); color: var(--color-text-muted); }
+  .line-page__resonance { display: inline-flex; align-items: center; gap: 0.375rem; font-family: var(--font-ui); font-size: var(--fs-caption); color: var(--color-text-muted); padding: 0.375rem 0.75rem; background: var(--color-bg-surface); border-radius: 2rem; }
+  .line-page__resonance svg { color: var(--color-accent-amber); }
+  .line-page__actions { display: flex; gap: var(--space-sm); flex-wrap: wrap; justify-content: center; }
+  .line-page__share-btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.625rem 1.25rem; font-family: var(--font-ui); font-size: var(--fs-small);
+    color: var(--color-text-secondary); background: var(--color-bg-surface);
+    border: 1px solid var(--color-card-border); border-radius: 2rem; cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .line-page__share-btn:hover { color: var(--color-text-primary); background: var(--color-bg-elevated); border-color: var(--color-accent-green); }
+  .line-page__nav { display: flex; flex-direction: column; align-items: center; gap: var(--space-sm); margin-top: var(--space-md); }
+  .line-page__nav-link { font-family: var(--font-ui); font-size: var(--fs-small); color: var(--color-text-muted); text-decoration: none; }
+  .line-page__nav-link:hover { color: var(--color-text-primary); }
+  .line-page__nav-link--cta { color: var(--color-accent-green); font-weight: 600; }
+  .line-page__nav-link--cta:hover { color: var(--color-accent-green-hover); }
+  @media (max-width: 640px) {
+    .line-page { padding: var(--space-lg) var(--space-sm); }
+    .line-page__actions { flex-direction: column; width: 100%; }
+    .line-page__share-btn { justify-content: center; }
+  }
+</style>
