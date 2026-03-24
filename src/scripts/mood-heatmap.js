@@ -247,10 +247,10 @@ const NEGATIVE_STEMS = [
 ];
 
 const MOOD_THRESHOLDS = [
-  { min: 0.4, label: 'Radiant', color: '#D4A574' },
-  { min: 0.15, label: 'Hopeful', color: '#79B939' },
-  { min: -0.15, label: 'Contemplative', color: '#908F8A' },
-  { min: -0.4, label: 'Melancholy', color: '#6B8BA4' },
+  { min: 0.25, label: 'Radiant', color: '#D4A574' },
+  { min: 0.08, label: 'Hopeful', color: '#79B939' },
+  { min: -0.08, label: 'Contemplative', color: '#908F8A' },
+  { min: -0.25, label: 'Melancholy', color: '#6B8BA4' },
   { min: -Infinity, label: 'Anguished', color: '#8B5E8B' },
 ];
 
@@ -311,9 +311,9 @@ export function analyzeSentiment(text) {
     }
   }
 
-  // Normalize: divide by word count but with a floor to avoid
-  // over-dilution in longer lines
-  const divisor = Math.max(words.length, 3);
+  // Normalize using square root of word count to prevent over-dilution
+  // in short poetic lines (e.g. 8 words → divisor ~2.8 instead of 8)
+  const divisor = Math.sqrt(words.length);
   const raw = totalScore / divisor;
   const score = Math.max(-1, Math.min(1, raw));
   const { label, color } = classifyMood(score);
