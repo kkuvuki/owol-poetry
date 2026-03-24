@@ -2,7 +2,7 @@
  * Service Worker — caches poems for offline reading.
  */
 
-var CACHE_NAME = 'ravings-v1';
+var CACHE_NAME = 'ravings-v2';
 var PRECACHE = ['/', '/poems/'];
 
 self.addEventListener('install', function (event) {
