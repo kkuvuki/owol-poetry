@@ -84,7 +84,8 @@ export function analyzeSentiment(text) {
  */
 export function generateMoodData(lines) {
   return lines.map((line, index) => {
-    const { score, mood, color } = analyzeSentiment(line);
+    const text = typeof line === 'string' ? line : line.text || '';
+    const { score, mood, color } = analyzeSentiment(text);
     return { lineId: index, score, mood, color };
   });
 }

@@ -566,6 +566,7 @@ import Base from '../layouts/Base.astro';
     if (moodContainer && allLines.length > 0) {
       try {
         var moodData = generateMoodData(allLines);
+        moodContainer._poemLines = allLines.map(function (l) { return l.text; });
         renderMoodStrip(moodContainer, moodData);
       } catch (_e) { console.warn('Mood strip init failed:', _e); }
     }
