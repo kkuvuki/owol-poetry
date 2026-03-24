@@ -247,11 +247,15 @@ const NEGATIVE_STEMS = [
 ];
 
 const MOOD_THRESHOLDS = [
+  { min: 0.45, label: 'Euphoric', color: '#E8C170' },
   { min: 0.25, label: 'Radiant', color: '#D4A574' },
-  { min: 0.08, label: 'Hopeful', color: '#79B939' },
-  { min: -0.08, label: 'Contemplative', color: '#908F8A' },
+  { min: 0.12, label: 'Hopeful', color: '#79B939' },
+  { min: 0.04, label: 'Tender', color: '#6DBF8B' },
+  { min: -0.04, label: 'Contemplative', color: '#908F8A' },
+  { min: -0.12, label: 'Wistful', color: '#7A9FB5' },
   { min: -0.25, label: 'Melancholy', color: '#6B8BA4' },
-  { min: -Infinity, label: 'Anguished', color: '#8B5E8B' },
+  { min: -0.45, label: 'Anguished', color: '#8B5E8B' },
+  { min: -Infinity, label: 'Desolate', color: '#6E3A6E' },
 ];
 
 /**
