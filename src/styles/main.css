@@ -4928,7 +4928,8 @@ ul, ol {
 }
 
 .soundscape-toggle:hover + .soundscape-volume,
-.soundscape-volume:hover {
+.soundscape-volume:hover,
+.soundscape-toggle.is-playing + .soundscape-volume {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
