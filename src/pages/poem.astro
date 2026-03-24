@@ -579,14 +579,16 @@ import Base from '../layouts/Base.astro';
     var presenceEl = document.getElementById('poem-page-presence');
     initPresence(presenceEl);
 
-    // Ambient soundscape
+    // Ambient soundscape (mood-reactive)
     var soundscapeCtrl = null;
+    var poemMoodData = null;
+    try { poemMoodData = generateMoodData(allLines); } catch (_) {}
     var soundscapeBtn = document.getElementById('soundscape-toggle');
     var soundscapeSlider = document.getElementById('soundscape-vol-slider');
     if (soundscapeBtn) {
       soundscapeBtn.addEventListener('click', function () {
         if (!soundscapeCtrl) {
-          soundscapeCtrl = initSoundscape();
+          soundscapeCtrl = initSoundscape(poemMoodData);
         }
         if (soundscapeBtn.classList.contains('is-playing')) {
           soundscapeCtrl.pause();
