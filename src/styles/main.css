@@ -275,11 +275,41 @@ ul, ol {
 .site-nav__menu li a {
   opacity: 0.6;
   transition: opacity var(--duration-fast) var(--ease-out-quart);
+  position: relative;
+  padding-bottom: 0.25rem;
 }
 
 .site-nav__menu li a:hover,
 .site-nav__menu li.is-active a {
   opacity: 1;
+}
+
+/* Active nav indicator dot */
+.site-nav__menu li.is-active a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-accent-green);
+}
+
+/* Focus-visible on all nav links */
+.site-nav__menu li a:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--color-accent-green);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+/* Mobile toggle focus */
+.site-nav__toggle:focus-visible {
+  outline: 2px solid var(--color-accent-green);
+  outline-offset: 4px;
+  border-radius: 2px;
 }
 
 /* Mobile menu toggle */
@@ -520,11 +550,22 @@ ul, ol {
   font-size: var(--fs-small);
   font-weight: 600;
   color: var(--color-text-muted);
-  transition: color var(--duration-fast) var(--ease-out-quart);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+  transition: color var(--duration-fast) var(--ease-out-quart),
+              border-color var(--duration-fast) var(--ease-out-quart);
 }
 
 .poems-feed__more-link:hover {
   color: var(--color-accent-amber);
+  border-bottom-color: var(--color-accent-amber);
+}
+
+.poems-feed__more-link:focus-visible {
+  outline: 2px solid var(--color-accent-green);
+  outline-offset: 4px;
+  border-radius: 2px;
 }
 
 
@@ -636,6 +677,15 @@ ul, ol {
   opacity: 1;
   background-color: var(--color-bg-elevated);
   border-color: var(--color-separator);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.poem-card--grid .poem-card__link {
+  transition: background-color var(--duration-fast) var(--ease-out-quart),
+              border-color var(--duration-fast) var(--ease-out-quart),
+              transform var(--duration-fast) var(--ease-out-expo),
+              box-shadow var(--duration-fast) var(--ease-out-quart);
 }
 
 .poem-card--grid .poem-card__arrow {
@@ -791,6 +841,10 @@ ul, ol {
   color: var(--color-text-muted);
 }
 
+.teaser__input:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
 .teaser__input:focus:not(:focus-visible) {
   outline: none;
   border-color: var(--color-accent-green);
@@ -820,7 +874,13 @@ ul, ol {
 
 .teaser__submit:hover {
   background-color: var(--color-accent-green-hover);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(87, 137, 39, 0.25);
+}
+
+.teaser__submit:focus-visible {
+  outline: 2px solid var(--color-accent-green);
+  outline-offset: 2px;
 }
 
 .teaser__submit:active {
@@ -905,10 +965,14 @@ ul, ol {
 .poem-single__reading-time {
   font-family: var(--font-ui);
   font-size: var(--fs-caption);
-  color: var(--color-text-muted);
-  letter-spacing: 0.05em;
+  color: var(--color-accent-green);
+  letter-spacing: 0.06em;
   margin-top: var(--space-sm);
-  display: block;
+  display: inline-block;
+  padding: 0.2em 0.7em;
+  background: rgba(121, 185, 57, 0.08);
+  border-radius: var(--radius-sm);
+  opacity: 0.7;
 }
 
 .poem-bg-canvas {
@@ -1111,6 +1175,20 @@ ul, ol {
 .poem-nav__link:hover {
   background-color: var(--color-bg-elevated);
   border-color: var(--color-separator);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.poem-nav__link {
+  transition: background-color var(--duration-fast) var(--ease-out-quart),
+              border-color var(--duration-fast) var(--ease-out-quart),
+              transform var(--duration-fast) var(--ease-out-expo),
+              box-shadow var(--duration-fast) var(--ease-out-quart);
+}
+
+.poem-nav__link:focus-visible {
+  outline: 2px solid var(--color-accent-green);
+  outline-offset: 2px;
 }
 
 .poem-nav__link--next {
@@ -3998,10 +4076,19 @@ ul, ol {
 .site-footer__colophon a {
   color: var(--color-text-secondary);
   transition: color var(--duration-fast);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
 }
 
 .site-footer__colophon a:hover {
   color: var(--color-text-primary);
+  border-bottom-color: rgba(255, 255, 255, 0.2);
+}
+
+.site-footer__colophon a:focus-visible {
+  outline: 2px solid var(--color-accent-green);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .site-footer__sep {
