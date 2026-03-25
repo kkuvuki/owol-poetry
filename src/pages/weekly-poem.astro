@@ -7,9 +7,16 @@ import Base from '../layouts/Base.astro';
   description="A poem composed from the voices of strangers, assembled weekly from community-submitted lines."
 >
   <article class="weekly-poem">
+    <!-- Decorative background orb -->
+    <div class="weekly-poem__orb" aria-hidden="true"></div>
+
     <header class="weekly-poem__header reveal" data-reveal="fade-up">
+      <span class="weekly-poem__eyebrow">A composition</span>
       <h1 class="weekly-poem__title">This Week's Poem</h1>
-      <p class="weekly-poem__subtitle">Each week, a new poem is woven from the lines strangers have left behind.</p>
+      <div class="weekly-poem__rule" aria-hidden="true">
+        <span class="weekly-poem__rule-dot"></span>
+      </div>
+      <p class="weekly-poem__subtitle">Woven from the lines strangers have left behind.</p>
     </header>
 
     <div class="weekly-poem__loading" id="weekly-poem-loading" aria-live="polite">
@@ -19,9 +26,11 @@ import Base from '../layouts/Base.astro';
     </div>
 
     <section class="weekly-poem__body" id="weekly-poem-body" hidden>
-      <blockquote class="weekly-poem__verse" id="weekly-poem-verse">
-        <!-- Lines injected by JS -->
-      </blockquote>
+      <div class="weekly-poem__stage">
+        <blockquote class="weekly-poem__verse" id="weekly-poem-verse">
+          <!-- Lines injected by JS -->
+        </blockquote>
+      </div>
 
       <div class="weekly-poem__meta" id="weekly-poem-meta">
         <!-- Voice count and date injected by JS -->
@@ -60,37 +69,95 @@ import Base from '../layouts/Base.astro';
   .weekly-poem {
     max-width: 48rem;
     margin: 0 auto;
-    padding: 4rem 1.5rem 6rem;
+    padding: 5rem 1.5rem 6rem;
     font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     color: var(--color-text-primary, #EFF0ED);
+    position: relative;
+    overflow: hidden;
   }
 
-  /* Header */
+  /* ── Floating background orb ── */
+  .weekly-poem__orb {
+    position: absolute;
+    top: -10%;
+    right: -15%;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(121, 185, 57, 0.06) 0%, transparent 70%);
+    filter: blur(60px);
+    pointer-events: none;
+    animation: orb-drift 20s ease-in-out infinite alternate;
+  }
+
+  @keyframes orb-drift {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-60px, 40px) scale(1.1); }
+    100% { transform: translate(30px, -20px) scale(0.95); }
+  }
+
+  /* ── Header ── */
   .weekly-poem__header {
     text-align: center;
-    margin-bottom: 3rem;
-    padding-bottom: 2rem;
-    border-bottom: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
+    margin-bottom: 3.5rem;
+    position: relative;
+  }
+
+  .weekly-poem__eyebrow {
+    display: block;
+    font-family: var(--font-ui, 'Inter', sans-serif);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--color-accent-green, #79B939);
+    margin-bottom: 0.75rem;
+    opacity: 0.8;
   }
 
   .weekly-poem__title {
-    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    font-size: clamp(2.6rem, 6vw, 4rem);
     font-weight: 400;
     font-style: italic;
-    letter-spacing: 0.02em;
-    margin: 0 0 0.3rem;
+    letter-spacing: 0.01em;
+    margin: 0 0 1.5rem;
     color: var(--color-text-primary, #EFF0ED);
+    line-height: 1.15;
+  }
+
+  .weekly-poem__rule {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .weekly-poem__rule::before,
+  .weekly-poem__rule::after {
+    content: '';
+    height: 1px;
+    width: 3rem;
+    background: linear-gradient(90deg, transparent, var(--color-text-muted, #908F8A), transparent);
+    opacity: 0.3;
+  }
+
+  .weekly-poem__rule-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--color-accent-green, #79B939);
+    opacity: 0.5;
   }
 
   .weekly-poem__subtitle {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     color: var(--color-text-muted, #908F8A);
     font-style: italic;
     margin: 0;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.03em;
   }
 
-  /* Loading */
+  /* ── Loading ── */
   .weekly-poem__loading {
     display: flex;
     justify-content: center;
@@ -98,74 +165,103 @@ import Base from '../layouts/Base.astro';
     padding: 4rem 0;
   }
 
-  .weekly-poem__loading[hidden] {
-    display: none;
-  }
+  .weekly-poem__loading[hidden] { display: none; }
 
-  /* Body */
-  .weekly-poem__body {
-    margin-bottom: 3rem;
-  }
+  /* ── Body ── */
+  .weekly-poem__body { margin-bottom: 3rem; }
+  .weekly-poem__body[hidden] { display: none; }
 
-  .weekly-poem__body[hidden] {
-    display: none;
-  }
-
-  /* Verse */
-  .weekly-poem__verse {
+  /* ── Stage — the dramatic poem container ── */
+  .weekly-poem__stage {
+    position: relative;
+    max-width: 38rem;
     margin: 0 auto 2.5rem;
-    padding: 2.5rem 1.5rem 2.5rem 2.5rem;
-    max-width: 36rem;
+    padding: 3rem 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 2px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.015) 0%, transparent 60%);
+  }
+
+  .weekly-poem__stage::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 2rem;
+    right: 2rem;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(121, 185, 57, 0.3), transparent);
+  }
+
+  .weekly-poem__stage::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 2rem;
+    right: 2rem;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(121, 185, 57, 0.15), transparent);
+  }
+
+  /* ── Verse ── */
+  .weekly-poem__verse {
+    margin: 0;
+    padding: 0;
     border: none;
-    border-left: 2px solid rgba(121, 185, 57, 0.2);
     position: relative;
     font-family: var(--font-body, 'EB Garamond', Georgia, serif);
   }
 
   .weekly-poem__verse::before {
     content: '\201C';
-    display: block;
+    position: absolute;
+    top: -1.5rem;
+    left: -0.5rem;
     font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: clamp(4rem, 8vw, 6rem);
     line-height: 1;
     color: var(--color-accent-green, #79B939);
-    opacity: 0.12;
-    margin-bottom: 0.5rem;
-    margin-left: -0.15em;
+    opacity: 0.1;
     user-select: none;
     pointer-events: none;
   }
 
   .weekly-poem__line {
-    font-size: clamp(1.15rem, 2.5vw, 1.35rem);
+    font-size: clamp(1.2rem, 2.5vw, 1.4rem);
     line-height: 1.6;
     color: var(--color-text-primary, #EFF0ED);
-    margin: 0 0 1rem;
+    margin: 0 0 1.1rem;
     padding: 0;
-    text-indent: 0;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: line-appear 0.6s ease forwards;
   }
 
   .weekly-poem__line:last-child {
-    margin-top: 1.2rem;
-    padding-top: 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0;
+    padding-top: 1.2rem;
     border-top: 1px solid rgba(255, 255, 255, 0.04);
     font-style: italic;
   }
 
+  @keyframes line-appear {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   /* Closing attribution */
-  .weekly-poem__verse::after {
-    content: '\2014\2009 voices, woven';
+  .weekly-poem__closing {
     display: block;
     margin-top: 2rem;
     font-family: var(--font-display, 'Playfair Display', Georgia, serif);
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-style: italic;
     color: var(--color-text-muted, #908F8A);
     text-align: right;
     opacity: 0.5;
+    letter-spacing: 0.03em;
   }
 
-  /* Meta */
+  /* ── Meta ── */
   .weekly-poem__meta {
     text-align: center;
     padding: 1.5rem 0;
@@ -179,16 +275,14 @@ import Base from '../layouts/Base.astro';
     gap: 0.75rem;
   }
 
-  .weekly-poem__date-sep {
-    opacity: 0.3;
-  }
+  .weekly-poem__date-sep { opacity: 0.3; }
 
   .weekly-poem__date {
     font-size: 0.8rem;
     letter-spacing: 0.05em;
   }
 
-  /* Share */
+  /* ── Share ── */
   .weekly-poem__share {
     text-align: center;
     margin-top: 2rem;
@@ -196,10 +290,11 @@ import Base from '../layouts/Base.astro';
 
   .weekly-poem__share-label {
     display: block;
-    font-size: 0.8rem;
+    font-family: var(--font-ui, 'Inter', sans-serif);
+    font-size: 0.7rem;
     color: var(--color-text-muted, #908F8A);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     margin-bottom: 0.75rem;
   }
 
@@ -216,28 +311,28 @@ import Base from '../layouts/Base.astro';
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 50%;
-    border: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
+    border: 1px solid rgba(255, 255, 255, 0.08);
     background: none;
     color: var(--color-text-muted, #908F8A);
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: all 0.3s ease;
   }
 
   .weekly-poem__share-btn:hover {
-    background: var(--color-text-primary, #EFF0ED);
+    background: var(--color-accent-green, #79B939);
     color: var(--color-bg, #13100D);
-    border-color: var(--color-text-primary, #EFF0ED);
+    border-color: var(--color-accent-green, #79B939);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(121, 185, 57, 0.2);
   }
 
-  /* Empty state */
+  /* ── Empty state ── */
   .weekly-poem__empty {
     text-align: center;
     padding: 4rem 2rem;
   }
 
-  .weekly-poem__empty[hidden] {
-    display: none;
-  }
+  .weekly-poem__empty[hidden] { display: none; }
 
   .weekly-poem__empty-text {
     font-size: 1.2rem;
@@ -253,17 +348,17 @@ import Base from '../layouts/Base.astro';
   }
 
   .weekly-poem__empty-hint a {
-    color: var(--color-text-primary, #EFF0ED);
+    color: var(--color-accent-green, #79B939);
     text-decoration: none;
-    border-bottom: 1px solid currentColor;
-    transition: opacity 0.2s;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
   }
 
   .weekly-poem__empty-hint a:hover {
-    opacity: 0.6;
+    border-bottom-color: currentColor;
   }
 
-  /* Footer */
+  /* ── Footer ── */
   .weekly-poem__footer {
     text-align: center;
     margin-top: 3rem;
@@ -284,9 +379,7 @@ import Base from '../layouts/Base.astro';
     transition: opacity 0.2s;
   }
 
-  .weekly-poem__cta:hover {
-    opacity: 0.6;
-  }
+  .weekly-poem__cta:hover { opacity: 0.6; }
 
   .weekly-poem__link {
     font-size: 0.95rem;
@@ -312,19 +405,21 @@ import Base from '../layouts/Base.astro';
     color: var(--color-text-primary, #EFF0ED);
   }
 
-  /* Responsive */
+  /* ── Responsive ── */
   @media (max-width: 640px) {
     .weekly-poem {
-      padding: 2.5rem 1rem 4rem;
+      padding: 3rem 1rem 4rem;
     }
 
-    .weekly-poem__verse {
-      padding: 1.5rem 1rem 1.5rem 1.5rem;
-      border-left-width: 1px;
+    .weekly-poem__stage {
+      padding: 2rem 1.25rem;
     }
 
-    .weekly-poem__line {
-      line-height: 1.8;
+    .weekly-poem__orb {
+      width: 300px;
+      height: 300px;
+      top: -5%;
+      right: -20%;
     }
 
     .weekly-poem__meta {
@@ -332,9 +427,7 @@ import Base from '../layouts/Base.astro';
       gap: 0.25rem;
     }
 
-    .weekly-poem__date-sep {
-      display: none;
-    }
+    .weekly-poem__date-sep { display: none; }
   }
 </style>
 
@@ -350,7 +443,6 @@ import Base from '../layouts/Base.astro';
 
     if (!verse || !body) return;
 
-    // Fetch the latest weekly poem
     var result = await supabase
       .from('weekly_poems')
       .select('*')
@@ -373,21 +465,28 @@ import Base from '../layouts/Base.astro';
       return;
     }
 
-    // Render lines — each on its own line, no author names in the poem
+    // Render lines with staggered entrance animation
     verse.innerHTML = '';
     lines.forEach(function (line, i) {
       var el = document.createElement('p');
       el.className = 'weekly-poem__line';
+      el.style.animationDelay = (i * 0.12) + 's';
       el.textContent = line.text;
       verse.appendChild(el);
     });
 
+    // Closing attribution
+    var voiceCount = new Set(lines.map(function (l) {
+      return (l.author_name || 'Anonymous').toLowerCase();
+    })).size;
+
+    var closing = document.createElement('span');
+    closing.className = 'weekly-poem__closing';
+    closing.textContent = '\u2014 ' + voiceCount + ' voice' + (voiceCount !== 1 ? 's' : '') + ', woven';
+    verse.appendChild(closing);
+
     // Render meta
     if (meta) {
-      var voiceCount = new Set(lines.map(function (l) {
-        return (l.author_name || 'Anonymous').toLowerCase();
-      })).size;
-
       var date = new Date(poem.created_at);
       var dateStr = date.toLocaleDateString('en-US', {
         year: 'numeric',
@@ -403,12 +502,11 @@ import Base from '../layouts/Base.astro';
 
     body.hidden = false;
 
-    // ── Share buttons ────────────────────────────────────────────────
+    // ── Share buttons ──
     var poemText = lines.map(function (l) { return l.text; }).join('\n');
     var shareText = poemText + '\n\n\u2014 Composed from strangers\' voices\nitsowol.com/weekly-poem';
     var shareUrl = 'https://itsowol.com/weekly-poem';
 
-    // Twitter share
     var twitterBtn = document.getElementById('weekly-poem-share-twitter');
     if (twitterBtn) {
       twitterBtn.addEventListener('click', function () {
@@ -418,7 +516,6 @@ import Base from '../layouts/Base.astro';
       });
     }
 
-    // Copy to clipboard
     var copyBtn = document.getElementById('weekly-poem-share-copy');
     if (copyBtn) {
       copyBtn.addEventListener('click', function () {
@@ -431,7 +528,6 @@ import Base from '../layouts/Base.astro';
       });
     }
 
-    // Native share
     var nativeBtn = document.getElementById('weekly-poem-share-native');
     if (nativeBtn) {
       if (navigator.share) {
