@@ -1,0 +1,273 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Weekly Poems — Relentlessly Human"
+  description="An archive of poems composed weekly from the voices of strangers."
+>
+  <article class="weekly-archive">
+    <header class="weekly-archive__header reveal" data-reveal="fade-up">
+      <h1 class="weekly-archive__title">Weekly Poems</h1>
+      <p class="weekly-archive__subtitle">An archive of poems woven from the lines strangers have left behind.</p>
+    </header>
+
+    <div class="weekly-archive__loading" id="archive-loading" aria-live="polite">
+      <span class="rh__loading-dot"></span>
+      <span class="rh__loading-dot"></span>
+      <span class="rh__loading-dot"></span>
+    </div>
+
+    <div class="weekly-archive__list" id="archive-list" hidden>
+      <!-- Poems injected by JS -->
+    </div>
+
+    <section class="weekly-archive__empty" id="archive-empty" hidden>
+      <p class="weekly-archive__empty-text">No weekly poems have been composed yet.</p>
+      <p class="weekly-archive__empty-hint">The first composition is on its way. <a href="/poem">Add your line</a> to help shape it.</p>
+    </section>
+
+    <footer class="weekly-archive__footer reveal" data-reveal="fade-up">
+      <a href="/weekly-poem" class="weekly-archive__link">This week's poem</a>
+      <a href="/poem" class="weekly-archive__link">Add your line &rarr;</a>
+      <a href="/" class="weekly-archive__back">&larr; Back to Ravings</a>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .weekly-archive {
+    max-width: 48rem;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
+    color: var(--color-text-primary, #EFF0ED);
+  }
+
+  .weekly-archive__header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
+  }
+
+  .weekly-archive__title {
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    margin: 0 0 0.3rem;
+  }
+
+  .weekly-archive__subtitle {
+    font-size: 1.1rem;
+    color: var(--color-text-muted, #908F8A);
+    font-style: italic;
+    margin: 0;
+    letter-spacing: 0.04em;
+  }
+
+  /* Loading */
+  .weekly-archive__loading {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 4rem 0;
+  }
+
+  .weekly-archive__loading[hidden] { display: none; }
+
+  /* List */
+  .weekly-archive__list {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  .weekly-archive__list[hidden] { display: none; }
+
+  /* Individual poem card */
+  .weekly-archive__poem {
+    border-left: 2px solid rgba(121, 185, 57, 0.15);
+    padding: 1.5rem 1.5rem 1.5rem 2rem;
+    position: relative;
+    font-family: var(--font-body, 'EB Garamond', Georgia, serif);
+    transition: border-color 0.3s ease;
+  }
+
+  .weekly-archive__poem:hover {
+    border-left-color: rgba(121, 185, 57, 0.4);
+  }
+
+  .weekly-archive__poem-date {
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
+    font-size: 0.75rem;
+    color: var(--color-text-muted, #908F8A);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0 0 1rem;
+  }
+
+  .weekly-archive__poem-line {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: var(--color-text-primary, #EFF0ED);
+    margin: 0 0 0.8rem;
+  }
+
+  .weekly-archive__poem-meta {
+    font-size: 0.8rem;
+    color: var(--color-text-muted, #908F8A);
+    font-style: italic;
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  /* Empty */
+  .weekly-archive__empty {
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+
+  .weekly-archive__empty[hidden] { display: none; }
+
+  .weekly-archive__empty-text {
+    font-size: 1.2rem;
+    font-style: italic;
+    color: var(--color-text-muted, #908F8A);
+    margin: 0 0 1rem;
+  }
+
+  .weekly-archive__empty-hint {
+    font-size: 0.95rem;
+    color: var(--color-text-muted, #908F8A);
+    margin: 0;
+  }
+
+  .weekly-archive__empty-hint a {
+    color: var(--color-text-primary, #EFF0ED);
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+    transition: opacity 0.2s;
+  }
+
+  .weekly-archive__empty-hint a:hover { opacity: 0.6; }
+
+  /* Footer */
+  .weekly-archive__footer {
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .weekly-archive__link {
+    font-size: 0.95rem;
+    color: var(--color-text-muted, #908F8A);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .weekly-archive__link:hover {
+    color: var(--color-text-primary, #EFF0ED);
+    border-bottom-color: currentColor;
+  }
+
+  .weekly-archive__back {
+    font-size: 0.9rem;
+    color: var(--color-text-muted, #908F8A);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .weekly-archive__back:hover {
+    color: var(--color-text-primary, #EFF0ED);
+  }
+
+  @media (max-width: 640px) {
+    .weekly-archive {
+      padding: 2.5rem 1rem 4rem;
+    }
+
+    .weekly-archive__poem {
+      padding: 1rem 1rem 1rem 1.25rem;
+      border-left-width: 1px;
+    }
+  }
+</style>
+
+<script>
+  import { supabase } from '../scripts/supabase.js';
+
+  async function initArchive() {
+    var loading = document.getElementById('archive-loading');
+    var list = document.getElementById('archive-list');
+    var emptyState = document.getElementById('archive-empty');
+
+    if (!list) return;
+
+    var result = await supabase
+      .from('weekly_poems')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (loading) loading.hidden = true;
+
+    if (result.error || !result.data || result.data.length === 0) {
+      if (emptyState) emptyState.hidden = false;
+      return;
+    }
+
+    list.innerHTML = '';
+
+    result.data.forEach(function (poem) {
+      var lines = poem.lines;
+      if (!lines || !Array.isArray(lines) || lines.length === 0) return;
+
+      var card = document.createElement('article');
+      card.className = 'weekly-archive__poem';
+
+      // Date heading
+      var date = new Date(poem.created_at);
+      var dateStr = date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      var dateEl = document.createElement('p');
+      dateEl.className = 'weekly-archive__poem-date';
+      dateEl.textContent = dateStr;
+      card.appendChild(dateEl);
+
+      // Poem lines
+      lines.forEach(function (line) {
+        var p = document.createElement('p');
+        p.className = 'weekly-archive__poem-line';
+        p.textContent = line.text;
+        card.appendChild(p);
+      });
+
+      // Meta
+      var voiceCount = new Set(lines.map(function (l) {
+        return (l.author_name || 'Anonymous').toLowerCase();
+      })).size;
+
+      var metaEl = document.createElement('p');
+      metaEl.className = 'weekly-archive__poem-meta';
+      metaEl.textContent = 'Woven from ' + voiceCount + ' voice' + (voiceCount !== 1 ? 's' : '');
+      card.appendChild(metaEl);
+
+      list.appendChild(card);
+    });
+
+    list.hidden = false;
+  }
+
+  document.addEventListener('astro:page-load', initArchive);
+</script>

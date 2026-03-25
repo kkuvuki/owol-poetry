@@ -50,7 +50,7 @@ import Base from '../layouts/Base.astro';
 
     <footer class="weekly-poem__footer reveal" data-reveal="fade-up">
       <a href="/poem" class="weekly-poem__cta">Add your line &rarr;</a>
-      <a href="/anthology" class="weekly-poem__link">Browse the anthology</a>
+      <a href="/weekly-poems" class="weekly-poem__link">Past weekly poems</a>
       <a href="/" class="weekly-poem__back">&larr; Back to Ravings</a>
     </footer>
   </article>
@@ -138,10 +138,10 @@ import Base from '../layouts/Base.astro';
 
   .weekly-poem__line {
     font-size: clamp(1.15rem, 2.5vw, 1.35rem);
-    line-height: 1.9;
+    line-height: 1.6;
     color: var(--color-text-primary, #EFF0ED);
-    margin: 0;
-    padding: 0.15rem 0;
+    margin: 0 0 1rem;
+    padding: 0;
     text-indent: 0;
   }
 
