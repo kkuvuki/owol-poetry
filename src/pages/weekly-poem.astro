@@ -9,8 +9,7 @@ import Base from '../layouts/Base.astro';
   <article class="weekly-poem">
     <header class="weekly-poem__header reveal" data-reveal="fade-up">
       <h1 class="weekly-poem__title">This Week's Poem</h1>
-      <p class="page-intro">Each week, a new poem is composed from the lines strangers have left behind. No single author — just voices, woven together.</p>
-      <p class="weekly-poem__subtitle">Composed from the voices of strangers</p>
+      <p class="weekly-poem__subtitle">Each week, a new poem is woven from the lines strangers have left behind.</p>
     </header>
 
     <div class="weekly-poem__loading" id="weekly-poem-loading" aria-live="polite">
@@ -115,46 +114,76 @@ import Base from '../layouts/Base.astro';
   /* Verse */
   .weekly-poem__verse {
     margin: 0 auto 2.5rem;
-    padding: 2.5rem 2rem;
-    max-width: 38rem;
+    padding: 2.5rem 1.5rem 2.5rem 2.5rem;
+    max-width: 36rem;
     border: none;
+    border-left: 2px solid rgba(121, 185, 57, 0.2);
     position: relative;
+    font-family: var(--font-body, 'EB Garamond', Georgia, serif);
   }
 
   .weekly-poem__verse::before {
     content: '\201C';
-    position: absolute;
-    top: 0;
-    left: 0;
-    font-size: 5rem;
-    color: var(--color-text-muted, #908F8A);
+    display: block;
     font-family: var(--font-display, 'Playfair Display', Georgia, serif);
+    font-size: clamp(4rem, 8vw, 6rem);
     line-height: 1;
-    opacity: 0.4;
+    color: var(--color-accent-green, #79B939);
+    opacity: 0.12;
+    margin-bottom: 0.5rem;
+    margin-left: -0.15em;
+    user-select: none;
+    pointer-events: none;
   }
 
   .weekly-poem__line {
-    font-size: 1.25rem;
-    line-height: 1.7;
-    font-style: italic;
+    font-size: clamp(1.15rem, 2.5vw, 1.35rem);
+    line-height: 1.9;
     color: var(--color-text-primary, #EFF0ED);
-    margin: 0 0 0.6rem;
-    padding: 0;
+    margin: 0;
+    padding: 0.15rem 0;
+    text-indent: 0;
+  }
+
+  .weekly-poem__line:last-child {
+    margin-top: 1.2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    font-style: italic;
+  }
+
+  /* Closing attribution */
+  .weekly-poem__verse::after {
+    content: '\2014\2009 voices, woven';
+    display: block;
+    margin-top: 2rem;
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--color-text-muted, #908F8A);
+    text-align: right;
+    opacity: 0.5;
   }
 
   /* Meta */
   .weekly-poem__meta {
     text-align: center;
     padding: 1.5rem 0;
-    border-top: 1px dotted var(--color-separator, rgba(255, 255, 255, 0.06));
     color: var(--color-text-muted, #908F8A);
     font-style: italic;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    letter-spacing: 0.03em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .weekly-poem__date-sep {
+    opacity: 0.3;
   }
 
   .weekly-poem__date {
-    display: block;
-    margin-top: 0.3rem;
     font-size: 0.8rem;
     letter-spacing: 0.05em;
   }
@@ -290,15 +319,21 @@ import Base from '../layouts/Base.astro';
     }
 
     .weekly-poem__verse {
-      padding: 2rem 1.2rem;
-    }
-
-    .weekly-poem__verse::before {
-      font-size: 3.5rem;
+      padding: 1.5rem 1rem 1.5rem 1.5rem;
+      border-left-width: 1px;
     }
 
     .weekly-poem__line {
-      font-size: 1.1rem;
+      line-height: 1.8;
+    }
+
+    .weekly-poem__meta {
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .weekly-poem__date-sep {
+      display: none;
     }
   }
 </style>
