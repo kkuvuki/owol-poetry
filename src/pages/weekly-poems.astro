@@ -126,40 +126,40 @@ import Base from '../layouts/Base.astro';
 
   .weekly-archive__list[hidden] { display: none; }
 
-  /* ── Individual poem entry ── */
-  .weekly-archive__poem {
-    position: relative;
-    padding: 2.5rem 2rem 2.5rem 3rem;
-    border-left: 1px solid rgba(255, 255, 255, 0.04);
-    transition: border-color 0.4s ease;
+  /* Poem lines and meta are JS-injected, so they need :global() to bypass Astro scoping */
+
+  :global(.weekly-archive__poem-line:first-child)::first-letter {
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
+    font-size: 2.4em;
+    float: left;
+    line-height: 0.8;
+    margin-right: 0.06em;
+    margin-top: 0.05em;
+    color: var(--color-accent-green, #79B939);
+    opacity: 0.6;
+    font-style: normal;
   }
 
-  .weekly-archive__poem:hover {
-    border-left-color: rgba(121, 185, 57, 0.3);
+  :global(.weekly-archive__poem-line) {
+    font-family: var(--font-body, 'EB Garamond', Georgia, serif);
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: var(--color-text-primary, #EFF0ED);
+    margin: 0 0 0.6rem;
+    font-style: italic;
   }
 
-  /* Timeline dot */
-  .weekly-archive__poem::before {
-    content: '';
-    position: absolute;
-    left: -4px;
-    top: 3rem;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--color-bg, #13100D);
-    border: 1.5px solid rgba(121, 185, 57, 0.4);
-    transition: all 0.3s ease;
+  :global(.weekly-archive__poem-line:last-child) {
+    margin-bottom: 0;
   }
 
-  .weekly-archive__poem:hover::before {
-    background: var(--color-accent-green, #79B939);
-    border-color: var(--color-accent-green, #79B939);
-    box-shadow: 0 0 8px rgba(121, 185, 57, 0.3);
+  :global(.weekly-archive__poem-verse) {
+    padding: 0.5rem 0 0.5rem 1.25rem;
+    border-left: 2px solid rgba(121, 185, 57, 0.15);
+    margin-bottom: 0;
   }
 
-  /* Poem number */
-  .weekly-archive__poem-number {
+  :global(.weekly-archive__poem-number) {
     display: block;
     font-family: var(--font-ui, 'Inter', sans-serif);
     font-size: 0.55rem;
@@ -171,8 +171,7 @@ import Base from '../layouts/Base.astro';
     margin-bottom: 0.3rem;
   }
 
-  /* Date */
-  .weekly-archive__poem-date {
+  :global(.weekly-archive__poem-date) {
     font-family: var(--font-ui, 'Inter', sans-serif);
     font-size: 0.65rem;
     font-weight: 400;
@@ -185,41 +184,7 @@ import Base from '../layouts/Base.astro';
     border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   }
 
-  /* The poem verse block */
-  .weekly-archive__poem-verse {
-    padding: 0.5rem 0 0.5rem 1.25rem;
-    border-left: 2px solid rgba(121, 185, 57, 0.15);
-    margin-bottom: 0;
-  }
-
-  /* Drop cap on first line */
-  .weekly-archive__poem-line:first-child::first-letter {
-    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
-    font-size: 2.4em;
-    float: left;
-    line-height: 0.8;
-    margin-right: 0.06em;
-    margin-top: 0.05em;
-    color: var(--color-accent-green, #79B939);
-    opacity: 0.6;
-    font-style: normal;
-  }
-
-  .weekly-archive__poem-line {
-    font-family: var(--font-body, 'EB Garamond', Georgia, serif);
-    font-size: 1.15rem;
-    line-height: 1.8;
-    color: var(--color-text-primary, #EFF0ED);
-    margin: 0 0 0.6rem;
-    font-style: italic;
-  }
-
-  .weekly-archive__poem-line:last-child {
-    margin-bottom: 0;
-  }
-
-  /* Meta line */
-  .weekly-archive__poem-meta {
+  :global(.weekly-archive__poem-meta) {
     font-family: var(--font-ui, 'Inter', sans-serif);
     font-size: 0.6rem;
     color: var(--color-text-muted, #908F8A);
@@ -229,6 +194,36 @@ import Base from '../layouts/Base.astro';
     padding-top: 0.75rem;
     border-top: 1px solid rgba(255, 255, 255, 0.03);
     opacity: 0.45;
+  }
+
+  :global(.weekly-archive__poem) {
+    position: relative;
+    padding: 2.5rem 2rem 2.5rem 3rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.04);
+    transition: border-color 0.4s ease;
+  }
+
+  :global(.weekly-archive__poem:hover) {
+    border-left-color: rgba(121, 185, 57, 0.3);
+  }
+
+  :global(.weekly-archive__poem)::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 3rem;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-bg, #13100D);
+    border: 1.5px solid rgba(121, 185, 57, 0.4);
+    transition: all 0.3s ease;
+  }
+
+  :global(.weekly-archive__poem:hover)::before {
+    background: var(--color-accent-green, #79B939);
+    border-color: var(--color-accent-green, #79B939);
+    box-shadow: 0 0 8px rgba(121, 185, 57, 0.3);
   }
 
   /* Separator between poems */

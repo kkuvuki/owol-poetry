@@ -225,8 +225,10 @@ import Base from '../layouts/Base.astro';
     pointer-events: none;
   }
 
+  /* JS-injected elements need :global() to bypass Astro scoping */
+
   /* Drop cap on first line */
-  .weekly-poem__line:first-child::first-letter {
+  :global(.weekly-poem__line:first-child)::first-letter {
     font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: 3em;
     float: left;
@@ -238,7 +240,7 @@ import Base from '../layouts/Base.astro';
     font-style: normal;
   }
 
-  .weekly-poem__line {
+  :global(.weekly-poem__line) {
     font-size: clamp(1.2rem, 2.5vw, 1.4rem);
     line-height: 1.7;
     color: var(--color-text-primary, #EFF0ED);
@@ -250,7 +252,7 @@ import Base from '../layouts/Base.astro';
     animation: line-appear 0.6s ease forwards;
   }
 
-  .weekly-poem__line:last-child {
+  :global(.weekly-poem__line:last-child) {
     margin-top: 1.5rem;
     margin-bottom: 0;
     padding-top: 1.2rem;
@@ -262,7 +264,7 @@ import Base from '../layouts/Base.astro';
   }
 
   /* Closing attribution */
-  .weekly-poem__closing {
+  :global(.weekly-poem__closing) {
     display: block;
     margin-top: 2rem;
     font-family: var(--font-ui, 'Inter', sans-serif);
