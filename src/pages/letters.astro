@@ -118,30 +118,30 @@ import Base from '../layouts/Base.astro';
   }
 
   .letters__title {
-    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: clamp(2rem, 5vw, 3.2rem);
     font-weight: 400;
     letter-spacing: -0.02em;
-    color: var(--color-text, #1a1a1a);
+    color: var(--color-text-primary, #EFF0ED);
     margin: 0 0 0.5rem;
   }
 
   .letters__subtitle {
-    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-style: italic;
     font-size: 1.1rem;
-    color: var(--color-text-muted, #6b6b6b);
+    color: var(--color-text-muted, #908F8A);
     margin: 0;
   }
 
   /* Write Section */
   .letters__write {
     margin-bottom: 4rem;
-    background: linear-gradient(135deg, #faf6f0 0%, #f5efe6 100%);
-    border: 1px solid #e8dfd2;
+    background: linear-gradient(135deg, #2a2520 0%, #252017 100%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 4px;
     padding: 2.5rem 2rem;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
   }
 
   .letters__form {
@@ -164,19 +164,19 @@ import Base from '../layouts/Base.astro';
   }
 
   .letters__label {
-    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-style: italic;
     font-size: 0.95rem;
-    color: var(--color-text-muted, #6b6b6b);
+    color: var(--color-text-muted, #908F8A);
   }
 
   .letters__input,
   .letters__textarea {
-    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: 1rem;
-    color: var(--color-text, #1a1a1a);
-    background: rgba(255, 255, 255, 0.6);
-    border: 1px solid #d9cfc0;
+    color: var(--color-text-primary, #EFF0ED);
+    background: var(--color-bg-elevated, #252119);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 3px;
     padding: 0.65rem 0.85rem;
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -186,13 +186,13 @@ import Base from '../layouts/Base.astro';
 
   .letters__input:focus,
   .letters__textarea:focus {
-    border-color: #b8a990;
-    box-shadow: 0 0 0 3px rgba(184, 169, 144, 0.15);
+    border-color: var(--color-accent-green, #79B939);
+    box-shadow: 0 0 0 3px rgba(121, 185, 57, 0.15);
   }
 
   .letters__input::placeholder,
   .letters__textarea::placeholder {
-    color: #b5a998;
+    color: var(--color-text-muted, #908F8A);
     font-style: italic;
   }
 
@@ -208,17 +208,17 @@ import Base from '../layouts/Base.astro';
 
   .letters__char-count {
     font-size: 0.78rem;
-    color: #b5a998;
+    color: var(--color-text-muted, #908F8A);
     text-align: right;
     font-variant-numeric: tabular-nums;
   }
 
   .letters__char-count--warn {
-    color: #c47a3a;
+    color: #D4A843;
   }
 
   .letters__char-count--full {
-    color: #b94a4a;
+    color: #C48B8B;
   }
 
   .letters__suggestions {
@@ -229,12 +229,12 @@ import Base from '../layouts/Base.astro';
   }
 
   .letters__suggestion {
-    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: 0.78rem;
     font-style: italic;
-    color: #8a7d6f;
-    background: rgba(255, 255, 255, 0.5);
-    border: 1px solid #ddd4c7;
+    color: var(--color-text-muted, #908F8A);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 20px;
     padding: 0.25rem 0.7rem;
     cursor: pointer;
@@ -242,17 +242,17 @@ import Base from '../layouts/Base.astro';
   }
 
   .letters__suggestion:hover {
-    background: rgba(255, 255, 255, 0.85);
-    color: #5a5047;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--color-text-secondary, #B0B1AB);
   }
 
   .letters__submit {
-    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: 1rem;
     font-style: italic;
-    color: #5a4a3a;
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid #c9bfb0;
+    color: var(--color-text-secondary, #B0B1AB);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 3px;
     padding: 0.75rem 1.5rem;
     cursor: pointer;
@@ -261,7 +261,7 @@ import Base from '../layouts/Base.astro';
   }
 
   .letters__submit:hover {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.1);
   }
 
   .letters__submit:active {
@@ -274,16 +274,16 @@ import Base from '../layouts/Base.astro';
   }
 
   .letters__status {
-    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: 0.9rem;
     font-style: italic;
     text-align: center;
-    color: #6b8f6b;
+    color: #8BC48B;
     margin: 0;
   }
 
   .letters__status--error {
-    color: #b94a4a;
+    color: #C48B8B;
   }
 
   /* Browse Section */
@@ -301,10 +301,10 @@ import Base from '../layouts/Base.astro';
   }
 
   .letters__browse-title {
-    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: 1.4rem;
     font-weight: 400;
-    color: var(--color-text, #1a1a1a);
+    color: var(--color-text-primary, #EFF0ED);
     margin: 0;
   }
 
@@ -312,12 +312,12 @@ import Base from '../layouts/Base.astro';
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: 0.85rem;
     font-style: italic;
-    color: #8a7d6f;
+    color: var(--color-text-muted, #908F8A);
     background: transparent;
-    border: 1px solid #d9cfc0;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 3px;
     padding: 0.45rem 0.9rem;
     cursor: pointer;
@@ -325,8 +325,8 @@ import Base from '../layouts/Base.astro';
   }
 
   .letters__shuffle-btn:hover {
-    color: #5a4a3a;
-    border-color: #b8a990;
+    color: var(--color-text-secondary, #B0B1AB);
+    border-color: rgba(255, 255, 255, 0.15);
   }
 
   .letters__loading {
@@ -344,16 +344,16 @@ import Base from '../layouts/Base.astro';
 
   /* Letter Card */
   .letters__card {
-    background: linear-gradient(145deg, #faf6f0 0%, #f3ece2 50%, #efe8dc 100%);
-    border: 1px solid #e0d6c8;
+    background: linear-gradient(145deg, #2a2520 0%, #252017 50%, #201c15 100%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 2px;
     padding: 1.8rem 1.6rem 1.4rem;
     box-shadow:
-      0 1px 4px rgba(0, 0, 0, 0.04),
-      0 4px 16px rgba(0, 0, 0, 0.03);
+      0 1px 4px rgba(0, 0, 0, 0.15),
+      0 4px 16px rgba(0, 0, 0, 0.1);
     position: relative;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
   }
 
   .letters__card:nth-child(3n+1) {
@@ -371,8 +371,8 @@ import Base from '../layouts/Base.astro';
   .letters__card:hover {
     transform: rotate(0deg) translateY(-2px);
     box-shadow:
-      0 2px 8px rgba(0, 0, 0, 0.06),
-      0 8px 24px rgba(0, 0, 0, 0.05);
+      0 2px 8px rgba(0, 0, 0, 0.2),
+      0 8px 24px rgba(0, 0, 0, 0.15);
   }
 
   /* Faux paper edge */
@@ -386,11 +386,11 @@ import Base from '../layouts/Base.astro';
     background: linear-gradient(
       90deg,
       transparent 0%,
-      #e0d6c8 10%,
-      #d6cbb8 30%,
-      #e0d6c8 50%,
-      #d6cbb8 70%,
-      #e0d6c8 90%,
+      rgba(255, 255, 255, 0.06) 10%,
+      rgba(255, 255, 255, 0.1) 30%,
+      rgba(255, 255, 255, 0.06) 50%,
+      rgba(255, 255, 255, 0.1) 70%,
+      rgba(255, 255, 255, 0.06) 90%,
       transparent 100%
     );
     border-radius: 2px 2px 0 0;
@@ -400,16 +400,16 @@ import Base from '../layouts/Base.astro';
   .letters__card-to {
     font-style: italic;
     font-size: 0.88rem;
-    color: #8a7d6f;
+    color: var(--color-text-muted, #908F8A);
     margin: 0 0 0.75rem;
     padding-bottom: 0.6rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   .letters__card-body {
     font-size: 0.95rem;
     line-height: 1.75;
-    color: #3d3630;
+    color: var(--color-text-secondary, #B0B1AB);
     margin: 0 0 1rem;
     white-space: pre-line;
     word-break: break-word;
@@ -424,16 +424,16 @@ import Base from '../layouts/Base.astro';
   .letters__card-from {
     font-style: italic;
     font-size: 0.82rem;
-    color: #a69882;
+    color: var(--color-text-muted, #908F8A);
   }
 
   .letters__heart-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: 0.8rem;
-    color: #b5a090;
+    color: var(--color-text-muted, #908F8A);
     background: transparent;
     border: none;
     cursor: pointer;
@@ -443,12 +443,12 @@ import Base from '../layouts/Base.astro';
   }
 
   .letters__heart-btn:hover {
-    color: #c47a6a;
-    background: rgba(196, 122, 106, 0.08);
+    color: #C47A6A;
+    background: rgba(196, 122, 106, 0.1);
   }
 
   .letters__heart-btn--active {
-    color: #c47a6a;
+    color: #C47A6A;
   }
 
   .letters__heart-icon {
@@ -464,9 +464,9 @@ import Base from '../layouts/Base.astro';
   .letters__empty {
     grid-column: 1 / -1;
     text-align: center;
-    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-style: italic;
-    color: var(--color-text-muted, #6b6b6b);
+    color: var(--color-text-muted, #908F8A);
     padding: 3rem 0;
   }
 
@@ -492,15 +492,15 @@ import Base from '../layouts/Base.astro';
   }
 
   .letters__back {
-    font-family: var(--font-serif, Georgia, 'Times New Roman', serif);
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: 0.9rem;
-    color: var(--color-text-muted, #6b6b6b);
+    color: var(--color-text-muted, #908F8A);
     text-decoration: none;
     transition: color 0.2s;
   }
 
   .letters__back:hover {
-    color: var(--color-text, #1a1a1a);
+    color: var(--color-text-primary, #EFF0ED);
   }
 
   /* Responsive */
@@ -524,92 +524,6 @@ import Base from '../layouts/Base.astro';
     .letters__card:hover {
       transform: translateY(-2px);
     }
-  }
-
-  /* Dark mode adjustments */
-  :global(.dark) .letters__write {
-    background: linear-gradient(135deg, #2a2520 0%, #252017 100%);
-    border-color: #3d362e;
-  }
-
-  :global(.dark) .letters__input,
-  :global(.dark) .letters__textarea {
-    background: rgba(0, 0, 0, 0.25);
-    border-color: #3d362e;
-    color: #e8dfd2;
-  }
-
-  :global(.dark) .letters__input:focus,
-  :global(.dark) .letters__textarea:focus {
-    border-color: #5a4a3a;
-    box-shadow: 0 0 0 3px rgba(90, 74, 58, 0.2);
-  }
-
-  :global(.dark) .letters__input::placeholder,
-  :global(.dark) .letters__textarea::placeholder {
-    color: #6b5d50;
-  }
-
-  :global(.dark) .letters__suggestion {
-    background: rgba(0, 0, 0, 0.2);
-    border-color: #3d362e;
-    color: #8a7d6f;
-  }
-
-  :global(.dark) .letters__suggestion:hover {
-    background: rgba(0, 0, 0, 0.35);
-    color: #b5a998;
-  }
-
-  :global(.dark) .letters__submit {
-    background: rgba(0, 0, 0, 0.2);
-    border-color: #3d362e;
-    color: #c9bfb0;
-  }
-
-  :global(.dark) .letters__submit:hover {
-    background: rgba(0, 0, 0, 0.35);
-  }
-
-  :global(.dark) .letters__card {
-    background: linear-gradient(145deg, #2a2520 0%, #252017 50%, #201c15 100%);
-    border-color: #3d362e;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1);
-  }
-
-  :global(.dark) .letters__card::before {
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      #3d362e 10%,
-      #4a3f33 30%,
-      #3d362e 50%,
-      #4a3f33 70%,
-      #3d362e 90%,
-      transparent 100%
-    );
-  }
-
-  :global(.dark) .letters__card-to {
-    color: #8a7d6f;
-    border-bottom-color: rgba(255, 255, 255, 0.06);
-  }
-
-  :global(.dark) .letters__card-body {
-    color: #d6cbb8;
-  }
-
-  :global(.dark) .letters__card-from {
-    color: #6b5d50;
-  }
-
-  :global(.dark) .letters__shuffle-btn {
-    border-color: #3d362e;
-  }
-
-  :global(.dark) .letters__shuffle-btn:hover {
-    color: #c9bfb0;
-    border-color: #5a4a3a;
   }
 </style>
 

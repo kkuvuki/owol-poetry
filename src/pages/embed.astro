@@ -209,10 +209,10 @@ import Base from '../layouts/Base.astro';
   }
 
   .embed-page__title {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: clamp(2rem, 5vw, 3rem);
     font-weight: 500;
-    color: var(--color-text, #EFF0ED);
+    color: var(--color-text-primary, #EFF0ED);
     margin: 0 0 0.75rem;
     letter-spacing: -0.01em;
   }
@@ -220,7 +220,7 @@ import Base from '../layouts/Base.astro';
   .embed-page__subtitle {
     font-family: 'Lora', Georgia, serif;
     font-size: 1.05rem;
-    color: var(--color-text-muted, #7A7B75);
+    color: var(--color-text-muted, #908F8A);
     line-height: 1.7;
     margin: 0;
   }
@@ -235,14 +235,14 @@ import Base from '../layouts/Base.astro';
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--color-text-muted, #7A7B75);
+    color: var(--color-text-muted, #908F8A);
     margin: 0 0 1.25rem;
   }
 
   .embed-page__text {
     font-family: 'Lora', Georgia, serif;
     font-size: 1rem;
-    color: var(--color-text-muted, #7A7B75);
+    color: var(--color-text-muted, #908F8A);
     line-height: 1.7;
     margin: 0 0 1.25rem;
   }
@@ -340,14 +340,14 @@ import Base from '../layouts/Base.astro';
   .embed-page__values {
     font-family: 'Nunito Sans', -apple-system, sans-serif;
     font-size: 0.8rem;
-    color: var(--color-text-muted, #7A7B75);
+    color: var(--color-text-muted, #908F8A);
     grid-row: 1;
   }
 
   .embed-page__default {
     font-family: 'Nunito Sans', -apple-system, sans-serif;
     font-size: 0.75rem;
-    color: var(--color-text-muted, #7A7B75);
+    color: var(--color-text-muted, #908F8A);
     opacity: 0.6;
     grid-row: 1;
     text-align: right;
@@ -356,7 +356,7 @@ import Base from '../layouts/Base.astro';
   .embed-page__desc {
     font-family: 'Lora', Georgia, serif;
     font-size: 0.9rem;
-    color: var(--color-text-muted, #7A7B75);
+    color: var(--color-text-muted, #908F8A);
     margin: 0;
     grid-column: 1 / -1;
     grid-row: 2;
@@ -366,7 +366,7 @@ import Base from '../layouts/Base.astro';
     font-family: 'Nunito Sans', -apple-system, sans-serif;
     font-size: 0.8rem;
     font-weight: 600;
-    color: var(--color-text-muted, #7A7B75);
+    color: var(--color-text-muted, #908F8A);
     margin: 0 0 0.75rem;
   }
 
@@ -374,7 +374,7 @@ import Base from '../layouts/Base.astro';
   .embed-page__list {
     font-family: 'Lora', Georgia, serif;
     font-size: 0.95rem;
-    color: var(--color-text-muted, #7A7B75);
+    color: var(--color-text-muted, #908F8A);
     line-height: 1.8;
     padding-left: 1.25rem;
     margin: 0;
@@ -385,7 +385,7 @@ import Base from '../layouts/Base.astro';
   }
 
   .embed-page__list strong {
-    color: var(--color-text, #EFF0ED);
+    color: var(--color-text-primary, #EFF0ED);
     font-weight: 600;
   }
 
@@ -401,13 +401,13 @@ import Base from '../layouts/Base.astro';
   .embed-page__back {
     font-family: 'Nunito Sans', -apple-system, sans-serif;
     font-size: 0.9rem;
-    color: var(--color-text-muted, #7A7B75);
+    color: var(--color-text-muted, #908F8A);
     text-decoration: none;
     transition: color 0.2s ease;
   }
 
   .embed-page__back:hover {
-    color: var(--color-text, #EFF0ED);
+    color: var(--color-text-primary, #EFF0ED);
   }
 
   /* Responsive */

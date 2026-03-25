@@ -919,7 +919,7 @@ ul, ol {
   height: 100%;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.6;
+  opacity: 1;
 }
 
 .poem-single__header,

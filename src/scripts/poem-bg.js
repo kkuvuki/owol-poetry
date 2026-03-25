@@ -120,9 +120,9 @@ function initGoodOldDays(w, h) {
       x: rand(0, w), y: rand(0, h),
       w: rand(40, 80), h: rand(50, 90),
       rot: rand(-0.2, 0.2),
-      drift: rand(0.05, 0.15),
+      drift: rand(0.15, 0.3),
       phase: rand(0, Math.PI * 2),
-      opacity: rand(0.02, 0.06),
+      opacity: rand(0.2, 0.27),
     });
   }
   var lights = [];
@@ -131,7 +131,7 @@ function initGoodOldDays(w, h) {
       x: rand(0, w), y: rand(0, h),
       r: rand(30, 120),
       phase: rand(0, Math.PI * 2),
-      speed: rand(0.0005, 0.002),
+      speed: rand(0.04, 0.128),
     });
   }
   return { photos: photos, lights: lights };
@@ -142,8 +142,8 @@ function drawGoodOldDays(ctx, s, color, w, h, t) {
   s.lights.forEach(function(l) {
     var pulse = Math.sin(t * l.speed + l.phase) * 0.5 + 0.5;
     var grad = ctx.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.r);
-    grad.addColorStop(0, rgba(color, 0.04 * pulse));
-    grad.addColorStop(0.5, rgba([255, 200, 100], 0.02 * pulse));
+    grad.addColorStop(0, rgba(color, 0.45 * pulse));
+    grad.addColorStop(0.5, rgba([255, 200, 100], 0.4 * pulse));
     grad.addColorStop(1, rgba(color, 0));
     ctx.fillStyle = grad;
     ctx.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
@@ -160,7 +160,7 @@ function drawGoodOldDays(ctx, s, color, w, h, t) {
     ctx.lineWidth = 1;
     ctx.strokeRect(-p.w / 2, -p.h / 2, p.w, p.h);
     // Inner "photo" area
-    ctx.fillStyle = rgba([255, 220, 150], p.opacity * 0.3);
+    ctx.fillStyle = rgba([255, 220, 150], p.opacity * 0.5);
     ctx.fillRect(-p.w / 2 + 4, -p.h / 2 + 4, p.w - 8, p.h - 16);
     ctx.restore();
   });
@@ -192,7 +192,7 @@ function drawHalfway(ctx, s, color, w, h, t) {
   var midIdx = Math.floor(s.steps.length / 2);
   // Draw path line
   ctx.beginPath();
-  ctx.strokeStyle = rgba(color, 0.04);
+  ctx.strokeStyle = rgba(color, 0.45);
   ctx.lineWidth = 1;
   for (var i = 0; i < s.steps.length; i++) {
     if (i === 0) ctx.moveTo(s.steps[i].x, s.steps[i].y);
@@ -203,12 +203,12 @@ function drawHalfway(ctx, s, color, w, h, t) {
   s.steps.forEach(function(step, i) {
     var isLit = i <= litCount;
     var isMid = i === midIdx;
-    var alpha = isLit ? 0.12 : 0.03;
+    var alpha = isLit ? 0.30 : 0.12;
     if (isMid) {
       // Pulsing midpoint beacon
       var pulse = Math.sin(t * 0.003) * 0.5 + 0.5;
       var grad = ctx.createRadialGradient(step.x, step.y, 0, step.x, step.y, 20 + pulse * 15);
-      grad.addColorStop(0, rgba(color, 0.15 * pulse));
+      grad.addColorStop(0, rgba(color, 0.5 * pulse));
       grad.addColorStop(1, rgba(color, 0));
       ctx.fillStyle = grad;
       ctx.beginPath();
@@ -241,8 +241,8 @@ function initFavoriteThings(w, h) {
     waves.push({
       y: h * 0.5 + i * 30,
       amp: rand(8, 20),
-      freq: rand(0.005, 0.015),
-      speed: rand(0.0005, 0.002),
+      freq: rand(0.24, 0.42),
+      speed: rand(0.04, 0.128),
       phase: rand(0, Math.PI * 2),
     });
   }
@@ -254,20 +254,20 @@ function drawFavoriteThings(ctx, s, color, w, h, t) {
   // Dewdrops — glistening, imperfect circles
   if (cycle < 1) {
     s.dewdrops.forEach(function(d) {
-      var shimmer = Math.sin(t * 0.002 * d.wobble + d.phase) * 0.5 + 0.5;
+      var shimmer = Math.sin(t * 0.008 * d.wobble + d.phase) * 0.5 + 0.5;
       ctx.save();
       ctx.translate(d.x, d.y);
       ctx.scale(1 + shimmer * 0.3, 1 - shimmer * 0.1);
       var grad = ctx.createRadialGradient(0, -d.r * 0.3, 0, 0, 0, d.r);
-      grad.addColorStop(0, rgba([220, 240, 255], 0.12 * shimmer));
-      grad.addColorStop(0.6, rgba([180, 220, 255], 0.05));
+      grad.addColorStop(0, rgba([220, 240, 255], 0.5 * shimmer));
+      grad.addColorStop(0.6, rgba([180, 220, 255], 0.375));
       grad.addColorStop(1, rgba(color, 0));
       ctx.fillStyle = grad;
       ctx.beginPath();
       ctx.arc(0, 0, d.r * 1.5, 0, Math.PI * 2);
       ctx.fill();
       // Tiny highlight
-      ctx.fillStyle = rgba([255, 255, 255], 0.15 * shimmer);
+      ctx.fillStyle = rgba([255, 255, 255], 0.5 * shimmer);
       ctx.beginPath();
       ctx.arc(-d.r * 0.2, -d.r * 0.3, d.r * 0.25, 0, Math.PI * 2);
       ctx.fill();
@@ -278,7 +278,7 @@ function drawFavoriteThings(ctx, s, color, w, h, t) {
   else if (cycle < 2) {
     s.waves.forEach(function(wave) {
       ctx.beginPath();
-      ctx.strokeStyle = rgba([200, 210, 230], 0.06);
+      ctx.strokeStyle = rgba([200, 210, 230], 0.36);
       ctx.lineWidth = 1;
       for (var x = 0; x < w; x += 3) {
         var y = wave.y + Math.sin(x * wave.freq + t * wave.speed + wave.phase) * wave.amp
@@ -291,7 +291,7 @@ function drawFavoriteThings(ctx, s, color, w, h, t) {
     // Moonlight reflection
     var moonY = h * 0.45;
     var moonGrad = ctx.createRadialGradient(w * 0.7, moonY, 0, w * 0.7, moonY, 80);
-    moonGrad.addColorStop(0, rgba([230, 230, 255], 0.04));
+    moonGrad.addColorStop(0, rgba([230, 230, 255], 0.3));
     moonGrad.addColorStop(1, rgba([200, 210, 240], 0));
     ctx.fillStyle = moonGrad;
     ctx.fillRect(0, 0, w, h);
@@ -305,7 +305,7 @@ function drawFavoriteThings(ctx, s, color, w, h, t) {
         var ox = (j - 2) * 18 + Math.sin(j * 1.5 + i) * 8;
         var oy = Math.cos(j * 2 + i) * 6;
         var r = rand(15, 25);
-        ctx.fillStyle = rgba([200, 210, 230], 0.025);
+        ctx.fillStyle = rgba([200, 210, 230], 0.25);
         ctx.beginPath();
         ctx.arc(cx + ox, cy + oy, r, 0, Math.PI * 2);
         ctx.fill();
@@ -335,7 +335,7 @@ function drawCalmHere(ctx, s, color, w, h, t) {
   // Slowly building tension
   s.tension = (Math.sin(t * 0.0002) * 0.5 + 0.5);
   // Edge storm - dark vignette that pulses
-  var stormAlpha = s.tension * 0.08;
+  var stormAlpha = s.tension * 0.20;
   var edgeGrad = ctx.createRadialGradient(w / 2, h / 2, w * 0.2, w / 2, h / 2, w * 0.7);
   edgeGrad.addColorStop(0, 'rgba(0,0,0,0)');
   edgeGrad.addColorStop(1, 'rgba(20,20,40,' + stormAlpha + ')');
@@ -348,15 +348,15 @@ function drawCalmHere(ctx, s, color, w, h, t) {
     m.y += Math.cos(t * 0.0002 + m.phase) * 0.03;
     // Subtle flicker at the edges as storm builds
     var distFromCenter = Math.hypot(m.x - w / 2, m.y - h / 2) / (w / 2);
-    var edgeBoost = distFromCenter * s.tension * 0.08;
-    ctx.fillStyle = rgba(color, 0.03 + edgeBoost);
+    var edgeBoost = distFromCenter * s.tension * 0.20;
+    ctx.fillStyle = rgba(color, 0.12 + edgeBoost);
     ctx.beginPath();
     ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
     ctx.fill();
   });
   // Lightning hint at peak tension
   if (s.tension > 0.9 && Math.random() > 0.98) {
-    ctx.fillStyle = rgba([150, 160, 200], 0.02);
+    ctx.fillStyle = rgba([150, 160, 200], 0.24);
     ctx.fillRect(0, 0, w, h);
   }
 }
@@ -384,7 +384,7 @@ function initStillWeFight(w, h) {
 function drawStillWeFight(ctx, s, color, w, h, t) {
   // Base glow from below
   var baseGrad = ctx.createLinearGradient(0, h, 0, h * 0.6);
-  baseGrad.addColorStop(0, rgba([200, 60, 20], 0.04));
+  baseGrad.addColorStop(0, rgba([200, 60, 20], 0.3));
   baseGrad.addColorStop(1, rgba(color, 0));
   ctx.fillStyle = baseGrad;
   ctx.fillRect(0, 0, w, h);
@@ -398,7 +398,7 @@ function drawStillWeFight(ctx, s, color, w, h, t) {
       e.x = rand(0, w);
       e.life = 0;
     }
-    var alpha = Math.sin(e.life / e.maxLife * Math.PI) * 0.15;
+    var alpha = Math.sin(e.life / e.maxLife * Math.PI) * 0.38;
     var flicker = Math.sin(t * 0.01 + e.phase) * 0.5 + 0.5;
     var r = e.r * (0.5 + flicker * 0.5);
     var grad = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, r * 4);
@@ -451,7 +451,7 @@ function drawBlacksmith(ctx, s, color, w, h, t) {
   // Shockwave ring
   if (s.shockwave > 0) {
     var radius = (1 - s.shockwave) * 150;
-    ctx.strokeStyle = rgba(color, s.shockwave * 0.1);
+    ctx.strokeStyle = rgba(color, s.shockwave * 0.25);
     ctx.lineWidth = 2 * s.shockwave;
     ctx.beginPath();
     ctx.arc(s.anvilX, s.anvilY, radius, 0, Math.PI * 2);
@@ -461,7 +461,7 @@ function drawBlacksmith(ctx, s, color, w, h, t) {
   // Forge glow
   var glow = Math.sin(t * 0.002) * 0.5 + 0.5;
   var forgeGrad = ctx.createRadialGradient(s.anvilX, s.anvilY, 0, s.anvilX, s.anvilY, 100);
-  forgeGrad.addColorStop(0, rgba([255, 180, 80], 0.03 * glow));
+  forgeGrad.addColorStop(0, rgba([255, 180, 80], 0.45 * glow));
   forgeGrad.addColorStop(1, rgba(color, 0));
   ctx.fillStyle = forgeGrad;
   ctx.fillRect(s.anvilX - 100, s.anvilY - 100, 200, 200);
@@ -473,7 +473,7 @@ function drawBlacksmith(ctx, s, color, w, h, t) {
     sp.vy += 0.03; // gravity
     sp.life -= 0.008;
     if (sp.life <= 0) { sp.active = false; return; }
-    ctx.fillStyle = rgba([255, 200, 100], sp.life * 0.12);
+    ctx.fillStyle = rgba([255, 200, 100], sp.life * 0.30);
     ctx.beginPath();
     ctx.arc(sp.x, sp.y, 1 + sp.life, 0, Math.PI * 2);
     ctx.fill();
@@ -509,7 +509,7 @@ function drawRaceBetwixt(ctx, s, color, w, h, t) {
     if (hound.x > w + 50) { hound.x = -50; hound.y = rand(h * 0.2, h * 0.8); }
     var breathe = Math.sin(t * 0.004 + hound.phase) * 3;
     var grad = ctx.createRadialGradient(hound.x, hound.y, 0, hound.x + 10, hound.y, hound.size + breathe);
-    grad.addColorStop(0, rgba([40, 20, 60], 0.08));
+    grad.addColorStop(0, rgba([40, 20, 60], 0.4));
     grad.addColorStop(1, rgba(color, 0));
     ctx.fillStyle = grad;
     ctx.beginPath();
@@ -518,7 +518,7 @@ function drawRaceBetwixt(ctx, s, color, w, h, t) {
   });
   // Cliff edge — a line near the right with depth beneath
   var cliffX = w * 0.75;
-  ctx.strokeStyle = rgba(color, 0.06);
+  ctx.strokeStyle = rgba(color, 0.36);
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(cliffX, 0);
@@ -527,7 +527,7 @@ function drawRaceBetwixt(ctx, s, color, w, h, t) {
   // Depth gradient beyond the cliff
   var depthGrad = ctx.createLinearGradient(cliffX, 0, w, 0);
   depthGrad.addColorStop(0, rgba([20, 10, 30], 0));
-  depthGrad.addColorStop(1, rgba([20, 10, 30], 0.06));
+  depthGrad.addColorStop(1, rgba([20, 10, 30], 0.36));
   ctx.fillStyle = depthGrad;
   ctx.fillRect(cliffX, 0, w - cliffX, h);
   ctx.restore();
@@ -558,7 +558,7 @@ function drawNemesis(ctx, s, color, w, h, t) {
     f.x += (f.tx - f.x) * 0.08 + rand(-2, 2);
     f.y += (f.ty - f.y) * 0.08 + rand(-2, 2);
     // Trail
-    s.trail.push({ x: f.x, y: f.y, a: 0.08 });
+    s.trail.push({ x: f.x, y: f.y, a: 0.20 });
     if (s.trail.length > 20) s.trail.shift();
     // Check for death
     if (t > s.nextDeath) {
@@ -576,13 +576,13 @@ function drawNemesis(ctx, s, color, w, h, t) {
   });
   if (!s.dead) {
     // The fly — buzzing
-    ctx.fillStyle = rgba(color, 0.12);
+    ctx.fillStyle = rgba(color, 0.45);
     ctx.beginPath();
     ctx.arc(f.x, f.y, 2, 0, Math.PI * 2);
     ctx.fill();
     // Wings
     var wingPhase = t * 0.05;
-    ctx.strokeStyle = rgba(color, 0.05);
+    ctx.strokeStyle = rgba(color, 0.375);
     ctx.lineWidth = 0.5;
     ctx.beginPath();
     ctx.ellipse(f.x - 3, f.y - 2, 3, 1.5 * Math.abs(Math.sin(wingPhase)), 0, 0, Math.PI * 2);
@@ -595,7 +595,7 @@ function drawNemesis(ctx, s, color, w, h, t) {
     var sinceDeath = t - s.deathTime;
     if (sinceDeath < 2000) {
       // Impact mark
-      ctx.fillStyle = rgba(color, 0.06 * (1 - sinceDeath / 2000));
+      ctx.fillStyle = rgba(color, 0.18 * (1 - sinceDeath / 2000));
       ctx.beginPath();
       ctx.arc(f.x, f.y, 3, 0, Math.PI * 2);
       ctx.fill();
@@ -621,7 +621,7 @@ function initDearth(w, h) {
       x: rand(0, w), y: rand(-h, 0),
       speed: rand(0.5, 1.5),
       length: rand(8, 20),
-      opacity: rand(0.03, 0.08),
+      opacity: rand(0.3, 0.3),
     });
   }
   return { tears: tears };
@@ -629,7 +629,7 @@ function initDearth(w, h) {
 
 function drawDearth(ctx, s, color, w, h, t) {
   // Mournful dark wash
-  ctx.fillStyle = rgba([40, 20, 20], 0.01);
+  ctx.fillStyle = rgba([40, 20, 20], 0.05);
   ctx.fillRect(0, 0, w, h);
   // Falling tears
   s.tears.forEach(function(tear) {
@@ -648,7 +648,7 @@ function drawDearth(ctx, s, color, w, h, t) {
     ctx.fill();
   });
   // Fading continental outlines — abstract curves
-  ctx.strokeStyle = rgba(color, 0.02);
+  ctx.strokeStyle = rgba(color, 0.1);
   ctx.lineWidth = 0.5;
   var drift = t * 0.0001;
   ctx.beginPath();
@@ -719,7 +719,7 @@ function drawPhobia(ctx, s, color, w, h, t) {
   // Visceral flash on burst
   if (t > s.nextBurst - 800 && t < s.nextBurst) {
     if (Math.random() > 0.95) {
-      ctx.fillStyle = rgba(color, 0.015);
+      ctx.fillStyle = rgba(color, 0.075);
       ctx.fillRect(0, 0, w, h);
     }
   }
@@ -745,7 +745,7 @@ function initFate(w, h) {
 
 function drawFate(ctx, s, color, w, h, t) {
   // Hourglass silhouette — very subtle
-  ctx.strokeStyle = rgba(color, 0.04);
+  ctx.strokeStyle = rgba(color, 0.16);
   ctx.lineWidth = 1;
   ctx.beginPath();
   // Top triangle
@@ -799,7 +799,7 @@ function initNomad(w, h) {
       x: rand(0, w), y: rand(0, h * 0.6),
       r: rand(0.5, 1.5),
       twinkle: rand(0, Math.PI * 2),
-      speed: rand(0.001, 0.004),
+      speed: rand(0.08, 0.192),
     });
   }
   return {
@@ -819,7 +819,7 @@ function drawNomad(ctx, s, color, w, h, t) {
     ctx.fill();
   });
   // Connect some stars as alien constellations
-  ctx.strokeStyle = rgba(color, 0.015);
+  ctx.strokeStyle = rgba(color, 0.075);
   ctx.lineWidth = 0.5;
   for (var i = 0; i < s.stars.length - 3; i += 4) {
     ctx.beginPath();
@@ -829,7 +829,7 @@ function drawNomad(ctx, s, color, w, h, t) {
     ctx.stroke();
   }
   // Ocean at bottom
-  ctx.strokeStyle = rgba([60, 80, 120], 0.04);
+  ctx.strokeStyle = rgba([60, 80, 120], 0.16);
   ctx.lineWidth = 1;
   for (var layer = 0; layer < 3; layer++) {
     ctx.beginPath();
@@ -855,7 +855,7 @@ function drawNomad(ctx, s, color, w, h, t) {
     ctx.fillRect(fp.x - 1, fp.y, 2, 1);
   });
   // The wanderer silhouette
-  ctx.fillStyle = rgba([50, 60, 80], 0.08);
+  ctx.fillStyle = rgba([50, 60, 80], 0.24);
   ctx.fillRect(wand.x - 1, wand.y - 14, 2, 14);
   ctx.fillRect(wand.x - 3, wand.y - 16, 6, 4);
 }
@@ -886,7 +886,7 @@ function drawForces(ctx, s, color, w, h, t) {
   var bx = cx + Math.cos(s.bodyB.angle) * (s.separation * 1.2);
   var by = cy + Math.sin(s.bodyB.angle) * (s.separation * 0.8);
   // Gravitational field lines
-  ctx.strokeStyle = rgba(color, 0.02);
+  ctx.strokeStyle = rgba(color, 0.1);
   ctx.lineWidth = 0.5;
   for (var i = 0; i < 8; i++) {
     var angle = (i / 8) * Math.PI * 2;
@@ -906,7 +906,7 @@ function drawForces(ctx, s, color, w, h, t) {
   }
   // Body A — warm
   var gradA = ctx.createRadialGradient(ax, ay, 0, ax, ay, 12);
-  gradA.addColorStop(0, rgba([255, 160, 140], 0.12));
+  gradA.addColorStop(0, rgba([255, 160, 140], 0.3));
   gradA.addColorStop(1, rgba(color, 0));
   ctx.fillStyle = gradA;
   ctx.beginPath();
@@ -914,7 +914,7 @@ function drawForces(ctx, s, color, w, h, t) {
   ctx.fill();
   // Body B — cool
   var gradB = ctx.createRadialGradient(bx, by, 0, bx, by, 10);
-  gradB.addColorStop(0, rgba([140, 160, 255], 0.1));
+  gradB.addColorStop(0, rgba([140, 160, 255], 0.25));
   gradB.addColorStop(1, rgba(color, 0));
   ctx.fillStyle = gradB;
   ctx.beginPath();
@@ -1054,7 +1054,7 @@ function initGeneric(w, h) {
     particles.push({
       x: rand(0, w), y: rand(0, h),
       vx: rand(-0.15, 0.15), vy: rand(-0.1, 0.1),
-      r: rand(1, 3), a: rand(0.02, 0.12),
+      r: rand(1, 3), a: rand(0.08, 0.3),
     });
   }
   return { particles: particles };
@@ -1089,7 +1089,7 @@ function drawGenericRipples(ctx, s, color, w, h, t) {
 }
 
 function drawGenericDrift(ctx, s, color, w, h, t) {
-  ctx.strokeStyle = rgba(color, 0.03);
+  ctx.strokeStyle = rgba(color, 0.12);
   ctx.lineWidth = 0.5;
   for (var i = 0; i < s.particles.length - 1; i++) {
     var a = s.particles[i]; var b = s.particles[i + 1];
@@ -1108,7 +1108,7 @@ function drawGenericThreads(ctx, s, color, w, h, t) {
     if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
     if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
   });
-  ctx.strokeStyle = rgba(color, 0.04);
+  ctx.strokeStyle = rgba(color, 0.3);
   ctx.lineWidth = 0.5;
   for (var i = 0; i < s.particles.length; i++) {
     for (var j = i + 1; j < s.particles.length; j++) {

@@ -46,8 +46,8 @@ import Base from '../layouts/Base.astro';
     max-width: 52rem;
     margin: 0 auto;
     padding: 4rem 1.5rem 6rem;
-    font-family: 'EB Garamond', 'Georgia', serif;
-    color: var(--rh-ink, #1a1a1a);
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
+    color: var(--color-text-primary, #EFF0ED);
   }
 
   /* Header */
@@ -55,7 +55,7 @@ import Base from '../layouts/Base.astro';
     text-align: center;
     margin-bottom: 3rem;
     padding-bottom: 2rem;
-    border-bottom: 1px solid var(--rh-border, #e0d8cf);
+    border-bottom: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
   }
 
   .anthology__title {
@@ -64,12 +64,12 @@ import Base from '../layouts/Base.astro';
     font-style: italic;
     letter-spacing: 0.02em;
     margin: 0 0 0.3rem;
-    color: var(--rh-ink, #1a1a1a);
+    color: var(--color-text-primary, #EFF0ED);
   }
 
   .anthology__subtitle {
     font-size: 1.1rem;
-    color: var(--rh-muted, #8a7f72);
+    color: var(--color-text-muted, #908F8A);
     font-style: italic;
     margin: 0 0 2rem;
     letter-spacing: 0.04em;
@@ -85,25 +85,25 @@ import Base from '../layouts/Base.astro';
 
   .anthology__year-tab {
     background: none;
-    border: 1px solid var(--rh-border, #e0d8cf);
+    border: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
     padding: 0.45rem 1.4rem;
-    font-family: 'EB Garamond', 'Georgia', serif;
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: 1.05rem;
     cursor: pointer;
-    color: var(--rh-muted, #8a7f72);
+    color: var(--color-text-muted, #908F8A);
     border-radius: 2px;
     transition: all 0.25s ease;
   }
 
   .anthology__year-tab:hover {
-    color: var(--rh-ink, #1a1a1a);
-    border-color: var(--rh-ink, #1a1a1a);
+    color: var(--color-text-primary, #EFF0ED);
+    border-color: var(--color-text-primary, #EFF0ED);
   }
 
   .anthology__year-tab--active {
-    background: var(--rh-ink, #1a1a1a);
-    color: var(--rh-bg, #faf8f5);
-    border-color: var(--rh-ink, #1a1a1a);
+    background: var(--color-text-primary, #EFF0ED);
+    color: var(--color-bg, #13100D);
+    border-color: var(--color-text-primary, #EFF0ED);
   }
 
   /* Loading */
@@ -127,7 +127,7 @@ import Base from '../layouts/Base.astro';
   .anthology__chapter {
     margin-bottom: 4rem;
     padding-bottom: 3rem;
-    border-bottom: 1px solid var(--rh-border, #e0d8cf);
+    border-bottom: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
   }
 
   .anthology__chapter:last-child {
@@ -139,7 +139,7 @@ import Base from '../layouts/Base.astro';
     font-weight: 400;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--rh-muted, #8a7f72);
+    color: var(--color-text-muted, #908F8A);
     margin: 0 0 1.5rem;
     text-align: center;
   }
@@ -159,16 +159,17 @@ import Base from '../layouts/Base.astro';
     top: -0.3rem;
     left: 0.5rem;
     font-size: 4rem;
-    color: var(--rh-border, #e0d8cf);
-    font-family: 'EB Garamond', 'Georgia', serif;
+    color: var(--color-text-muted, #908F8A);
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     line-height: 1;
+    opacity: 0.4;
   }
 
   .anthology__epigraph-text {
     font-size: 1.2rem;
     font-style: italic;
     line-height: 1.7;
-    color: var(--rh-ink, #1a1a1a);
+    color: var(--color-text-primary, #EFF0ED);
     margin: 0;
   }
 
@@ -183,7 +184,7 @@ import Base from '../layouts/Base.astro';
     font-size: 1.1rem;
     line-height: 1.85;
     padding: 0.15rem 0 0.15rem 1.5rem;
-    color: var(--rh-ink, #1a1a1a);
+    color: var(--color-text-primary, #EFF0ED);
     position: relative;
   }
 
@@ -199,12 +200,12 @@ import Base from '../layouts/Base.astro';
     padding-right: 0.08em;
     margin-top: 0.05em;
     font-weight: 400;
-    color: var(--rh-ink, #1a1a1a);
+    color: var(--color-text-primary, #EFF0ED);
   }
 
   .anthology__line-author {
     font-size: 0.75rem;
-    color: var(--rh-muted, #8a7f72);
+    color: var(--color-text-muted, #908F8A);
     font-style: italic;
     margin-left: 0.5rem;
     opacity: 0;
@@ -222,9 +223,9 @@ import Base from '../layouts/Base.astro';
     align-items: center;
     padding-top: 1.5rem;
     margin-top: 1rem;
-    border-top: 1px dotted var(--rh-border, #e0d8cf);
+    border-top: 1px dotted var(--color-separator, rgba(255, 255, 255, 0.06));
     font-size: 0.85rem;
-    color: var(--rh-muted, #8a7f72);
+    color: var(--color-text-muted, #908F8A);
     font-style: italic;
   }
 
@@ -245,9 +246,9 @@ import Base from '../layouts/Base.astro';
   .anthology__summary {
     margin-top: 3rem;
     padding: 3rem 2rem;
-    background: var(--rh-surface, rgba(0,0,0,0.02));
+    background: var(--color-bg-surface, #1C1916);
     border-radius: 4px;
-    border: 1px solid var(--rh-border, #e0d8cf);
+    border: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
   }
 
   .anthology__summary[hidden] {
@@ -260,7 +261,7 @@ import Base from '../layouts/Base.astro';
     font-weight: 400;
     font-style: italic;
     margin: 0 0 2rem;
-    color: var(--rh-ink, #1a1a1a);
+    color: var(--color-text-primary, #EFF0ED);
   }
 
   .anthology__summary-grid {
@@ -278,13 +279,13 @@ import Base from '../layouts/Base.astro';
     display: block;
     font-size: 1.8rem;
     font-weight: 400;
-    color: var(--rh-ink, #1a1a1a);
+    color: var(--color-text-primary, #EFF0ED);
     margin-bottom: 0.25rem;
   }
 
   .anthology__stat-label {
     font-size: 0.8rem;
-    color: var(--rh-muted, #8a7f72);
+    color: var(--color-text-muted, #908F8A);
     text-transform: uppercase;
     letter-spacing: 0.1em;
   }
@@ -293,7 +294,7 @@ import Base from '../layouts/Base.astro';
     display: block;
     font-size: 0.85rem;
     font-style: italic;
-    color: var(--rh-muted, #8a7f72);
+    color: var(--color-text-muted, #908F8A);
     margin-top: 0.3rem;
     max-width: 20rem;
     margin-left: auto;
@@ -308,7 +309,7 @@ import Base from '../layouts/Base.astro';
     text-align: center;
     margin-top: 3rem;
     padding-top: 2rem;
-    border-top: 1px solid var(--rh-border, #e0d8cf);
+    border-top: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -320,25 +321,25 @@ import Base from '../layouts/Base.astro';
     align-items: center;
     gap: 0.5rem;
     background: none;
-    border: 1px solid var(--rh-border, #e0d8cf);
+    border: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
     padding: 0.6rem 1.6rem;
-    font-family: 'EB Garamond', 'Georgia', serif;
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: 1rem;
     cursor: pointer;
-    color: var(--rh-ink, #1a1a1a);
+    color: var(--color-text-primary, #EFF0ED);
     border-radius: 2px;
     transition: all 0.25s ease;
   }
 
   .anthology__export-btn:hover {
-    background: var(--rh-ink, #1a1a1a);
-    color: var(--rh-bg, #faf8f5);
-    border-color: var(--rh-ink, #1a1a1a);
+    background: var(--color-text-primary, #EFF0ED);
+    color: var(--color-bg, #13100D);
+    border-color: var(--color-text-primary, #EFF0ED);
   }
 
   .anthology__cta {
     font-size: 1rem;
-    color: var(--rh-ink, #1a1a1a);
+    color: var(--color-text-primary, #EFF0ED);
     text-decoration: none;
     border-bottom: 1px solid currentColor;
     padding-bottom: 0.1rem;
@@ -351,20 +352,20 @@ import Base from '../layouts/Base.astro';
 
   .anthology__back {
     font-size: 0.9rem;
-    color: var(--rh-muted, #8a7f72);
+    color: var(--color-text-muted, #908F8A);
     text-decoration: none;
     transition: color 0.2s;
   }
 
   .anthology__back:hover {
-    color: var(--rh-ink, #1a1a1a);
+    color: var(--color-text-primary, #EFF0ED);
   }
 
   /* Empty state */
   .anthology__empty {
     text-align: center;
     padding: 4rem 2rem;
-    color: var(--rh-muted, #8a7f72);
+    color: var(--color-text-muted, #908F8A);
     font-style: italic;
     font-size: 1.1rem;
   }

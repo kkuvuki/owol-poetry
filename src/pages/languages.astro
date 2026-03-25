@@ -370,10 +370,10 @@ import Base from '../layouts/Base.astro';
   }
 
   .lang-page__title {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: clamp(2rem, 5vw, 3.2rem);
     font-weight: 600;
-    color: var(--ink, #1a1612);
+    color: var(--color-text-primary, #EFF0ED);
     margin: 0 0 0.5rem;
     letter-spacing: -0.02em;
   }
@@ -381,7 +381,7 @@ import Base from '../layouts/Base.astro';
   .lang-page__subtitle {
     font-family: 'Lora', serif;
     font-size: 1.15rem;
-    color: var(--ink-muted, #6b5e52);
+    color: var(--color-text-muted, #908F8A);
     font-style: italic;
     margin: 0;
   }
@@ -400,8 +400,8 @@ import Base from '../layouts/Base.astro';
     align-items: center;
     gap: 0.35rem;
     padding: 1.5rem 1rem;
-    background: var(--paper, #faf8f5);
-    border: 1px solid var(--border, #e8e0d8);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--color-card-border, rgba(255, 255, 255, 0.04));
     border-radius: 0.75rem;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
@@ -415,12 +415,12 @@ import Base from '../layouts/Base.astro';
   .lang-card:hover,
   .lang-card:focus-visible {
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    border-color: var(--accent, #c4956a);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    border-color: var(--color-accent-green, #79B939);
   }
 
   .lang-card:focus-visible {
-    outline: 2px solid var(--accent, #c4956a);
+    outline: 2px solid var(--color-accent-green, #79B939);
     outline-offset: 2px;
   }
 
@@ -432,18 +432,18 @@ import Base from '../layouts/Base.astro';
   .lang-card__name {
     font-weight: 700;
     font-size: 1rem;
-    color: var(--ink, #1a1612);
+    color: var(--color-text-primary, #EFF0ED);
   }
 
   .lang-card__native {
     font-size: 0.85rem;
-    color: var(--ink-muted, #6b5e52);
+    color: var(--color-text-muted, #908F8A);
     font-style: italic;
   }
 
   .lang-card__count {
     font-size: 0.78rem;
-    color: var(--ink-muted, #6b5e52);
+    color: var(--color-text-muted, #908F8A);
     margin-top: 0.15rem;
   }
 
@@ -453,14 +453,14 @@ import Base from '../layouts/Base.astro';
     padding: 0.3rem 1rem;
     font-size: 0.8rem;
     font-weight: 600;
-    color: var(--accent, #c4956a);
-    border: 1px solid var(--accent, #c4956a);
+    color: var(--color-accent-green, #79B939);
+    border: 1px solid var(--color-accent-green, #79B939);
     border-radius: 2rem;
     transition: background 0.15s ease, color 0.15s ease;
   }
 
   .lang-card:hover .lang-card__join {
-    background: var(--accent, #c4956a);
+    background: var(--color-accent-green, #79B939);
     color: #fff;
   }
 
@@ -469,7 +469,7 @@ import Base from '../layouts/Base.astro';
     display: inline-block;
     background: none;
     border: none;
-    color: var(--accent, #c4956a);
+    color: var(--color-accent-green, #79B939);
     font-family: 'Nunito Sans', sans-serif;
     font-size: 0.9rem;
     font-weight: 600;
@@ -497,17 +497,17 @@ import Base from '../layouts/Base.astro';
   }
 
   .lang-page__poem-title {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: 1.6rem;
     font-weight: 600;
-    color: var(--ink, #1a1612);
+    color: var(--color-text-primary, #EFF0ED);
     margin: 0;
   }
 
   .lang-page__poem-count {
     font-family: 'Nunito Sans', sans-serif;
     font-size: 0.85rem;
-    color: var(--ink-muted, #6b5e52);
+    color: var(--color-text-muted, #908F8A);
   }
 
   /* ── Loading dots ── */
@@ -531,7 +531,7 @@ import Base from '../layouts/Base.astro';
   .lang-page__empty {
     font-family: 'Lora', serif;
     font-style: italic;
-    color: var(--ink-muted, #6b5e52);
+    color: var(--color-text-muted, #908F8A);
     text-align: center;
     padding: 3rem 0;
   }
@@ -542,20 +542,20 @@ import Base from '../layouts/Base.astro';
     align-items: baseline;
     gap: 1rem;
     padding: 0.6rem 0;
-    border-bottom: 1px solid var(--border-faint, #f0ebe5);
+    border-bottom: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
     animation: langFadeIn 0.5s ease both;
   }
 
   .lang-page__line--new {
     animation: langSlideIn 0.6s ease both;
-    background: rgba(196, 149, 106, 0.06);
+    background: rgba(121, 185, 57, 0.08);
   }
 
   .lang-page__line-text {
     font-family: 'Lora', serif;
     font-size: 1.05rem;
     line-height: 1.6;
-    color: var(--ink, #1a1612);
+    color: var(--color-text-primary, #EFF0ED);
     margin: 0;
     flex: 1;
   }
@@ -563,7 +563,7 @@ import Base from '../layouts/Base.astro';
   .lang-page__line-meta {
     font-family: 'Nunito Sans', sans-serif;
     font-size: 0.75rem;
-    color: var(--ink-muted, #6b5e52);
+    color: var(--color-text-muted, #908F8A);
     white-space: nowrap;
     flex-shrink: 0;
   }
@@ -607,8 +607,8 @@ import Base from '../layouts/Base.astro';
 
   /* ── Contribution form ── */
   .lang-page__form {
-    background: var(--paper, #faf8f5);
-    border: 1px solid var(--border, #e8e0d8);
+    background: var(--color-bg-surface, #1C1916);
+    border: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
     border-radius: 0.75rem;
     padding: 1.25rem;
     margin-bottom: 2rem;
@@ -624,16 +624,20 @@ import Base from '../layouts/Base.astro';
     font-family: 'Lora', serif;
     font-size: 0.95rem;
     padding: 0.6rem 0.9rem;
-    border: 1px solid var(--border, #e8e0d8);
+    border: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
     border-radius: 0.5rem;
-    background: #fff;
-    color: var(--ink, #1a1612);
+    background: var(--color-bg-elevated, #252119);
+    color: var(--color-text-primary, #EFF0ED);
     transition: border-color 0.15s ease;
+  }
+
+  .lang-page__input::placeholder {
+    color: var(--color-text-muted, #908F8A);
   }
 
   .lang-page__input:focus {
     outline: none;
-    border-color: var(--accent, #c4956a);
+    border-color: var(--color-accent-green, #79B939);
   }
 
   .lang-page__input--line {
@@ -651,7 +655,7 @@ import Base from '../layouts/Base.astro';
     font-size: 0.9rem;
     font-weight: 700;
     padding: 0.6rem 1.4rem;
-    background: var(--accent, #c4956a);
+    background: var(--color-accent-green, #79B939);
     color: #fff;
     border: none;
     border-radius: 0.5rem;
@@ -676,7 +680,7 @@ import Base from '../layouts/Base.astro';
   .lang-page__form-hint {
     font-family: 'Nunito Sans', sans-serif;
     font-size: 0.75rem;
-    color: var(--ink-muted, #6b5e52);
+    color: var(--color-text-muted, #908F8A);
     margin: 0.6rem 0 0;
   }
 
@@ -684,13 +688,13 @@ import Base from '../layouts/Base.astro';
   .lang-page__footer {
     text-align: center;
     padding-top: 2rem;
-    border-top: 1px solid var(--border-faint, #f0ebe5);
+    border-top: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
   }
 
   .lang-page__home-link {
     font-family: 'Nunito Sans', sans-serif;
     font-size: 0.9rem;
-    color: var(--accent, #c4956a);
+    color: var(--color-accent-green, #79B939);
     text-decoration: none;
     font-weight: 600;
     transition: opacity 0.15s;
@@ -742,35 +746,6 @@ import Base from '../layouts/Base.astro';
     .lang-page__poem-header {
       flex-direction: column;
       gap: 0.25rem;
-    }
-  }
-
-  /* ── Dark mode ── */
-  @media (prefers-color-scheme: dark) {
-    .lang-card {
-      background: rgba(255, 255, 255, 0.04);
-      border-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .lang-card:hover,
-    .lang-card:focus-visible {
-      border-color: var(--accent, #c4956a);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-    }
-
-    .lang-page__form {
-      background: rgba(255, 255, 255, 0.04);
-      border-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .lang-page__input {
-      background: rgba(255, 255, 255, 0.06);
-      border-color: rgba(255, 255, 255, 0.12);
-      color: var(--ink, #e8e0d8);
-    }
-
-    .lang-page__line--new {
-      background: rgba(196, 149, 106, 0.1);
     }
   }
 </style>

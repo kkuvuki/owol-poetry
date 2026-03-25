@@ -43,6 +43,10 @@ import Base from '../layouts/Base.astro';
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export
       </button>
+      <button class="poem-page__toolbar-btn poem-page__toolbar-btn--generate" id="poem-page-generate-top" type="button" title="Generate a mini-poem from contributed lines">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z"/></svg>
+        Generate a Poem
+      </button>
     </div>
 
     <!-- Search -->
@@ -168,6 +172,7 @@ import Base from '../layouts/Base.astro';
   import { initDayNightTheme } from '../scripts/day-night-theme.js';
   import { initPresence, destroyPresence } from '../scripts/live-presence.js';
   import { showAnimatedShareModal } from '../scripts/animated-share.js';
+  import { generatePoem } from '../scripts/poem-generator.js';
 
   var allLines = [];
   var subscription = null;
@@ -218,6 +223,17 @@ import Base from '../layouts/Base.astro';
       showAnimatedShareModal(line.text, line.author_name);
     });
 
+    // Generate poem from this line
+    var genBtn = document.createElement('button');
+    genBtn.className = 'poem-page__line-share poem-page__line-generate';
+    genBtn.type = 'button';
+    genBtn.setAttribute('aria-label', 'Generate a poem from this line');
+    genBtn.title = 'Generate poem';
+    genBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z"/></svg>';
+    genBtn.addEventListener('click', function () {
+      generatePoem(allLines, line);
+    });
+
     // Permalink
     var linkBtn = document.createElement('a');
     linkBtn.className = 'poem-page__line-share';
@@ -229,6 +245,7 @@ import Base from '../layouts/Base.astro';
     right.appendChild(meta);
     right.appendChild(shareBtn);
     right.appendChild(animBtn);
+    right.appendChild(genBtn);
     right.appendChild(linkBtn);
     el.appendChild(text);
     el.appendChild(right);
@@ -497,6 +514,12 @@ import Base from '../layouts/Base.astro';
     // Export (top)
     var exportBtnTop = document.getElementById('poem-page-export-top');
     if (exportBtnTop) exportBtnTop.addEventListener('click', exportPoem);
+
+    // Generate poem (top toolbar)
+    var generateBtnTop = document.getElementById('poem-page-generate-top');
+    if (generateBtnTop) generateBtnTop.addEventListener('click', function () {
+      generatePoem(allLines, null);
+    });
 
     // Poster generator
     var posterBtn = document.getElementById('poem-page-poster');

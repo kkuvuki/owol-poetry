@@ -177,19 +177,19 @@ import Base from '../layouts/Base.astro';
   }
 
   .pen-pals__title {
-    font-family: var(--font-display, 'EB Garamond', Georgia, serif);
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: clamp(2.4rem, 6vw, 3.6rem);
     font-weight: 400;
     letter-spacing: -0.02em;
-    color: var(--color-text, #1a1a1a);
+    color: var(--color-text-primary, #EFF0ED);
     margin: 0 0 0.5rem;
   }
 
   .pen-pals__subtitle {
-    font-family: var(--font-display, 'EB Garamond', Georgia, serif);
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-style: italic;
     font-size: 1.25rem;
-    color: var(--color-muted, #6b6b6b);
+    color: var(--color-text-muted, #908F8A);
     margin: 0 0 1.5rem;
   }
 
@@ -198,27 +198,27 @@ import Base from '../layouts/Base.astro';
     align-items: baseline;
     gap: 0.4rem;
     padding: 0.5rem 1.2rem;
-    background: var(--color-surface, #faf8f5);
-    border: 1px solid var(--color-border, #e8e4df);
+    background: var(--color-bg-surface, #1C1916);
+    border: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
     border-radius: 2rem;
     font-size: 0.9rem;
   }
 
   .pen-pals__count-number {
     font-weight: 600;
-    color: var(--color-text, #1a1a1a);
+    color: var(--color-text-primary, #EFF0ED);
   }
 
   .pen-pals__count-label {
-    color: var(--color-muted, #6b6b6b);
+    color: var(--color-text-muted, #908F8A);
   }
 
   /* Section titles */
   .pen-pals__section-title {
-    font-family: var(--font-display, 'EB Garamond', Georgia, serif);
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: 1.5rem;
     font-weight: 400;
-    color: var(--color-text, #1a1a1a);
+    color: var(--color-text-primary, #EFF0ED);
     margin: 0 0 1.5rem;
     text-align: center;
   }
@@ -227,8 +227,8 @@ import Base from '../layouts/Base.astro';
   .pen-pals__how {
     margin-bottom: 3.5rem;
     padding: 2rem 0;
-    border-top: 1px solid var(--color-border, #e8e4df);
-    border-bottom: 1px solid var(--color-border, #e8e4df);
+    border-top: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
+    border-bottom: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
   }
 
   .pen-pals__steps {
@@ -254,7 +254,7 @@ import Base from '../layouts/Base.astro';
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: var(--color-accent, #8b6f47);
+    background: var(--color-accent-green, #79B939);
     color: #fff;
     font-size: 0.85rem;
     font-weight: 600;
@@ -264,14 +264,14 @@ import Base from '../layouts/Base.astro';
   .pen-pals__step-content strong {
     display: block;
     font-size: 1rem;
-    color: var(--color-text, #1a1a1a);
+    color: var(--color-text-primary, #EFF0ED);
     margin-bottom: 0.2rem;
   }
 
   .pen-pals__step-content p {
     margin: 0;
     font-size: 0.9rem;
-    color: var(--color-muted, #6b6b6b);
+    color: var(--color-text-muted, #908F8A);
     line-height: 1.5;
   }
 
@@ -296,12 +296,12 @@ import Base from '../layouts/Base.astro';
   .pen-pals__label {
     font-size: 0.9rem;
     font-weight: 500;
-    color: var(--color-text, #1a1a1a);
+    color: var(--color-text-primary, #EFF0ED);
     letter-spacing: 0.01em;
   }
 
   .pen-pals__label span {
-    color: var(--color-accent, #8b6f47);
+    color: var(--color-accent-green, #79B939);
   }
 
   .pen-pals__input,
@@ -310,10 +310,10 @@ import Base from '../layouts/Base.astro';
     font-family: inherit;
     font-size: 1rem;
     padding: 0.75rem 1rem;
-    border: 1px solid var(--color-border, #e8e4df);
+    border: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
     border-radius: 0.5rem;
-    background: var(--color-surface, #faf8f5);
-    color: var(--color-text, #1a1a1a);
+    background: var(--color-bg-elevated, #252119);
+    color: var(--color-text-primary, #EFF0ED);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
     outline: none;
     width: 100%;
@@ -323,13 +323,13 @@ import Base from '../layouts/Base.astro';
   .pen-pals__input:focus,
   .pen-pals__textarea:focus,
   .pen-pals__select:focus {
-    border-color: var(--color-accent, #8b6f47);
-    box-shadow: 0 0 0 3px rgba(139, 111, 71, 0.12);
+    border-color: var(--color-accent-green, #79B939);
+    box-shadow: 0 0 0 3px rgba(121, 185, 57, 0.15);
   }
 
   .pen-pals__input::placeholder,
   .pen-pals__textarea::placeholder {
-    color: var(--color-muted, #6b6b6b);
+    color: var(--color-text-muted, #908F8A);
     opacity: 0.6;
   }
 
@@ -340,13 +340,13 @@ import Base from '../layouts/Base.astro';
 
   .pen-pals__char-count {
     font-size: 0.75rem;
-    color: var(--color-muted, #6b6b6b);
+    color: var(--color-text-muted, #908F8A);
     text-align: right;
   }
 
   .pen-pals__select {
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b6b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23908F8A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 1rem center;
     padding-right: 2.5rem;
@@ -376,7 +376,7 @@ import Base from '../layouts/Base.astro';
     gap: 0.6rem;
     cursor: pointer;
     font-size: 0.95rem;
-    color: var(--color-text, #1a1a1a);
+    color: var(--color-text-primary, #EFF0ED);
     line-height: 1.4;
   }
 
@@ -385,9 +385,9 @@ import Base from '../layouts/Base.astro';
     flex-shrink: 0;
     width: 1.15rem;
     height: 1.15rem;
-    border: 1.5px solid var(--color-border, #e8e4df);
+    border: 1.5px solid var(--color-separator, rgba(255, 255, 255, 0.06));
     border-radius: 0.25rem;
-    background: var(--color-surface, #faf8f5);
+    background: var(--color-bg-elevated, #252119);
     cursor: pointer;
     position: relative;
     margin-top: 0.15rem;
@@ -395,8 +395,8 @@ import Base from '../layouts/Base.astro';
   }
 
   .pen-pals__checkbox:checked {
-    background: var(--color-accent, #8b6f47);
-    border-color: var(--color-accent, #8b6f47);
+    background: var(--color-accent-green, #79B939);
+    border-color: var(--color-accent-green, #79B939);
   }
 
   .pen-pals__checkbox:checked::after {
@@ -412,7 +412,7 @@ import Base from '../layouts/Base.astro';
   }
 
   .pen-pals__checkbox:focus-visible {
-    box-shadow: 0 0 0 3px rgba(139, 111, 71, 0.12);
+    box-shadow: 0 0 0 3px rgba(121, 185, 57, 0.15);
   }
 
   /* Submit */
@@ -423,7 +423,7 @@ import Base from '../layouts/Base.astro';
     padding: 0.85rem 2rem;
     border: none;
     border-radius: 0.5rem;
-    background: var(--color-accent, #8b6f47);
+    background: var(--color-accent-green, #79B939);
     color: #fff;
     cursor: pointer;
     transition: background 0.2s ease, transform 0.1s ease;
@@ -432,7 +432,7 @@ import Base from '../layouts/Base.astro';
   }
 
   .pen-pals__submit:hover {
-    background: var(--color-accent-hover, #7a6040);
+    background: var(--color-accent-green-hover, #8AC44F);
   }
 
   .pen-pals__submit:active {
@@ -454,15 +454,15 @@ import Base from '../layouts/Base.astro';
   }
 
   .pen-pals__message--success {
-    background: #f0f7f0;
-    color: #2d6a2d;
-    border: 1px solid #c4dfc4;
+    background: rgba(121, 185, 57, 0.1);
+    color: #8BC48B;
+    border: 1px solid rgba(121, 185, 57, 0.2);
   }
 
   .pen-pals__message--error {
-    background: #fdf0f0;
-    color: #9a2e2e;
-    border: 1px solid #e8c4c4;
+    background: rgba(200, 60, 60, 0.1);
+    color: #C48B8B;
+    border: 1px solid rgba(200, 60, 60, 0.2);
   }
 
   /* Privacy notice */
@@ -473,7 +473,7 @@ import Base from '../layouts/Base.astro';
     gap: 0.4rem;
     margin-top: 1.5rem;
     font-size: 0.8rem;
-    color: var(--color-muted, #6b6b6b);
+    color: var(--color-text-muted, #908F8A);
     text-align: center;
   }
 
@@ -486,31 +486,18 @@ import Base from '../layouts/Base.astro';
   .pen-pals__footer {
     text-align: center;
     padding-top: 2rem;
-    border-top: 1px solid var(--color-border, #e8e4df);
+    border-top: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
   }
 
   .pen-pals__back {
     font-size: 0.9rem;
-    color: var(--color-muted, #6b6b6b);
+    color: var(--color-text-muted, #908F8A);
     text-decoration: none;
     transition: color 0.2s ease;
   }
 
   .pen-pals__back:hover {
-    color: var(--color-text, #1a1a1a);
-  }
-
-  /* Dark mode overrides */
-  :global(.dark) .pen-pals__message--success {
-    background: #1a2e1a;
-    color: #8bc48b;
-    border-color: #2d4a2d;
-  }
-
-  :global(.dark) .pen-pals__message--error {
-    background: #2e1a1a;
-    color: #c48b8b;
-    border-color: #4a2d2d;
+    color: var(--color-text-primary, #EFF0ED);
   }
 
   @media (max-width: 480px) {
@@ -556,7 +543,7 @@ import Base from '../layouts/Base.astro';
       bioInput.addEventListener('input', function () {
         var len = this.value.length;
         charCount.textContent = len + ' / 200';
-        charCount.style.color = len > 180 ? '#9a2e2e' : '';
+        charCount.style.color = len > 180 ? '#C48B8B' : '';
       });
     }
 
