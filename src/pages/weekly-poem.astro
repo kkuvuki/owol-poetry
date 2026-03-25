@@ -225,12 +225,26 @@ import Base from '../layouts/Base.astro';
     pointer-events: none;
   }
 
+  /* Drop cap on first line */
+  .weekly-poem__line:first-child::first-letter {
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
+    font-size: 3em;
+    float: left;
+    line-height: 0.75;
+    margin-right: 0.06em;
+    margin-top: 0.08em;
+    color: var(--color-accent-green, #79B939);
+    opacity: 0.6;
+    font-style: normal;
+  }
+
   .weekly-poem__line {
     font-size: clamp(1.2rem, 2.5vw, 1.4rem);
-    line-height: 1.6;
+    line-height: 1.7;
     color: var(--color-text-primary, #EFF0ED);
     margin: 0 0 1.1rem;
     padding: 0;
+    font-style: italic;
     opacity: 0;
     transform: translateY(8px);
     animation: line-appear 0.6s ease forwards;
@@ -241,7 +255,6 @@ import Base from '../layouts/Base.astro';
     margin-bottom: 0;
     padding-top: 1.2rem;
     border-top: 1px solid rgba(255, 255, 255, 0.04);
-    font-style: italic;
   }
 
   @keyframes line-appear {
@@ -252,13 +265,15 @@ import Base from '../layouts/Base.astro';
   .weekly-poem__closing {
     display: block;
     margin-top: 2rem;
-    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
-    font-size: 0.8rem;
-    font-style: italic;
+    font-family: var(--font-ui, 'Inter', sans-serif);
+    font-size: 0.6rem;
+    font-style: normal;
+    font-weight: 400;
     color: var(--color-text-muted, #908F8A);
     text-align: right;
-    opacity: 0.5;
-    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    opacity: 0.4;
   }
 
   /* ── Meta ── */
@@ -266,20 +281,24 @@ import Base from '../layouts/Base.astro';
     text-align: center;
     padding: 1.5rem 0;
     color: var(--color-text-muted, #908F8A);
-    font-style: italic;
-    font-size: 0.85rem;
-    letter-spacing: 0.03em;
+    font-family: var(--font-ui, 'Inter', sans-serif);
+    font-style: normal;
+    font-size: 0.65rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 0.75rem;
+    opacity: 0.5;
   }
 
   .weekly-poem__date-sep { opacity: 0.3; }
 
   .weekly-poem__date {
-    font-size: 0.8rem;
-    letter-spacing: 0.05em;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
   }
 
   /* ── Share ── */
