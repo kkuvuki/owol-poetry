@@ -134,33 +134,12 @@ import Base from '../layouts/Base.astro';
   }
 
   .weekly-poem__line {
-    display: block;
     font-size: 1.25rem;
-    line-height: 2;
+    line-height: 1.7;
     font-style: italic;
     color: var(--color-text-primary, #EFF0ED);
-    padding: 0.2rem 0;
-    position: relative;
-    transition: color 0.2s ease;
-  }
-
-  .weekly-poem__line:hover {
-    color: var(--color-text-muted, #908F8A);
-  }
-
-  .weekly-poem__line-author {
-    font-size: 0.7rem;
-    color: var(--color-text-muted, #908F8A);
-    font-style: normal;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-left: 0.75rem;
-    opacity: 0;
-    transition: opacity 0.25s ease;
-  }
-
-  .weekly-poem__line:hover .weekly-poem__line-author {
-    opacity: 1;
+    margin: 0 0 0.6rem;
+    padding: 0;
   }
 
   /* Meta */
@@ -321,14 +300,6 @@ import Base from '../layouts/Base.astro';
     .weekly-poem__line {
       font-size: 1.1rem;
     }
-
-    .weekly-poem__line-author {
-      display: block;
-      margin-left: 0;
-      opacity: 1;
-      margin-top: -0.2rem;
-      margin-bottom: 0.5rem;
-    }
   }
 </style>
 
@@ -367,20 +338,12 @@ import Base from '../layouts/Base.astro';
       return;
     }
 
-    // Render lines
+    // Render lines — each on its own line, no author names in the poem
     verse.innerHTML = '';
-    lines.forEach(function (line) {
-      var el = document.createElement('span');
+    lines.forEach(function (line, i) {
+      var el = document.createElement('p');
       el.className = 'weekly-poem__line';
-
-      var textNode = document.createTextNode(line.text);
-      el.appendChild(textNode);
-
-      var author = document.createElement('span');
-      author.className = 'weekly-poem__line-author';
-      author.textContent = '\u2014 ' + (line.author_name || 'Anonymous');
-      el.appendChild(author);
-
+      el.textContent = line.text;
       verse.appendChild(el);
     });
 
@@ -398,7 +361,8 @@ import Base from '../layouts/Base.astro';
       });
 
       meta.innerHTML =
-        'Woven from ' + voiceCount + ' voice' + (voiceCount !== 1 ? 's' : '') +
+        '<span>Woven from ' + voiceCount + ' voice' + (voiceCount !== 1 ? 's' : '') + '</span>' +
+        '<span class="weekly-poem__date-sep">&middot;</span>' +
         '<span class="weekly-poem__date">Composed ' + dateStr + '</span>';
     }
 
