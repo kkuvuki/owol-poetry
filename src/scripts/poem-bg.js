@@ -115,35 +115,35 @@ function rand(min, max) { return Math.random() * (max - min) + min; }
    ══════════════════════════════════════════════════ */
 function initGoodOldDays(w, h) {
   var photos = [];
-  for (var i = 0; i < 8; i++) {
+  for (var i = 0; i < 6; i++) {
     photos.push({
       x: rand(0, w), y: rand(0, h),
       w: rand(40, 80), h: rand(50, 90),
       rot: rand(-0.2, 0.2),
-      drift: rand(0.15, 0.3),
+      drift: rand(0.08, 0.18),
       phase: rand(0, Math.PI * 2),
-      opacity: rand(0.2, 0.27),
+      opacity: rand(0.08, 0.14),
     });
   }
   var lights = [];
-  for (var i = 0; i < 15; i++) {
+  for (var i = 0; i < 8; i++) {
     lights.push({
       x: rand(0, w), y: rand(0, h),
-      r: rand(30, 120),
+      r: rand(60, 180),
       phase: rand(0, Math.PI * 2),
-      speed: rand(0.04, 0.128),
+      speed: rand(0.004, 0.012),
     });
   }
   return { photos: photos, lights: lights };
 }
 
 function drawGoodOldDays(ctx, s, color, w, h, t) {
-  // Warm light leaks
+  // Slow, gentle warm light leaks
   s.lights.forEach(function(l) {
-    var pulse = Math.sin(t * l.speed + l.phase) * 0.5 + 0.5;
+    var pulse = Math.sin(t * l.speed + l.phase) * 0.3 + 0.7;
     var grad = ctx.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.r);
-    grad.addColorStop(0, rgba(color, 0.45 * pulse));
-    grad.addColorStop(0.5, rgba([255, 200, 100], 0.4 * pulse));
+    grad.addColorStop(0, rgba(color, 0.07 * pulse));
+    grad.addColorStop(0.5, rgba([255, 200, 100], 0.05 * pulse));
     grad.addColorStop(1, rgba(color, 0));
     ctx.fillStyle = grad;
     ctx.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
@@ -153,14 +153,13 @@ function drawGoodOldDays(ctx, s, color, w, h, t) {
     ctx.save();
     p.y -= p.drift;
     if (p.y < -100) { p.y = h + 100; p.x = rand(0, w); }
-    var breathe = Math.sin(t * 0.001 + p.phase) * 0.02;
+    var breathe = Math.sin(t * 0.0005 + p.phase) * 0.01;
     ctx.translate(p.x, p.y);
     ctx.rotate(p.rot + breathe);
     ctx.strokeStyle = rgba([255, 240, 200], p.opacity);
     ctx.lineWidth = 1;
     ctx.strokeRect(-p.w / 2, -p.h / 2, p.w, p.h);
-    // Inner "photo" area
-    ctx.fillStyle = rgba([255, 220, 150], p.opacity * 0.5);
+    ctx.fillStyle = rgba([255, 220, 150], p.opacity * 0.4);
     ctx.fillRect(-p.w / 2 + 4, -p.h / 2 + 4, p.w - 8, p.h - 16);
     ctx.restore();
   });
@@ -1123,6 +1122,48 @@ function drawGenericThreads(ctx, s, color, w, h, t) {
 }
 
 /* ══════════════════════════════════════════════════
+   Procedural visual — deterministic unique animation per slug
+   ══════════════════════════════════════════════════ */
+
+function hashSlug(str) {
+  var h = 0;
+  for (var i = 0; i < str.length; i++) {
+    h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+function seededRand(seed) {
+  var s = seed;
+  return function() {
+    s = (s * 16807 + 0) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+}
+
+var PROCEDURAL_PALETTES = [
+  [180, 140, 200], [100, 170, 160], [200, 150, 100], [140, 160, 200],
+  [170, 120, 100], [120, 180, 140], [200, 130, 150], [160, 180, 100],
+  [130, 100, 180], [100, 150, 200], [190, 160, 120], [140, 200, 180],
+];
+
+var PROCEDURAL_DRAWS = [drawGenericEmbers, drawGenericRipples, drawGenericDrift, drawGenericThreads];
+
+function buildProceduralVisual(slug) {
+  var h = hashSlug(slug);
+  var colorIdx = h % PROCEDURAL_PALETTES.length;
+  var drawIdx = (h >> 4) % PROCEDURAL_DRAWS.length;
+  var rng = seededRand(h);
+  var base = PROCEDURAL_PALETTES[colorIdx];
+  var color = [
+    Math.min(255, Math.max(0, base[0] + Math.floor((rng() - 0.5) * 60))),
+    Math.min(255, Math.max(0, base[1] + Math.floor((rng() - 0.5) * 60))),
+    Math.min(255, Math.max(0, base[2] + Math.floor((rng() - 0.5) * 60))),
+  ];
+  return { color: color, init: initGeneric, draw: PROCEDURAL_DRAWS[drawIdx] };
+}
+
+/* ══════════════════════════════════════════════════
    Main entry points
    ══════════════════════════════════════════════════ */
 export function initPoemBg(themeStr, slugStr) {
@@ -1135,10 +1176,13 @@ export function initPoemBg(themeStr, slugStr) {
   container.style.position = 'relative';
   container.insertBefore(canvas, container.firstChild);
 
-  // Prefer slug-specific visual, fall back to theme
-  var visual = POEM_VISUALS[(slugStr || '').toLowerCase()]
-    || THEMES[(themeStr || '').toLowerCase()]
-    || THEMES.resilience;
+  var slug = (slugStr || '').toLowerCase();
+  var theme = (themeStr || '').toLowerCase();
+
+  // Prefer slug-specific, then theme fallback, then procedural from slug
+  var visual = POEM_VISUALS[slug]
+    || THEMES[theme]
+    || (slug ? buildProceduralVisual(slug) : THEMES.resilience);
 
   function resize() {
     canvas.width = container.offsetWidth;
