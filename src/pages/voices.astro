@@ -9,6 +9,7 @@ import Base from '../layouts/Base.astro';
   <article class="voices-page">
     <header class="voices-page__header reveal" data-reveal="fade-up">
       <h1 class="voices-page__title">Voices</h1>
+      <p class="page-intro">Meet the people behind every line. Each card shows a contributor's words, where they wrote from, and how many lines they've added to the poem.</p>
       <p class="voices-page__subtitle">Every person who left a line in the poem.</p>
       <div class="voices-page__stats" aria-live="polite">
         <span class="voices-page__stat" id="voices-count">&mdash;</span>
@@ -17,6 +18,7 @@ import Base from '../layouts/Base.astro';
     </header>
 
     <div class="voices-page__loading" id="voices-loading" aria-live="polite">
+      <span class="sr-only">Loading voices</span>
       <span class="rh__loading-dot"></span>
       <span class="rh__loading-dot"></span>
       <span class="rh__loading-dot"></span>
@@ -27,8 +29,9 @@ import Base from '../layouts/Base.astro';
     </div>
 
     <footer class="voices-page__footer reveal" data-reveal="fade-up">
-      <a href="/#relentlessly-human" class="voices-page__cta">Add your voice &rarr;</a>
+      <a href="/#relentlessly-human" class="voices-page__cta">Add a line to the poem &rarr;</a>
       <a href="/poem" class="voices-page__link">Read the full poem</a>
+      <a href="/anthology" class="voices-page__link">Browse by year</a>
     </footer>
   </article>
 </Base>
@@ -42,7 +45,7 @@ import Base from '../layouts/Base.astro';
     var countEl = document.getElementById('voices-count');
     if (!grid) return;
 
-    var { data: lines } = await supabase
+    var result = await supabase
       .from('poem_lines')
       .select('text, author_name, author_link, created_at')
       .eq('flagged', false)
@@ -51,8 +54,14 @@ import Base from '../layouts/Base.astro';
 
     if (loading) loading.hidden = true;
 
+    if (result.error) {
+      grid.innerHTML = '<p class="voices-page__empty">Unable to load voices right now. Please try refreshing.</p>';
+      return;
+    }
+
+    var lines = result.data;
     if (!lines || lines.length === 0) {
-      grid.innerHTML = '<p class="voices-page__empty">No voices yet. Be the first.</p>';
+      grid.innerHTML = '<p class="voices-page__empty">No voices yet. <a href="/#relentlessly-human">Add a line to the poem</a> and your name will appear here.</p>';
       return;
     }
 
@@ -165,3 +174,221 @@ import Base from '../layouts/Base.astro';
 
   document.addEventListener('astro:page-load', initVoices);
 </script>
+
+<style>
+  .voices-page {
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+  }
+
+  .voices-page__header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .voices-page__title {
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary, #EFF0ED);
+    margin: 0 0 0.5rem;
+  }
+
+  .voices-page__subtitle {
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--color-text-muted, #A6A5A0);
+    margin: 0 0 1.5rem;
+  }
+
+  .voices-page__stats {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    padding: 0.5rem 1.2rem;
+    background: var(--color-bg-surface, #1C1916);
+    border: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
+    border-radius: 2rem;
+    font-size: 0.9rem;
+  }
+
+  .voices-page__stat {
+    font-weight: 600;
+    color: var(--color-text-primary, #EFF0ED);
+  }
+
+  .voices-page__stat-label {
+    color: var(--color-text-muted, #A6A5A0);
+  }
+
+  .voices-page__loading {
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 3rem 0;
+  }
+
+  .voices-page__loading[hidden] {
+    display: none;
+  }
+
+  .voices-page__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  /* Cards are JS-created, so use :global() */
+  :global(.voice-card) {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  :global(.voice-card:hover) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  :global(.voice-card__header) {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
+  }
+
+  :global(.voice-card__name) {
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--color-text-primary, #EFF0ED);
+    margin: 0 0 0.25rem;
+  }
+
+  :global(.voice-card__count) {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.78rem;
+    color: var(--color-accent-green, #79B939);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  :global(.voice-card__location) {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.78rem;
+    color: var(--color-text-muted, #A6A5A0);
+    display: block;
+  }
+
+  :global(.voice-card__socials) {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  :global(.voice-card__social) {
+    color: var(--color-text-muted, #A6A5A0);
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+  }
+
+  :global(.voice-card__social:hover) {
+    color: var(--color-accent-green, #79B939);
+  }
+
+  :global(.voice-card__lines) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  :global(.voice-card__line) {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--color-text-secondary, #B0B1AB);
+    margin: 0;
+    padding-left: 0.75rem;
+    border-left: 2px solid var(--color-separator, rgba(255, 255, 255, 0.06));
+  }
+
+  :global(.voices-page__empty) {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
+    font-style: italic;
+    color: var(--color-text-muted, #A6A5A0);
+    padding: 4rem 0;
+  }
+
+  /* Footer */
+  .voices-page__footer {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .voices-page__cta {
+    font-family: var(--font-display, 'Playfair Display', Georgia, serif);
+    font-size: 1rem;
+    color: var(--color-text-primary, #EFF0ED);
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 0.1rem;
+    transition: opacity 0.2s;
+  }
+
+  .voices-page__cta:hover {
+    opacity: 0.6;
+  }
+
+  .voices-page__link {
+    font-size: 0.9rem;
+    color: var(--color-text-muted, #A6A5A0);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .voices-page__link:hover {
+    color: var(--color-text-primary, #EFF0ED);
+  }
+
+  @media (max-width: 600px) {
+    .voices-page {
+      padding: 2.5rem 1rem 4rem;
+    }
+
+    .voices-page__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media print {
+    .voices-page__footer,
+    .voices-page__loading {
+      display: none;
+    }
+
+    :global(.voice-card) {
+      break-inside: avoid;
+      border: 1px solid #ccc;
+    }
+
+    :global(.voice-card__social) {
+      display: none;
+    }
+  }
+</style>

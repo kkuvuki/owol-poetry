@@ -32,7 +32,7 @@ const description = 'A line from the collaborative poem, written by strangers, f
     var id = lineIndex >= 0 ? pathParts[lineIndex + 1] : null;
 
     if (!id) {
-      container.innerHTML = '<p style="text-align:center;color:#908F8A;">Line not found. <a href="/poem" style="color:#79B939;">Read the full poem &rarr;</a></p>';
+      container.innerHTML = '<p style="text-align:center;color:#A6A5A0;">Line not found. <a href="/poem" style="color:#79B939;">Read the full poem &rarr;</a></p>';
       return;
     }
 
@@ -46,7 +46,7 @@ const description = 'A line from the collaborative poem, written by strangers, f
     if (loading) loading.hidden = true;
 
     if (result.error || !result.data) {
-      container.innerHTML = '<p style="text-align:center;color:#908F8A;">Line not found. <a href="/poem" style="color:#79B939;">Read the full poem &rarr;</a></p>';
+      container.innerHTML = '<p style="text-align:center;color:#A6A5A0;">Line not found. <a href="/poem" style="color:#79B939;">Read the full poem &rarr;</a></p>';
       return;
     }
 

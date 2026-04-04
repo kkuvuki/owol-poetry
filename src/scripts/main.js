@@ -160,14 +160,31 @@ import Lenis from 'lenis';
       });
     });
 
-    // Close menu on Escape key.
+    // Close menu on Escape key + focus trap.
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && menu.classList.contains('is-open')) {
+      if (!menu.classList.contains('is-open')) return;
+
+      if (e.key === 'Escape') {
         toggle.setAttribute('aria-expanded', 'false');
         menu.classList.remove('is-open');
         document.body.style.overflow = '';
         if (lenis) lenis.start();
         toggle.focus();
+        return;
+      }
+
+      // Focus trap: keep Tab within menu + toggle button
+      if (e.key === 'Tab') {
+        var focusable = [toggle].concat(Array.from(menu.querySelectorAll('a')));
+        var first = focusable[0];
+        var last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     });
   }

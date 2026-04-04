@@ -91,7 +91,7 @@ export function generateLineCard(text, authorName) {
     });
 
     // Author attribution
-    ctx.fillStyle = '#908F8A';
+    ctx.fillStyle = '#A6A5A0';
     ctx.font = '22px "Nunito Sans", -apple-system, "Segoe UI", sans-serif';
     ctx.fillText('\u2014 ' + authorName, OG_W / 2, startY + blockHeight + 40);
 
@@ -166,7 +166,7 @@ export function generateStoryCard(text, authorName) {
     });
 
     // Author attribution
-    ctx.fillStyle = '#908F8A';
+    ctx.fillStyle = '#A6A5A0';
     ctx.font = '28px "Nunito Sans", -apple-system, "Segoe UI", sans-serif';
     ctx.fillText('\u2014 ' + authorName, STORY_W / 2, startY + blockHeight + 60);
 

@@ -23,7 +23,7 @@ var MAX_CHARS_PER_LINE = 35;
 var COLOR_BG = '#13100D';
 var COLOR_TEXT = '#EFF0ED';
 var COLOR_ACCENT = '#79B939';
-var COLOR_AUTHOR = '#908F8A';
+var COLOR_AUTHOR = '#A6A5A0';
 var COLOR_WATERMARK = '#7A7B75';
 
 /* ------------------------------------------------------------------ */

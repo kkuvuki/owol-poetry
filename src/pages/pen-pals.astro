@@ -90,7 +90,7 @@ import Base from '../layouts/Base.astro';
         </div>
 
         <div class="pen-pals__field">
-          <label for="bio" class="pen-pals__label">About your writing</label>
+          <label for="bio" class="pen-pals__label">About your writing <span class="pen-pals__optional">(optional)</span></label>
           <textarea
             id="bio"
             name="bio"
@@ -123,7 +123,7 @@ import Base from '../layouts/Base.astro';
         </div>
 
         <fieldset class="pen-pals__fieldset">
-          <legend class="pen-pals__label">What are you looking for?</legend>
+          <legend class="pen-pals__label">What are you looking for? <span class="pen-pals__optional">(optional)</span></legend>
           <div class="pen-pals__checkboxes">
             <label class="pen-pals__checkbox-label">
               <input type="checkbox" name="looking_for" value="exchange_poems" class="pen-pals__checkbox" />
@@ -189,7 +189,7 @@ import Base from '../layouts/Base.astro';
     font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-style: italic;
     font-size: 1.25rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     margin: 0 0 1.5rem;
   }
 
@@ -210,7 +210,7 @@ import Base from '../layouts/Base.astro';
   }
 
   .pen-pals__count-label {
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
   }
 
   /* Section titles */
@@ -271,13 +271,23 @@ import Base from '../layouts/Base.astro';
   .pen-pals__step-content p {
     margin: 0;
     font-size: 0.9rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     line-height: 1.5;
   }
 
   /* Form section */
   .pen-pals__form-section {
     margin-bottom: 3rem;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
+    border-radius: 8px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .pen-pals__form-section:focus-within {
+    border-color: rgba(121, 185, 57, 0.2);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(121, 185, 57, 0.1);
   }
 
   .pen-pals__form {
@@ -302,6 +312,13 @@ import Base from '../layouts/Base.astro';
 
   .pen-pals__label span {
     color: var(--color-accent-green, #79B939);
+  }
+
+  .pen-pals__optional {
+    font-weight: 400;
+    opacity: 0.6;
+    font-size: 0.85em;
+    color: var(--color-text-muted, #A6A5A0);
   }
 
   .pen-pals__input,
@@ -329,7 +346,7 @@ import Base from '../layouts/Base.astro';
 
   .pen-pals__input::placeholder,
   .pen-pals__textarea::placeholder {
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     opacity: 0.6;
   }
 
@@ -340,13 +357,13 @@ import Base from '../layouts/Base.astro';
 
   .pen-pals__char-count {
     font-size: 0.75rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     text-align: right;
   }
 
   .pen-pals__select {
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23908F8A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23A6A5A0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 1rem center;
     padding-right: 2.5rem;
@@ -444,6 +461,30 @@ import Base from '../layouts/Base.astro';
     cursor: not-allowed;
   }
 
+  .pen-pals__submit--sending {
+    position: relative;
+    color: transparent;
+    pointer-events: none;
+  }
+
+  .pen-pals__submit--sending::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: penpals-spin 0.6s linear infinite;
+  }
+
+  @keyframes penpals-spin {
+    to { transform: rotate(360deg); }
+  }
+
   /* Message */
   .pen-pals__message {
     text-align: center;
@@ -473,7 +514,7 @@ import Base from '../layouts/Base.astro';
     gap: 0.4rem;
     margin-top: 1.5rem;
     font-size: 0.8rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     text-align: center;
   }
 
@@ -491,7 +532,7 @@ import Base from '../layouts/Base.astro';
 
   .pen-pals__back {
     font-size: 0.9rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     text-decoration: none;
     transition: color 0.2s ease;
   }
@@ -575,7 +616,7 @@ import Base from '../layouts/Base.astro';
       }
 
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Searching for kindred spirits...';
+      submitBtn.classList.add('pen-pals__submit--sending');
 
       var result = await supabase
         .from('pen_pals')
@@ -595,7 +636,7 @@ import Base from '../layouts/Base.astro';
           showMessage('Something went wrong. Please try again.', 'error');
         }
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Find my match';
+        submitBtn.classList.remove('pen-pals__submit--sending');
         return;
       }
 

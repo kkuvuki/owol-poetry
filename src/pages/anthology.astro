@@ -14,6 +14,7 @@ import Base from '../layouts/Base.astro';
     </header>
 
     <div class="anthology__loading" id="anthology-loading" aria-live="polite">
+      <span class="sr-only">Loading anthology</span>
       <span class="rh__loading-dot"></span>
       <span class="rh__loading-dot"></span>
       <span class="rh__loading-dot"></span>
@@ -31,10 +32,12 @@ import Base from '../layouts/Base.astro';
     </section>
 
     <footer class="anthology__footer reveal" data-reveal="fade-up">
-      <button class="anthology__export-btn" id="anthology-export" type="button">
+      <button class="anthology__export-btn" id="anthology-export" type="button" title="Download this year's poetry as a text file">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export as text
       </button>
+      <a href="/voices" class="anthology__link">Meet the contributors</a>
+      <a href="/ledger" class="anthology__link">View the public ledger</a>
       <a href="/#relentlessly-human" class="anthology__cta">Add your line &rarr;</a>
       <a href="/" class="anthology__back">&larr; Back to Ravings</a>
     </footer>
@@ -69,7 +72,7 @@ import Base from '../layouts/Base.astro';
 
   .anthology__subtitle {
     font-size: 1.1rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     font-style: italic;
     margin: 0 0 2rem;
     letter-spacing: 0.04em;
@@ -90,7 +93,7 @@ import Base from '../layouts/Base.astro';
     font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: 1.05rem;
     cursor: pointer;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     border-radius: 2px;
     transition: all 0.25s ease;
   }
@@ -98,6 +101,11 @@ import Base from '../layouts/Base.astro';
   .anthology__year-tab:hover {
     color: var(--color-text-primary, #EFF0ED);
     border-color: var(--color-text-primary, #EFF0ED);
+  }
+
+  .anthology__year-tab:focus-visible {
+    outline: 2px solid var(--color-accent-green, #79B939);
+    outline-offset: 2px;
   }
 
   .anthology__year-tab--active {
@@ -139,7 +147,7 @@ import Base from '../layouts/Base.astro';
     font-weight: 400;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     margin: 0 0 1.5rem;
     text-align: center;
   }
@@ -159,7 +167,7 @@ import Base from '../layouts/Base.astro';
     top: -0.3rem;
     left: 0.5rem;
     font-size: 4rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     line-height: 1;
     opacity: 0.4;
@@ -205,7 +213,7 @@ import Base from '../layouts/Base.astro';
 
   .anthology__line-author {
     font-size: 0.75rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     font-style: italic;
     margin-left: 0.5rem;
     opacity: 0;
@@ -225,7 +233,7 @@ import Base from '../layouts/Base.astro';
     margin-top: 1rem;
     border-top: 1px dotted var(--color-separator, rgba(255, 255, 255, 0.06));
     font-size: 0.85rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     font-style: italic;
   }
 
@@ -285,7 +293,7 @@ import Base from '../layouts/Base.astro';
 
   .anthology__stat-label {
     font-size: 0.8rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     text-transform: uppercase;
     letter-spacing: 0.1em;
   }
@@ -294,7 +302,7 @@ import Base from '../layouts/Base.astro';
     display: block;
     font-size: 0.85rem;
     font-style: italic;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     margin-top: 0.3rem;
     max-width: 20rem;
     margin-left: auto;
@@ -337,6 +345,10 @@ import Base from '../layouts/Base.astro';
     border-color: var(--color-text-primary, #EFF0ED);
   }
 
+  .anthology__export-btn:active {
+    transform: scale(0.98);
+  }
+
   .anthology__cta {
     font-size: 1rem;
     color: var(--color-text-primary, #EFF0ED);
@@ -350,9 +362,22 @@ import Base from '../layouts/Base.astro';
     opacity: 0.6;
   }
 
+  .anthology__link {
+    font-size: 0.9rem;
+    color: var(--color-text-muted, #A6A5A0);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .anthology__link:hover {
+    color: var(--color-text-primary, #EFF0ED);
+    border-bottom-color: currentColor;
+  }
+
   .anthology__back {
     font-size: 0.9rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     text-decoration: none;
     transition: color 0.2s;
   }
@@ -365,7 +390,7 @@ import Base from '../layouts/Base.astro';
   .anthology__empty {
     text-align: center;
     padding: 4rem 2rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     font-style: italic;
     font-size: 1.1rem;
   }
@@ -499,25 +524,55 @@ import Base from '../layouts/Base.astro';
     var nav = document.getElementById('anthology-years');
     if (!nav) return;
     nav.innerHTML = '';
+    nav.setAttribute('role', 'tablist');
 
-    years.forEach(function (year) {
+    years.forEach(function (year, idx) {
       var btn = document.createElement('button');
       btn.className = 'anthology__year-tab';
       btn.textContent = year;
       btn.type = 'button';
+      btn.setAttribute('role', 'tab');
       btn.setAttribute('aria-label', 'Show ' + year + ' anthology');
+      btn.setAttribute('tabindex', year === currentYear ? '0' : '-1');
+      btn.setAttribute('aria-selected', year === currentYear ? 'true' : 'false');
       if (year === currentYear) btn.classList.add('anthology__year-tab--active');
       btn.addEventListener('click', function () {
-        currentYear = year;
-        renderYear(year);
-        // Update active tab
-        nav.querySelectorAll('.anthology__year-tab').forEach(function (t) {
-          t.classList.remove('anthology__year-tab--active');
-        });
-        btn.classList.add('anthology__year-tab--active');
+        activateTab(nav, btn, year);
+      });
+      btn.addEventListener('keydown', function (e) {
+        var tabs = Array.from(nav.querySelectorAll('.anthology__year-tab'));
+        var i = tabs.indexOf(btn);
+        var next = null;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          next = tabs[(i + 1) % tabs.length];
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          next = tabs[(i - 1 + tabs.length) % tabs.length];
+        } else if (e.key === 'Home') {
+          next = tabs[0];
+        } else if (e.key === 'End') {
+          next = tabs[tabs.length - 1];
+        }
+        if (next) {
+          e.preventDefault();
+          next.focus();
+          activateTab(nav, next, years[tabs.indexOf(next)]);
+        }
       });
       nav.appendChild(btn);
     });
+  }
+
+  function activateTab(nav, btn, year) {
+    currentYear = year;
+    renderYear(year);
+    nav.querySelectorAll('.anthology__year-tab').forEach(function (t) {
+      t.classList.remove('anthology__year-tab--active');
+      t.setAttribute('tabindex', '-1');
+      t.setAttribute('aria-selected', 'false');
+    });
+    btn.classList.add('anthology__year-tab--active');
+    btn.setAttribute('tabindex', '0');
+    btn.setAttribute('aria-selected', 'true');
   }
 
   function renderYear(year) {
@@ -758,15 +813,20 @@ import Base from '../layouts/Base.astro';
     // Fetch all lines
     var result = await supabase
       .from('poem_lines')
-      .select('*')
+      .select('id,text,author_name,created_at')
       .eq('flagged', false)
       .order('created_at', { ascending: true })
       .limit(5000);
 
     if (loading) loading.hidden = true;
 
-    if (result.error || !result.data || result.data.length === 0) {
-      book.innerHTML = '<p class="anthology__empty">No lines yet. The anthology awaits its first voice.</p>';
+    if (result.error) {
+      book.innerHTML = '<p class="anthology__empty">Unable to load the anthology right now. Please try refreshing.</p>';
+      return;
+    }
+
+    if (!result.data || result.data.length === 0) {
+      book.innerHTML = '<p class="anthology__empty">No lines yet. The anthology awaits its first voice. <a href="/#relentlessly-human" style="color: var(--color-accent-green)">Add a line</a> to begin.</p>';
       return;
     }
 

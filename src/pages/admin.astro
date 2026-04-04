@@ -53,7 +53,7 @@ import Base from '../layouts/Base.astro';
 
       <h2 class="admin__section-title">Contribution Timeline</h2>
       <div class="admin__chart" id="admin-chart">
-        <canvas id="admin-chart-canvas" height="200"></canvas>
+        <canvas id="admin-chart-canvas" height="200" role="img" aria-label="Contribution timeline chart"></canvas>
       </div>
 
       <h2 class="admin__section-title">Timezone Distribution</h2>
@@ -124,7 +124,7 @@ import Base from '../layouts/Base.astro';
     // All lines for analysis
     var { data: lines } = await supabase
       .from('poem_lines')
-      .select('*')
+      .select('id,author_name,created_at,resonance_count')
       .eq('flagged', false)
       .order('created_at', { ascending: false })
       .limit(1000);
@@ -209,6 +209,7 @@ import Base from '../layouts/Base.astro';
     var canvas = document.getElementById('admin-chart-canvas');
     if (!canvas) return;
     var ctx = canvas.getContext('2d');
+    if (!ctx) return;
     var w = canvas.parentElement.offsetWidth;
     canvas.width = w;
 

@@ -75,6 +75,9 @@ import Base from '../layouts/Base.astro';
 
     <!-- Create Branch View -->
     <section class="branches-page__panel" id="panel-create" hidden>
+      <div class="branches-form__intro">
+        <p>Choose any line from the poem, name your alternate path, then write 1&ndash;3 lines imagining where the poem could have gone instead.</p>
+      </div>
       <form class="branches-form" id="branches-form" autocomplete="off">
         <div class="branches-form__group">
           <label class="branches-form__label" for="branch-fork-line">Fork after this line</label>
@@ -127,7 +130,7 @@ import Base from '../layouts/Base.astro';
     </section>
 
     <!-- Branch Reader overlay -->
-    <div class="branch-reader" id="branch-reader" hidden>
+    <div class="branch-reader" id="branch-reader" role="dialog" aria-modal="true" aria-label="Branch reader" hidden>
       <button class="branch-reader__close" id="branch-reader-close" type="button" aria-label="Close branch reader">&times;</button>
       <div class="branch-reader__content">
         <h2 class="branch-reader__name" id="branch-reader-name"></h2>
@@ -139,7 +142,9 @@ import Base from '../layouts/Base.astro';
     </div>
 
     <footer class="branches-page__footer reveal" data-reveal="fade-up">
-      <a href="/poem" class="branches-page__back">&larr; Read the full poem</a>
+      <a href="/poem" class="branches-page__link">Read the full poem</a>
+      <a href="/voices" class="branches-page__link">Meet the contributors</a>
+      <a href="/" class="branches-page__back">&larr; Back to Ravings</a>
     </footer>
   </article>
 </Base>
@@ -502,6 +507,16 @@ import Base from '../layouts/Base.astro';
   }
 
   /* ── Create Form ── */
+  .branches-form__intro {
+    max-width: 36rem;
+    margin: 0 auto var(--space-xl);
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    color: var(--color-text-secondary);
+    line-height: var(--lh-body);
+  }
+
   .branches-form {
     max-width: 36rem;
     margin: 0 auto;
@@ -831,6 +846,24 @@ import Base from '../layouts/Base.astro';
     padding-top: var(--space-xl);
     border-top: 1px solid var(--color-separator);
     margin-top: var(--space-2xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .branches-page__link {
+    font-family: var(--font-ui);
+    font-size: var(--fs-small);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color var(--duration-fast), border-color var(--duration-fast);
+  }
+
+  .branches-page__link:hover {
+    color: var(--color-text-primary);
+    border-bottom-color: currentColor;
   }
 
   .branches-page__back {

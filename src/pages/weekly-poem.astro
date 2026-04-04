@@ -54,7 +54,7 @@ import Base from '../layouts/Base.astro';
 
     <section class="weekly-poem__empty" id="weekly-poem-empty" hidden>
       <p class="weekly-poem__empty-text">No weekly poem has been composed yet.</p>
-      <p class="weekly-poem__empty-hint">The first composition is on its way. In the meantime, <a href="/poem">add your line</a> to the collective poem.</p>
+      <p class="weekly-poem__empty-hint">Weekly poems are woven from lines people contribute to Relentlessly Human. <a href="/#relentlessly-human">Add your line</a> to help create this week's collection.</p>
     </section>
 
     <footer class="weekly-poem__footer reveal" data-reveal="fade-up">
@@ -137,7 +137,7 @@ import Base from '../layouts/Base.astro';
     content: '';
     height: 1px;
     width: 3rem;
-    background: linear-gradient(90deg, transparent, var(--color-text-muted, #908F8A), transparent);
+    background: linear-gradient(90deg, transparent, var(--color-text-muted, #A6A5A0), transparent);
     opacity: 0.3;
   }
 
@@ -151,7 +151,7 @@ import Base from '../layouts/Base.astro';
 
   .weekly-poem__subtitle {
     font-size: 1.05rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     font-style: italic;
     margin: 0;
     letter-spacing: 0.03em;
@@ -271,7 +271,7 @@ import Base from '../layouts/Base.astro';
     font-size: 0.6rem;
     font-style: normal;
     font-weight: 400;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     text-align: right;
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -282,7 +282,7 @@ import Base from '../layouts/Base.astro';
   .weekly-poem__meta {
     text-align: center;
     padding: 1.5rem 0;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     font-family: var(--font-ui, 'Inter', sans-serif);
     font-style: normal;
     font-size: 0.65rem;
@@ -313,7 +313,7 @@ import Base from '../layouts/Base.astro';
     display: block;
     font-family: var(--font-ui, 'Inter', sans-serif);
     font-size: 0.7rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     text-transform: uppercase;
     letter-spacing: 0.12em;
     margin-bottom: 0.75rem;
@@ -334,7 +334,7 @@ import Base from '../layouts/Base.astro';
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: none;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     cursor: pointer;
     transition: all 0.3s ease;
   }
@@ -358,13 +358,13 @@ import Base from '../layouts/Base.astro';
   .weekly-poem__empty-text {
     font-size: 1.2rem;
     font-style: italic;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     margin: 0 0 1rem;
   }
 
   .weekly-poem__empty-hint {
     font-size: 0.95rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     margin: 0;
   }
 
@@ -404,7 +404,7 @@ import Base from '../layouts/Base.astro';
 
   .weekly-poem__link {
     font-size: 0.95rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     text-decoration: none;
     border-bottom: 1px solid transparent;
     transition: all 0.2s;
@@ -417,7 +417,7 @@ import Base from '../layouts/Base.astro';
 
   .weekly-poem__back {
     font-size: 0.9rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     text-decoration: none;
     transition: color 0.2s;
   }
@@ -466,7 +466,7 @@ import Base from '../layouts/Base.astro';
 
     var result = await supabase
       .from('weekly_poems')
-      .select('*')
+      .select('id,title,body,lines,voice_name,line_count,created_at')
       .order('created_at', { ascending: false })
       .limit(1)
       .single();

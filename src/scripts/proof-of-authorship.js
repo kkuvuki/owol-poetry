@@ -114,7 +114,7 @@ export async function renderCertificate(proof) {
   ctx.stroke();
 
   // "This certifies that" text
-  ctx.fillStyle = '#908F8A';
+  ctx.fillStyle = '#A6A5A0';
   ctx.font = '18px Georgia, serif';
   ctx.fillText('This certifies that', W / 2, 250);
 
@@ -124,7 +124,7 @@ export async function renderCertificate(proof) {
   ctx.fillText(proof.author, W / 2, 300);
 
   // "contributed the following line"
-  ctx.fillStyle = '#908F8A';
+  ctx.fillStyle = '#A6A5A0';
   ctx.font = '18px Georgia, serif';
   ctx.fillText('contributed the following line to Relentlessly Human:', W / 2, 350);
 
@@ -173,7 +173,7 @@ export async function renderCertificate(proof) {
     hour: '2-digit', minute: '2-digit',
   });
 
-  ctx.fillStyle = '#908F8A';
+  ctx.fillStyle = '#A6A5A0';
   ctx.font = '16px "Nunito Sans", -apple-system, sans-serif';
   ctx.fillText(dateStr, W / 2, verifyY + 40);
 

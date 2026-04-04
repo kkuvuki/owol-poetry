@@ -251,7 +251,7 @@ const MOOD_THRESHOLDS = [
   { min: 0.25, label: 'Radiant', color: '#D4A574' },
   { min: 0.12, label: 'Hopeful', color: '#79B939' },
   { min: 0.015, label: 'Tender', color: '#6DBF8B' },
-  { min: -0.015, label: 'Contemplative', color: '#908F8A' },
+  { min: -0.015, label: 'Contemplative', color: '#A6A5A0' },
   { min: -0.12, label: 'Wistful', color: '#7A9FB5' },
   { min: -0.25, label: 'Melancholy', color: '#6B8BA4' },
   { min: -0.45, label: 'Anguished', color: '#8B5E8B' },
@@ -267,7 +267,7 @@ function classifyMood(score) {
       return { label: threshold.label, color: threshold.color };
     }
   }
-  return { label: 'Contemplative', color: '#908F8A' };
+  return { label: 'Contemplative', color: '#A6A5A0' };
 }
 
 /**
@@ -436,7 +436,7 @@ export function renderMoodStrip(container, moodData) {
       alignItems: 'center',
       gap: '5px',
       fontSize: '0.75rem',
-      color: '#908F8A',
+      color: '#A6A5A0',
     });
     const dot = document.createElement('span');
     Object.assign(dot.style, {
@@ -459,7 +459,7 @@ export function renderMoodStrip(container, moodData) {
   Object.assign(summaryEl.style, {
     marginTop: '8px',
     fontSize: '0.85rem',
-    color: '#908F8A',
+    color: '#A6A5A0',
     lineHeight: '1.5',
     textAlign: 'center',
   });
@@ -482,7 +482,7 @@ export function getMoodSummary(moodData) {
   if (!moodData || moodData.length === 0) {
     return {
       dominant: 'Contemplative',
-      dominantColor: '#908F8A',
+      dominantColor: '#A6A5A0',
       averageScore: 0,
       breakdown: { Contemplative: 100 },
     };
@@ -511,7 +511,7 @@ export function getMoodSummary(moodData) {
   }
 
   const dominantColor =
-    MOOD_THRESHOLDS.find((t) => t.label === dominant)?.color || '#908F8A';
+    MOOD_THRESHOLDS.find((t) => t.label === dominant)?.color || '#A6A5A0';
 
   return { dominant, dominantColor, averageScore, breakdown };
 }

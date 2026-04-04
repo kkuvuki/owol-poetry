@@ -187,7 +187,11 @@ import Base from '../layouts/Base.astro';
         var code = '<script src="https://itsowol.com/embed.js"><\/script>';
         navigator.clipboard.writeText(code).then(function () {
           copyBtn.textContent = 'Copied!';
-          setTimeout(function () { copyBtn.textContent = 'Copy'; }, 2000);
+          copyBtn.classList.add('embed-page__copy--copied');
+          setTimeout(function () {
+            copyBtn.textContent = 'Copy';
+            copyBtn.classList.remove('embed-page__copy--copied');
+          }, 2000);
         });
       });
     }
@@ -220,7 +224,7 @@ import Base from '../layouts/Base.astro';
   .embed-page__subtitle {
     font-family: 'Lora', Georgia, serif;
     font-size: 1.05rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     line-height: 1.7;
     margin: 0;
   }
@@ -235,14 +239,14 @@ import Base from '../layouts/Base.astro';
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     margin: 0 0 1.25rem;
   }
 
   .embed-page__text {
     font-family: 'Lora', Georgia, serif;
     font-size: 1rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     line-height: 1.7;
     margin: 0 0 1.25rem;
   }
@@ -309,6 +313,17 @@ import Base from '../layouts/Base.astro';
     background: #8cc94a;
   }
 
+  .embed-page__copy--copied {
+    background: #4CAF50 !important;
+    animation: copy-flash 0.3s ease;
+  }
+
+  @keyframes copy-flash {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+
   /* Configuration options */
   .embed-page__options {
     display: flex;
@@ -340,14 +355,14 @@ import Base from '../layouts/Base.astro';
   .embed-page__values {
     font-family: 'Nunito Sans', -apple-system, sans-serif;
     font-size: 0.8rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     grid-row: 1;
   }
 
   .embed-page__default {
     font-family: 'Nunito Sans', -apple-system, sans-serif;
     font-size: 0.75rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     opacity: 0.6;
     grid-row: 1;
     text-align: right;
@@ -356,7 +371,7 @@ import Base from '../layouts/Base.astro';
   .embed-page__desc {
     font-family: 'Lora', Georgia, serif;
     font-size: 0.9rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     margin: 0;
     grid-column: 1 / -1;
     grid-row: 2;
@@ -366,7 +381,7 @@ import Base from '../layouts/Base.astro';
     font-family: 'Nunito Sans', -apple-system, sans-serif;
     font-size: 0.8rem;
     font-weight: 600;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     margin: 0 0 0.75rem;
   }
 
@@ -374,7 +389,7 @@ import Base from '../layouts/Base.astro';
   .embed-page__list {
     font-family: 'Lora', Georgia, serif;
     font-size: 0.95rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     line-height: 1.8;
     padding-left: 1.25rem;
     margin: 0;
@@ -401,7 +416,7 @@ import Base from '../layouts/Base.astro';
   .embed-page__back {
     font-family: 'Nunito Sans', -apple-system, sans-serif;
     font-size: 0.9rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     text-decoration: none;
     transition: color 0.2s ease;
   }

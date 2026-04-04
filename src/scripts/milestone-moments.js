@@ -100,12 +100,12 @@ export function showMilestoneCelebration(lineCount, lineText, authorName) {
     '<div style="font-size:48px;margin-bottom:16px;">&#127881;</div>',
     '<div style="color:#79B939;font-size:12px;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;">MILESTONE</div>',
     '<h2 style="color:#EFF0ED;font-family:Playfair Display,Georgia,serif;font-size:32px;margin:0 0 8px;">' + label + '</h2>',
-    '<p style="color:#908F8A;font-size:14px;margin:0 0 24px;">Line #' + lineCount + ' of the poem</p>',
+    '<p style="color:#A6A5A0;font-size:14px;margin:0 0 24px;">Line #' + lineCount + ' of the poem</p>',
     '<p style="color:#EFF0ED;font-style:italic;font-family:Lora,Georgia,serif;font-size:20px;margin:0 0 8px;">&ldquo;' + escHtml(lineText) + '&rdquo;</p>',
     '<p style="color:#79B939;font-size:14px;margin:0 0 32px;">&mdash; ' + escHtml(authorName) + '</p>',
     '<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">',
     '  <button id="milestone-share" style="padding:10px 24px;background:#79B939;color:#13100D;border:none;border-radius:100px;font-weight:600;cursor:pointer;font-size:14px;">Share this moment</button>',
-    '  <button id="milestone-close" style="padding:10px 24px;background:none;border:1px solid rgba(255,255,255,0.1);color:#908F8A;border-radius:100px;cursor:pointer;font-size:14px;">Close</button>',
+    '  <button id="milestone-close" style="padding:10px 24px;background:none;border:1px solid rgba(255,255,255,0.1);color:#A6A5A0;border-radius:100px;cursor:pointer;font-size:14px;">Close</button>',
     '</div>',
   ].join('');
 

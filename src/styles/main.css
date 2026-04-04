@@ -14,13 +14,17 @@
   --color-bg-elevated:     #252119;
   --color-text-primary:    #EFF0ED;
   --color-text-secondary:  #B0B1AB;
-  --color-text-muted:      #908F8A;
+  --color-text-muted:      #A6A5A0;
   --color-accent-green:    #79B939;
   --color-accent-green-hover: #8AC44F;
   --color-accent-purple:   #B94EC8; /* AA-compliant against --color-bg (4.5:1) */
   --color-accent-purple-light: rgba(121, 39, 129, 0.15);
   --color-accent-amber:    #D4A574;
   --color-accent-amber-light: rgba(212, 165, 116, 0.12);
+  --color-accent-heart:    #C47A6A;
+  --color-accent-error:    #E55C5C;
+  --color-accent-success:  #8BC48B;
+  --color-accent-caution:  #D4A843;
   --color-separator:       rgba(255, 255, 255, 0.06);
   --color-card-border:     rgba(255, 255, 255, 0.04);
 
@@ -461,6 +465,15 @@ ul, ol {
   50%      { opacity: 0.3; transform: scaleY(0.6); }
 }
 
+/* Landscape mobile: prevent oversized hero */
+@media (max-height: 600px) and (orientation: landscape) {
+  .hero {
+    min-height: auto;
+    padding-top: var(--space-xl);
+    padding-bottom: var(--space-xl);
+  }
+}
+
 
 /* ═══════════════════════════════════════════════
    Section Dividers — decorative transitions
@@ -594,6 +607,12 @@ ul, ol {
 .poem-card__link:hover {
   background-color: rgba(255, 255, 255, 0.02);
   border-left-color: var(--color-accent-amber);
+}
+
+.poem-card__link:focus-visible {
+  outline: 2px solid var(--color-accent-green);
+  outline-offset: -2px;
+  background-color: rgba(255, 255, 255, 0.02);
 }
 
 .poem-card__meta {
@@ -904,7 +923,7 @@ ul, ol {
 .teaser__error {
   font-family: var(--font-ui);
   font-size: var(--fs-small);
-  color: #e55c5c;
+  color: var(--color-accent-error);
   margin-top: var(--space-xs);
 }
 
@@ -913,6 +932,7 @@ ul, ol {
 .teaser__submit:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  pointer-events: none;
 }
 
 .teaser__submit-sending[hidden] { display: none; }
@@ -1189,6 +1209,11 @@ ul, ol {
 .poem-nav__link:focus-visible {
   outline: 2px solid var(--color-accent-green);
   outline-offset: 2px;
+}
+
+.poem-nav__link:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .poem-nav__link--next {
@@ -1870,7 +1895,7 @@ ul, ol {
 }
 
 .owol-cta__submit:hover { background: var(--color-accent-green-hover); }
-.owol-cta__submit:disabled { opacity: 0.5; }
+.owol-cta__submit:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
 
 .owol-cta__done {
   font-family: var(--font-body);
@@ -2403,9 +2428,10 @@ ul, ol {
 /* ── Print Styles ── */
 @media print {
   body { background: #fff !important; color: #000 !important; }
+  .site-header, .site-nav, .skip-link, nav, footer,
   .poem-page__header, .poem-page__search, .poem-page__filter,
   .poem-page__footer, .poem-page__map, .reading-mode,
-  nav, header, footer { display: none !important; }
+  .poem-page__toolbar, .poem-page__view-toggle { display: none !important; }
   .poem-page { padding: 20px !important; }
   .poem-page__line { padding: 4px 0 !important; animation: none !important; }
   .poem-page__line-text { color: #000 !important; font-size: 14pt !important; }
@@ -2413,6 +2439,13 @@ ul, ol {
   .poem-page__line-share { display: none !important; }
   .poem-page__stanza-break { height: 12pt !important; }
   .poem-page__title { display: block !important; text-align: center; font-size: 24pt; margin-bottom: 20px; color: #000 !important; }
+  /* Anthology print */
+  .anthology { padding: 20px !important; }
+  .anthology__header, .anthology__footer { display: none !important; }
+  .anthology__book { color: #000 !important; }
+  /* General print resets */
+  a { color: #000 !important; text-decoration: underline !important; }
+  .reveal { opacity: 1 !important; transform: none !important; }
 }
 
 .poem-page__back {
@@ -2678,11 +2711,15 @@ ul, ol {
   border: 1px solid var(--color-card-border);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
-  transition: border-color var(--duration-fast) var(--ease-out-quart);
+  transition: border-color var(--duration-fast) var(--ease-out-quart),
+              transform var(--duration-fast) var(--ease-out-expo),
+              box-shadow var(--duration-fast) var(--ease-out-quart);
 }
 
 .voice-card:hover {
-  border-color: rgba(121, 185, 57, 0.3);
+  border-color: rgba(121, 185, 57, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .voice-card__header {
@@ -2697,6 +2734,10 @@ ul, ol {
   font-weight: 600;
   color: var(--color-text-primary);
   margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .voice-card__count {
@@ -2714,6 +2755,10 @@ ul, ol {
   color: var(--color-text-muted);
   display: block;
   margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .voice-card__socials {
@@ -2724,11 +2769,15 @@ ul, ol {
 
 .voice-card__social {
   color: var(--color-text-muted);
-  transition: color var(--duration-fast) var(--ease-out-quart);
+  display: inline-flex;
+  align-items: center;
+  transition: color var(--duration-fast) var(--ease-out-quart),
+              transform var(--duration-fast) var(--ease-out-quart);
 }
 
 .voice-card__social:hover {
   color: var(--color-accent-green);
+  transform: scale(1.15);
 }
 
 .voice-card__lines {
@@ -2743,6 +2792,10 @@ ul, ol {
   font-style: italic;
   line-height: var(--lh-poem);
   color: var(--color-text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .voices-page__footer {
@@ -2839,7 +2892,7 @@ ul, ol {
 }
 
 .admin__input--error {
-  border-color: #c44;
+  border-color: var(--color-accent-error, #E55C5C);
   animation: shake 0.3s ease;
 }
 
@@ -3145,6 +3198,15 @@ ul, ol {
   color: var(--color-text-secondary);
 }
 
+.rh__pill:focus-visible {
+  outline: 2px solid var(--color-accent-green);
+  outline-offset: 2px;
+}
+
+.rh__pill:active {
+  transform: scale(0.96);
+}
+
 .rh__pill.is-active {
   background: var(--color-accent-green);
   border-color: var(--color-accent-green);
@@ -3155,6 +3217,16 @@ ul, ol {
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+}
+
+.rh__pill--link:hover {
+  border-color: rgba(121, 185, 57, 0.4);
+  color: var(--color-text-secondary);
+}
+
+.rh__pill--link:focus-visible {
+  outline: 2px solid var(--color-accent-green);
+  outline-offset: 2px;
 }
 
 .rh__pill[aria-busy="true"] {
@@ -3603,7 +3675,7 @@ ul, ol {
 }
 
 .rh__char-count.is-at-limit {
-  color: #e55c5c;
+  color: var(--color-accent-error);
 }
 
 .rh__form-row {
@@ -3760,6 +3832,7 @@ ul, ol {
 .rh__submit:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+  pointer-events: none;
 }
 
 .rh__submit-sending[hidden] { display: none; }
@@ -3767,8 +3840,12 @@ ul, ol {
 .rh__error {
   font-family: var(--font-ui);
   font-size: var(--fs-small);
-  color: #e55c5c;
-  padding: var(--space-xs) 0;
+  color: var(--color-accent-error);
+  background: rgba(229, 92, 92, 0.08);
+  border-left: 3px solid var(--color-accent-error);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin-top: var(--space-sm);
 }
 
 .rh__error[hidden] { display: none; }
@@ -4439,8 +4516,8 @@ ul, ol {
 }
 
 .rh__audio-btn.is-recording {
-  border-color: #e74c3c;
-  color: #e74c3c;
+  border-color: var(--color-accent-error);
+  color: var(--color-accent-error);
   animation: pulse-record 1.5s ease infinite;
 }
 
@@ -4482,8 +4559,8 @@ ul, ol {
 }
 
 .rh__audio-delete:hover {
-  border-color: #e74c3c;
-  color: #e74c3c;
+  border-color: var(--color-accent-error);
+  color: var(--color-accent-error);
 }
 
 .rh__audio-duration {
@@ -5194,4 +5271,27 @@ ul, ol {
   max-width: 36rem;
   margin: 0 auto var(--space-lg);
   line-height: var(--lh-body);
+}
+
+/* ── Touch Device: disable transform hovers ── */
+@media (hover: none) and (pointer: coarse) {
+  .poem-card__link:hover,
+  .poem-nav__link:hover,
+  .voice-card:hover {
+    transform: none;
+  }
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }

@@ -87,7 +87,7 @@ import Base from '../layouts/Base.astro';
     content: '';
     height: 1px;
     width: 3rem;
-    background: linear-gradient(90deg, transparent, var(--color-text-muted, #908F8A), transparent);
+    background: linear-gradient(90deg, transparent, var(--color-text-muted, #A6A5A0), transparent);
     opacity: 0.3;
   }
 
@@ -101,7 +101,7 @@ import Base from '../layouts/Base.astro';
 
   .weekly-archive__subtitle {
     font-size: 1.05rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     font-style: italic;
     margin: 0;
     letter-spacing: 0.03em;
@@ -175,7 +175,7 @@ import Base from '../layouts/Base.astro';
     font-family: var(--font-ui, 'Inter', sans-serif);
     font-size: 0.65rem;
     font-weight: 400;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     text-transform: uppercase;
     letter-spacing: 0.12em;
     margin: 0 0 1.5rem;
@@ -187,7 +187,7 @@ import Base from '../layouts/Base.astro';
   :global(.weekly-archive__poem-meta) {
     font-family: var(--font-ui, 'Inter', sans-serif);
     font-size: 0.6rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     margin-top: 1.25rem;
@@ -242,13 +242,13 @@ import Base from '../layouts/Base.astro';
   .weekly-archive__empty-text {
     font-size: 1.2rem;
     font-style: italic;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     margin: 0 0 1rem;
   }
 
   .weekly-archive__empty-hint {
     font-size: 0.95rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     margin: 0;
   }
 
@@ -286,7 +286,7 @@ import Base from '../layouts/Base.astro';
 
   .weekly-archive__link {
     font-size: 0.95rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     text-decoration: none;
     border-bottom: 1px solid transparent;
     transition: all 0.2s;
@@ -299,7 +299,7 @@ import Base from '../layouts/Base.astro';
 
   .weekly-archive__back {
     font-size: 0.9rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     text-decoration: none;
     transition: color 0.2s;
   }
@@ -340,7 +340,7 @@ import Base from '../layouts/Base.astro';
 
     var result = await supabase
       .from('weekly_poems')
-      .select('*')
+      .select('id,title,body,lines,voice_name,line_count,created_at')
       .order('created_at', { ascending: false });
 
     if (loading) loading.hidden = true;

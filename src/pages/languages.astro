@@ -29,6 +29,7 @@ import Base from '../layouts/Base.astro';
       </div>
 
       <div class="lang-page__poem-loading" id="lang-poem-loading" aria-live="polite">
+        <span class="sr-only">Loading poem lines</span>
         <span class="rh__loading-dot"></span>
         <span class="rh__loading-dot"></span>
         <span class="rh__loading-dot"></span>
@@ -65,6 +66,8 @@ import Base from '../layouts/Base.astro';
     </section>
 
     <footer class="lang-page__footer reveal" data-reveal="fade-up">
+      <a href="/poem" class="lang-page__link">Read the English poem</a>
+      <a href="/voices" class="lang-page__link">Meet the contributors</a>
       <a href="/" class="lang-page__home-link">&larr; Back to Ravings</a>
     </footer>
   </article>
@@ -298,7 +301,7 @@ import Base from '../layouts/Base.astro';
 
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Adding...';
+      submitBtn.classList.add('lang-page__submit--sending');
     }
 
     var result = await supabase
@@ -312,7 +315,7 @@ import Base from '../layouts/Base.astro';
 
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Add line';
+      submitBtn.classList.remove('lang-page__submit--sending');
     }
 
     if (result.error) {
@@ -381,7 +384,7 @@ import Base from '../layouts/Base.astro';
   .lang-page__subtitle {
     font-family: 'Lora', serif;
     font-size: 1.15rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     font-style: italic;
     margin: 0;
   }
@@ -437,13 +440,13 @@ import Base from '../layouts/Base.astro';
 
   .lang-card__native {
     font-size: 0.85rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     font-style: italic;
   }
 
   .lang-card__count {
     font-size: 0.78rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     margin-top: 0.15rem;
   }
 
@@ -507,7 +510,7 @@ import Base from '../layouts/Base.astro';
   .lang-page__poem-count {
     font-family: 'Nunito Sans', sans-serif;
     font-size: 0.85rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
   }
 
   /* ── Loading dots ── */
@@ -531,7 +534,7 @@ import Base from '../layouts/Base.astro';
   .lang-page__empty {
     font-family: 'Lora', serif;
     font-style: italic;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     text-align: center;
     padding: 3rem 0;
   }
@@ -563,7 +566,7 @@ import Base from '../layouts/Base.astro';
   .lang-page__line-meta {
     font-family: 'Nunito Sans', sans-serif;
     font-size: 0.75rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     white-space: nowrap;
     flex-shrink: 0;
   }
@@ -612,6 +615,12 @@ import Base from '../layouts/Base.astro';
     border-radius: 0.75rem;
     padding: 1.25rem;
     margin-bottom: 2rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .lang-page__form:focus-within {
+    border-color: rgba(121, 185, 57, 0.2);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(121, 185, 57, 0.1);
   }
 
   .lang-page__form-fields {
@@ -632,7 +641,7 @@ import Base from '../layouts/Base.astro';
   }
 
   .lang-page__input::placeholder {
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
   }
 
   .lang-page__input:focus {
@@ -677,10 +686,34 @@ import Base from '../layouts/Base.astro';
     cursor: not-allowed;
   }
 
+  .lang-page__submit--sending {
+    position: relative;
+    color: transparent;
+    pointer-events: none;
+  }
+
+  .lang-page__submit--sending::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 14px;
+    height: 14px;
+    margin: -7px 0 0 -7px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: lang-spin 0.6s linear infinite;
+  }
+
+  @keyframes lang-spin {
+    to { transform: rotate(360deg); }
+  }
+
   .lang-page__form-hint {
     font-family: 'Nunito Sans', sans-serif;
     font-size: 0.75rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     margin: 0.6rem 0 0;
   }
 
@@ -689,6 +722,24 @@ import Base from '../layouts/Base.astro';
     text-align: center;
     padding-top: 2rem;
     border-top: 1px solid var(--color-separator, rgba(255, 255, 255, 0.06));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .lang-page__link {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--color-text-muted, #A6A5A0);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .lang-page__link:hover {
+    color: var(--color-text-primary, #EFF0ED);
+    border-bottom-color: currentColor;
   }
 
   .lang-page__home-link {

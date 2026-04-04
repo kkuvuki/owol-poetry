@@ -37,6 +37,7 @@ import Base from '../layouts/Base.astro';
             maxlength="120"
             required
           />
+          <div class="letters__suggestions-label">or try one of these:</div>
           <div class="letters__suggestions">
             <button type="button" class="letters__suggestion" data-to="my younger self">my younger self</button>
             <button type="button" class="letters__suggestion" data-to="the stranger on the train">the stranger on the train</button>
@@ -88,6 +89,7 @@ import Base from '../layouts/Base.astro';
       </div>
 
       <div class="letters__loading" id="letters-loading" aria-live="polite">
+        <span class="sr-only">Loading letters</span>
         <span class="rh__loading-dot"></span>
         <span class="rh__loading-dot"></span>
         <span class="rh__loading-dot"></span>
@@ -130,7 +132,7 @@ import Base from '../layouts/Base.astro';
     font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-style: italic;
     font-size: 1.1rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     margin: 0;
   }
 
@@ -138,10 +140,16 @@ import Base from '../layouts/Base.astro';
   .letters__write {
     margin-bottom: 4rem;
     background: linear-gradient(135deg, #2a2520 0%, #252017 100%);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 4px;
     padding: 2.5rem 2rem;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .letters__write:focus-within {
+    border-color: rgba(121, 185, 57, 0.2);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(121, 185, 57, 0.1);
   }
 
   .letters__form {
@@ -167,7 +175,7 @@ import Base from '../layouts/Base.astro';
     font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-style: italic;
     font-size: 0.95rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
   }
 
   .letters__input,
@@ -192,7 +200,7 @@ import Base from '../layouts/Base.astro';
 
   .letters__input::placeholder,
   .letters__textarea::placeholder {
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     font-style: italic;
   }
 
@@ -208,17 +216,26 @@ import Base from '../layouts/Base.astro';
 
   .letters__char-count {
     font-size: 0.78rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     text-align: right;
     font-variant-numeric: tabular-nums;
   }
 
   .letters__char-count--warn {
-    color: #D4A843;
+    color: var(--color-accent-caution, #D4A843);
   }
 
   .letters__char-count--full {
-    color: #C48B8B;
+    color: var(--color-accent-error, #E55C5C);
+  }
+
+  .letters__suggestions-label {
+    font-family: var(--font-ui, 'Inter', sans-serif);
+    font-size: 0.7rem;
+    color: var(--color-text-muted, #A6A5A0);
+    letter-spacing: 0.06em;
+    margin-top: 0.5rem;
+    opacity: 0.7;
   }
 
   .letters__suggestions {
@@ -232,7 +249,7 @@ import Base from '../layouts/Base.astro';
     font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: 0.78rem;
     font-style: italic;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 20px;
@@ -273,17 +290,41 @@ import Base from '../layouts/Base.astro';
     cursor: not-allowed;
   }
 
+  .letters__submit--sending {
+    position: relative;
+    color: transparent;
+    pointer-events: none;
+  }
+
+  .letters__submit--sending::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: var(--color-text-secondary, #B0B1AB);
+    border-radius: 50%;
+    animation: letters-spin 0.6s linear infinite;
+  }
+
+  @keyframes letters-spin {
+    to { transform: rotate(360deg); }
+  }
+
   .letters__status {
     font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: 0.9rem;
     font-style: italic;
     text-align: center;
-    color: #8BC48B;
+    color: var(--color-accent-success, #8BC48B);
     margin: 0;
   }
 
   .letters__status--error {
-    color: #C48B8B;
+    color: var(--color-accent-error, #E55C5C);
   }
 
   /* Browse Section */
@@ -315,7 +356,7 @@ import Base from '../layouts/Base.astro';
     font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: 0.85rem;
     font-style: italic;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 3px;
@@ -327,6 +368,10 @@ import Base from '../layouts/Base.astro';
   .letters__shuffle-btn:hover {
     color: var(--color-text-secondary, #B0B1AB);
     border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .letters__shuffle-btn:active {
+    transform: scale(0.95);
   }
 
   .letters__loading {
@@ -400,7 +445,7 @@ import Base from '../layouts/Base.astro';
   .letters__card-to {
     font-style: italic;
     font-size: 0.88rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     margin: 0 0 0.75rem;
     padding-bottom: 0.6rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
@@ -424,7 +469,7 @@ import Base from '../layouts/Base.astro';
   .letters__card-from {
     font-style: italic;
     font-size: 0.82rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
   }
 
   .letters__heart-btn {
@@ -433,7 +478,7 @@ import Base from '../layouts/Base.astro';
     gap: 0.3rem;
     font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: 0.8rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     background: transparent;
     border: none;
     cursor: pointer;
@@ -443,12 +488,12 @@ import Base from '../layouts/Base.astro';
   }
 
   .letters__heart-btn:hover {
-    color: #C47A6A;
+    color: var(--color-accent-heart, #C47A6A);
     background: rgba(196, 122, 106, 0.1);
   }
 
   .letters__heart-btn--active {
-    color: #C47A6A;
+    color: var(--color-accent-heart, #C47A6A);
   }
 
   .letters__heart-icon {
@@ -461,12 +506,24 @@ import Base from '../layouts/Base.astro';
     transform: scale(1.3);
   }
 
+  :global(.letters__heart-icon--pop) {
+    animation: heart-pop 0.4s ease both;
+  }
+
+  @keyframes heart-pop {
+    0%   { transform: scale(1); }
+    30%  { transform: scale(1.5); }
+    50%  { transform: scale(0.9); }
+    70%  { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
   .letters__empty {
     grid-column: 1 / -1;
     text-align: center;
     font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-style: italic;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     padding: 3rem 0;
   }
 
@@ -494,7 +551,7 @@ import Base from '../layouts/Base.astro';
   .letters__back {
     font-family: var(--font-display, 'Playfair Display', Georgia, serif);
     font-size: 0.9rem;
-    color: var(--color-text-muted, #908F8A);
+    color: var(--color-text-muted, #A6A5A0);
     text-decoration: none;
     transition: color 0.2s;
   }
@@ -594,6 +651,7 @@ import Base from '../layouts/Base.astro';
 
       heartBtn.classList.add('letters__heart-btn--active');
       heartIcon.textContent = '\u2764';
+      heartIcon.classList.add('letters__heart-icon--pop');
       letter.hearts = (letter.hearts || 0) + 1;
       heartCount.textContent = letter.hearts;
 
@@ -619,7 +677,7 @@ import Base from '../layouts/Base.astro';
     grid.innerHTML = '';
 
     if (letters.length === 0) {
-      grid.innerHTML = '<p class="letters__empty">No letters yet. Be the first to leave one.</p>';
+      grid.innerHTML = '<div class="letters__empty"><p>No letters yet.</p><p>Be the first to write a message to someone you\'ll never meet. Scroll up and leave a letter for a stranger, your future self, or anyone who needs to hear it.</p></div>';
       return;
     }
 
@@ -681,6 +739,7 @@ import Base from '../layouts/Base.astro';
         if (!addressedTo || !body) return;
 
         submitBtn.disabled = true;
+        submitBtn.classList.add('letters__submit--sending');
         statusEl.hidden = true;
 
         var result = await supabase
@@ -693,6 +752,7 @@ import Base from '../layouts/Base.astro';
           .select();
 
         submitBtn.disabled = false;
+        submitBtn.classList.remove('letters__submit--sending');
 
         if (result.error) {
           statusEl.textContent = 'Something went wrong. Try again.';
@@ -729,7 +789,7 @@ import Base from '../layouts/Base.astro';
     // Fetch letters
     var result = await supabase
       .from('letters')
-      .select('*')
+      .select('id,addressed_to,body,signed_from,hearts,created_at')
       .eq('flagged', false)
       .order('created_at', { ascending: false })
       .limit(200);

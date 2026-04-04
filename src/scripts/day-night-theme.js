@@ -17,7 +17,7 @@ const BASE_PALETTE = {
   '--color-bg-elevated':     '#252119',
   '--color-text-primary':    '#EFF0ED',
   '--color-text-secondary':  '#B0B1AB',
-  '--color-text-muted':      '#908F8A',
+  '--color-text-muted':      '#A6A5A0',
   '--color-accent-green':    '#79B939',
   '--color-accent-green-hover': '#8AC44F',
   '--color-separator':       'rgba(255, 255, 255, 0.06)',
